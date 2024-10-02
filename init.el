@@ -98,29 +98,46 @@
   :no-require
   :functions (dbus-color-theme-dark-p)
   :init (require 'bind-key)
-  :bind (("M-Q" . split-pararagraph-into-lines))
+  :bind (("M-Q" . split-pararagraph-into-lines)
+         ("C-<return>" . open-line-below)
+         ("M-<return>" . open-line-above))
   :preface
   (require 'subr-x)
-  (defun split-pararagraph-into-lines ()
-    "Split the current paragraph into lines with one sentence each."
+  (defun open-line-below ()
+    "Open a line below the current line."
     (interactive)
-    (save-excursion
-      (let ((fill-column most-positive-fixnum))
-        (fill-paragraph))
-      (let ((auto-fill-p auto-fill-function)
-            (end (progn (end-of-line) (backward-sentence) (point))))
-        (back-to-indentation)
-        (unless (= (point) end)
-          (auto-fill-mode -1)
-          (while (< (point) end)
-            (forward-sentence)
-            (delete-horizontal-space)
-            (newline-and-indent))
-          (deactivate-mark)
-          (when auto-fill-p
-            (auto-fill-mode t))
-          (when (looking-at "^$")
-            (delete-char -1))))))
+    (end-of-line)
+    (newline)
+    (indent-for-tab-command))
+
+(defun open-line-above ()
+  "Open a line above the current line."
+  (interactive)
+  (beginning-of-line)
+  (newline)
+  (forward-line -1)
+  (indent-for-tab-command))
+
+(defun split-pararagraph-into-lines ()
+  "Split the current paragraph into lines with one sentence each."
+  (interactive)
+  (save-excursion
+    (let ((fill-column most-positive-fixnum))
+      (fill-paragraph))
+    (let ((auto-fill-p auto-fill-function)
+          (end (progn (end-of-line) (backward-sentence) (point))))
+      (back-to-indentation)
+      (unless (= (point) end)
+        (auto-fill-mode -1)
+        (while (< (point) end)
+          (forward-sentence)
+          (delete-horizontal-space)
+          (newline-and-indent))
+        (deactivate-mark)
+        (when auto-fill-p
+          (auto-fill-mode t))
+        (when (looking-at "^$")
+          (delete-char -1))))))
   (defun in-termux-p ()
     "Detect if Emacs is running in Termux."
     (executable-find "termux-info"))
@@ -615,6 +632,53 @@ created with `json-hs-extra-create-overlays'."
 (use-package marginalia
   :ensure t
   :hook (after-init . marginalia-mode))
+
+(use-package all-the-icons
+  :ensure all-the-icons)
+
+(use-package all-the-icons-completion
+  :ensure all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :functions
+  all-the-icons-completion-mode
+  :hook
+  (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init
+  (all-the-icons-completion-mode))
+
+(use-package all-the-icons-dired
+  :ensure all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package all-the-icons-ibuffer
+  :ensure all-the-icons-ibuffer
+  :after (ibuffer)
+  :functions
+  all-the-icons-ibuffer-mode
+  :config
+  (all-the-icons-ibuffer-mode 1))
+
+
+;;; APHELEIA
+;; auto-format different source code files extremely intelligently
+;; https://github.com/radian-software/apheleia
+(use-package apheleia
+  :ensure apheleia
+  :diminish ""                          ; Don't show in modeline
+  :defines
+  apheleia-formatters
+  apheleia-mode-alist
+  :functions
+  apheleia-global-mode
+  :config
+  (setf (alist-get 'shfmt apheleia-formatters)
+        '("shfmt" "-i=4" "-sr" "-kp"))
+  (setq apheleia-log-debug-info nil)
+  ;; https://git.genehack.net/os/emacs/issues/2
+  (setf (alist-get 'prettier-json apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
+  (apheleia-global-mode +1))
 
 (use-package corfu
   :ensure t
