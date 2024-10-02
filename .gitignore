@@ -1,0 +1,14 @@
+/.cache/
+/.lsp-session
+/auto-save-list/
+/eln-cache/
+/elpa/
+/emacs-private.el
+/fontaine-latest-state.eld
+/history
+/projects
+/recentf
+/straight/
+/tmp/
+/transient/
+/tree-sitter/
