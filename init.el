@@ -1114,8 +1114,11 @@ See `cider-find-and-clear-repl-output' for more info."
   :config (setq highlight-indent-guides-method 'character))
 
 
-;; tree-sitter modes
+(use-package hl-todo
+  :straight '(hl-todo :type git :host github :repo "tarsius/hl-todo")
+  :init (global-hl-todo-mode))
 
+;; tree-sitter modes
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode)
          ("\\.cmake\\'" . cmake-ts-mode)
@@ -1192,33 +1195,29 @@ See `cider-find-and-clear-repl-output' for more info."
              (sh-base-mode . bash-ts-mode)))
     (add-to-list 'major-mode-remap-alist mapping))
   :config
-  (os/setup-install-grammars)
-  ;; Do not forget to customize Combobulate to your liking:
-  ;;
-  ;;  M-x customize-group RET combobulate RET
-  ;;
-  (use-package combobulate
-    :straight '(combobulate :type git :host github :repo "mickeynp/combobulate")
-    :preface
-    ;; You can customize Combobulate's key prefix here.
-    ;; Note that you may have to restart Emacs for this to take effect!
-    (setq combobulate-key-prefix "C-c o")
+  (os/setup-install-grammars))
 
-    ;; Optional, but recommended.
-    ;;
-    ;; You can manually enable Combobulate with `M-x
-    ;; combobulate-mode'.
-    :hook
-    ((python-ts-mode . combobulate-mode)
-     (js-ts-mode . combobulate-mode)
-     (go-mode . go-ts-mode)
-     (html-ts-mode . combobulate-mode)
-     (css-ts-mode . combobulate-mode)
-     (yaml-ts-mode . combobulate-mode)
-     (typescript-ts-mode . combobulate-mode)
-     (json-ts-mode . combobulate-mode)
-     (tsx-ts-mode . combobulate-mode))
-    ))
+(use-package combobulate
+  :straight '(combobulate :type git :host github :repo "mickeynp/combobulate")
+  :preface
+  ;; You can customize Combobulate's key prefix here.
+  ;; Note that you may have to restart Emacs for this to take effect!
+  (setq combobulate-key-prefix "C-c o")
+
+  ;; Optional, but recommended.
+  ;;
+  ;; You can manually enable Combobulate with `M-x
+  ;; combobulate-mode'.
+  :hook
+  ((python-ts-mode . combobulate-mode)
+   (js-ts-mode . combobulate-mode)
+   (go-mode . go-ts-mode)
+   (html-ts-mode . combobulate-mode)
+   (css-ts-mode . combobulate-mode)
+   (yaml-ts-mode . combobulate-mode)
+   (typescript-ts-mode . combobulate-mode)
+   (json-ts-mode . combobulate-mode)
+   (tsx-ts-mode . combobulate-mode)))
 
 
 ;;;; LSP
@@ -1239,10 +1238,10 @@ See `cider-find-and-clear-repl-output' for more info."
   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
     "Prepend emacs-lsp-booster command to lsp CMD."
     (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
+      (if (and (not test?) ;; for check lsp-server-present?
                (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
                lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (not (functionp 'json-rpc-connection)) ;; native json-rpc
                (executable-find "emacs-lsp-booster"))
           (progn
             (message "Using emacs-lsp-booster for %s!" orig-result)
@@ -1278,43 +1277,43 @@ See `cider-find-and-clear-repl-output' for more info."
   (lsp-completion-provider :none) ;; we use Corfu
   (lsp-diagnostics-provider :flycheck)
   (lsp-session-file (locate-user-emacs-file ".lsp-session"))
-  (lsp-log-io nil)                      ; IMPORTANT! Use only for debugging! Drastically affects performance
-  (lsp-keep-workspace-alive nil)        ; Close LSP server if all project buffers are closed
-  (lsp-idle-delay 0.5)                  ; Debounce timer for `after-change-function'
+  (lsp-log-io nil) ; IMPORTANT! Use only for debugging! Drastically affects performance
+  (lsp-keep-workspace-alive nil) ; Close LSP server if all project buffers are closed
+  (lsp-idle-delay 0.5)   ; Debounce timer for `after-change-function'
   ;; core
-  (lsp-enable-xref t)                   ; Use xref to find references
-  (lsp-auto-configure t)                ; Used to decide between current active servers
-  (lsp-eldoc-enable-hover t)            ; Display signature information in the echo area
+  (lsp-enable-xref t)    ; Use xref to find references
+  (lsp-auto-configure t) ; Used to decide between current active servers
+  (lsp-eldoc-enable-hover t) ; Display signature information in the echo area
   (lsp-enable-dap-auto-configure t)     ; Debug support
   (lsp-enable-file-watchers t)
-  (lsp-enable-folding nil)              ; I disable folding since I use origami
+  (lsp-enable-folding nil)     ; I disable folding since I use origami
   (lsp-enable-imenu t)
-  (lsp-enable-indentation nil)          ; I use prettier
-  (lsp-enable-links nil)                ; No need since we have `browse-url'
+  (lsp-enable-indentation nil)    ; I use prettier
+  (lsp-enable-links nil)          ; No need since we have `browse-url'
   (lsp-enable-on-type-formatting nil)   ; Prettier handles this
   (lsp-enable-suggest-server-download t) ; Useful prompt to download LSP providers
-  (lsp-enable-symbol-highlighting t)     ; Shows usages of symbol at point in the current buffer
-  (lsp-enable-text-document-color nil)   ; This is Treesitter's job
+  (lsp-enable-symbol-highlighting t) ; Shows usages of symbol at point in the current buffer
+  (lsp-enable-text-document-color nil)  ; This is Treesitter's job
 
-  (lsp-ui-sideline-show-hover nil)      ; Sideline used only for diagnostics
+  (lsp-ui-sideline-show-hover nil) ; Sideline used only for diagnostics
   (lsp-ui-sideline-diagnostic-max-lines 20) ; 20 lines since typescript errors can be quite big
   ;; completion
   (lsp-completion-enable t)
   (lsp-completion-enable-additional-text-edit t) ; Ex: auto-insert an import for a completion candidate
-  (lsp-enable-snippet t)                         ; Important to provide full JSX completion
-  (lsp-completion-show-kind t)                   ; Optional
+  (lsp-enable-snippet t)    ; Important to provide full JSX completion
+  (lsp-completion-show-kind t)         ; Optional
   ;; headerline
-  (lsp-headerline-breadcrumb-enable t)  ; Optional, I like the breadcrumbs
+  (lsp-headerline-breadcrumb-enable t) ; Optional, I like the breadcrumbs
   (lsp-headerline-breadcrumb-enable-diagnostics nil) ; Don't make them red, too noisy
   (lsp-headerline-breadcrumb-enable-symbol-numbers nil)
   (lsp-headerline-breadcrumb-icons-enable nil)
   ;; modeline
   (lsp-modeline-code-actions-enable nil) ; Modeline should be relatively clean
-  (lsp-modeline-diagnostics-enable nil)  ; Already supported through `flycheck'
+  (lsp-modeline-diagnostics-enable nil) ; Already supported through `flycheck'
   (lsp-modeline-workspace-status-enable nil) ; Modeline displays "LSP" when lsp-mode is enabled
-  (lsp-signature-doc-lines 1)                ; Don't raise the echo area. It's distracting
-  (lsp-ui-doc-use-childframe t)              ; Show docs for symbol at point
-  (lsp-eldoc-render-all nil)            ; This would be very useful if it would respect `lsp-signature-doc-lines', currently it's distracting
+  (lsp-signature-doc-lines 1) ; Don't raise the echo area. It's distracting
+  (lsp-ui-doc-use-childframe t)        ; Show docs for symbol at point
+  (lsp-eldoc-render-all nil) ; This would be very useful if it would respect `lsp-signature-doc-lines', currently it's distracting
   ;; lens
   (lsp-lens-enable nil)                 ; Optional, I don't need it
   ;; semantic
@@ -1358,23 +1357,19 @@ See `cider-find-and-clear-repl-output' for more info."
   :custom
   (lsp-treemacs-theme "Iconless"))
 
-;; (use-package lsp-tailwindcss
-;;   :straight '(lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss")
-;;   :init (setq lsp-tailwindcss-add-on-mode t)
-;;   :config
-;;   (setq lsp-tailwindcss-major-modes '(tsx-ts-mode css-ts-mode clojure-mode clojurescript-mode clojurec-mode)
-;;         lsp-tailwindcss-experimental-class-regex
-;;         [":class\\s+\"([^\"]*)\""
-;;          ":[\\w-.#>]+\\.([\\w-]*)"
-;;          "tw|yourModule\\(([^)]*)\\)"
-;;          "[\"'`]([^\"'`]*).*?[\"'`]"
-;;          ]
-;;         lsp-tailwindcss-rustywind-command nil
-;;         lsp-tailwindcss-validate nil
-;;         lsp-tailwindcss-emmet-completions nil
-;;         lsp-tailwindcss-suggestions nil
-;;         Lsp-tailwindcss-code-actions nili
-;;         lsp-tailwindcss-class-attributes ["class" "className" "ngClass" ":class"]))
+(use-package lsp-tailwindcss
+  :straight '(lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss")
+  :init (setq lsp-tailwindcss-add-on-mode t)
+  :config
+  (setq lsp-tailwindcss-major-modes '(clojure-mode tsx-ts-mode css-ts-mode clojurescript-mode clojurec-mode)
+        lsp-tailwindcss-experimental-class-regex
+        [":class\\s+\"([^\"]*)\""
+         ":[\\w-.#>]+\\.([\\w-]*)"
+         "tw|yourModule\\(([^)]*)\\)"
+         "[\"'`]([^\"'`]*).*?[\"'`]"
+         ]
+        lsp-tailwindcss-class-attributes ["class" "className" "ngClass" ":class"]))
+
 
 (use-package lsp-clojure
   :demand t
@@ -1393,7 +1388,7 @@ See `cider-find-and-clear-repl-output' for more info."
 
 
 
-;;; Navigation & Editing
+;;;;; Navigation & Editing
 
 (use-package whole-line-or-region
   :ensure t
