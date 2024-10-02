@@ -448,67 +448,6 @@ are defining or executing a macro."
      (border-width . 1)
      (no-special-glyphs . t))))
 
-(use-package modus-themes
-  :ensure t
-  :requires (local-config)
-  :custom
-  (modus-themes-org-blocks nil)
-  (modus-themes-completions
-   '((matches . (intense bold))
-     (selection . (intense))))
-  (modus-operandi-palette-overrides
-   '((bg-main "#fbfbfb")
-     (string "#702f00")
-     (bg-line-number-active "#f0f0f0")))
-  (modus-vivendi-palette-overrides
-   `((bg-main ,(if (in-termux-p) "#000000" "#181818"))
-     (bg-line-number-active "#1e1e1e")
-     (string "#f5aa80")))
-  :custom-face
-  (region ((t :extend nil))))
-
-(use-package modus-themes
-  :after modus-themes
-  :no-require
-  :custom
-  (modus-themes-common-palette-overrides
-   `(;; syntax
-     (builtin magenta-faint)
-     (keyword cyan-faint)
-     (comment fg-dim)
-     (constant blue-faint)
-     (docstring fg-dim)
-     (docmarkup fg-dim)
-     (fnname magenta-faint)
-     (preprocessor cyan-faint)
-     (string red-faint)
-     (type magenta-cooler)
-     (variable blue-faint)
-     (rx-construct magenta-faint)
-     (rx-backslash blue-faint)
-     ;; misc
-     (bg-paren-match bg-ochre)
-     (bg-region bg-inactive)
-     (fg-region unspecified)
-     ;; line-numbers
-     (fg-line-number-active fg-main)
-     (bg-line-number-inactive bg-main)
-     (fg-line-number-inactive fg-dim)
-     ;; modeline
-     (border-mode-line-active unspecified)
-     (border-mode-line-inactive unspecified)
-     ;; links
-     (underline-link unspecified)
-     (underline-link-visited unspecified)
-     (underline-link-symbolic unspecified)
-     ,@modus-themes-preset-overrides-faint))
-  :config
-  (load-theme
-   (if (dark-mode-enabled-p)
-       local-config-dark-theme
-     local-config-light-theme)
-   'no-confirm))
-
 
 (use-package uniquify
   :defer t
@@ -616,21 +555,12 @@ created with `json-hs-extra-create-overlays'."
   :custom
   (help-window-select t))
 
-(use-package flymake
-  :preface
-  (defvar flymake-prefix-map (make-sparse-keymap))
-  (fset 'flymake-prefix-map flymake-prefix-map)
-  :bind ( :map ctl-x-map
-          ("!" . flymake-prefix-map)
-          :map flymake-prefix-map
-          ("l" . flymake-show-buffer-diagnostics)
-          ("n" . flymake-goto-next-error)
-          ("p" . flymake-goto-prev-error))
-  :custom
-  (flymake-fringe-indicator-position 'right-fringe)
-  (flymake-mode-line-lighter "FlyM")
-  :config
-  (setq elisp-flymake-byte-compile-load-path (cons "./" load-path)))
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode)
+  :bind (:map flycheck-mode-map
+              ("M-n" . flycheck-next-error)
+              ("M-p" . flycheck-previous-error)))
 
 (use-package flyspell
   :ensure t
@@ -1331,6 +1261,7 @@ See `cider-find-and-clear-repl-output' for more info."
            clojurescript-mode
            go-ts-mode) . lsp))
   :config
+  (define-key lsp-command-map (kbd "d") #'lsp-ui-doc-glance)
   (setenv "PATH" (concat
                   "/usr/local/bin" path-separator
                   (getenv "PATH")))
@@ -1345,7 +1276,7 @@ See `cider-find-and-clear-repl-output' for more info."
   :custom
   (lsp-keymap-prefix "C-c l")
   (lsp-completion-provider :none) ;; we use Corfu
-  (lsp-diagnostics-provider :flymake)
+  (lsp-diagnostics-provider :flycheck)
   (lsp-session-file (locate-user-emacs-file ".lsp-session"))
   (lsp-log-io nil)                      ; IMPORTANT! Use only for debugging! Drastically affects performance
   (lsp-keep-workspace-alive nil)        ; Close LSP server if all project buffers are closed
@@ -1414,11 +1345,9 @@ See `cider-find-and-clear-repl-output' for more info."
   :commands
   (lsp-ui-doc-show
    lsp-ui-doc-glance)
-  :bind (:map lsp-mode-map
-              ("C-c l c d" . 'lsp-ui-doc-glance))
-  :after (lsp-mode evil)
+  :after (lsp-mode)
   :config (setq lsp-ui-doc-enable t
-                evil-lookup-func #'lsp-ui-doc-glance ; Makes K in evil-mode toggle the doc for symbol at point
+                ;; evil-lookup-func #'lsp-ui-doc-glance ; Makes K in evil-mode toggle the doc for symbol at point
                 lsp-ui-doc-show-with-cursor nil      ; Don't show doc when cursor is over symbol - too distracting
                 lsp-ui-doc-include-signature t       ; Show signature
                 lsp-ui-doc-position 'at-point)) ; Display the doc under the point
@@ -2358,3 +2287,4 @@ dependency artifact based on the project's dependencies."
 
 
 (provide 'init)
+;;; init.el ends here
