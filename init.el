@@ -684,33 +684,42 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package corfu
   :ensure t
-  :bind ( :map corfu-map
-          ("TAB" . corfu-next)
-          ([tab] . corfu-next)
-          ("S-TAB" . corfu-previous)
-          ([backtab] . corfu-previous)
-          ([remap completion-at-point] . corfu-complete)
-          ("RET" . corfu-complete-and-quit)
-          ("<return>" . corfu-complete-and-quit))
-  :commands (corfu-quit)
+  ;; Optional customizations
   :custom
-  (corfu-cycle t)
-  (corfu-preselect-first t)
-  (corfu-scroll-margin 4)
-  (corfu-quit-no-match t)
-  (corfu-quit-at-boundary t)
-  (corfu-max-width 100)
-  (corfu-min-width 42)
-  (corfu-count 9)
-  ;; should be configured in the `indent' package, but `indent.el'
-  ;; doesn't provide the `indent' feature.
-  (tab-always-indent 'complete)
+  (corfu-cycle t)            ; Allows cycling through candidates
+  (corfu-auto t)             ; Enable auto completion
+  (corfu-auto-prefix 2)      ; Minimum length of prefix for completion
+  (corfu-auto-delay 0)       ; No delay for completion
+  (corfu-popupinfo-delay '(0.5 . 0.2)) ; Automatically update info popup after that numver of seconds
+  (corfu-preview-current 'insert)      ; insert previewed candidate
+  (corfu-preselect 'prompt)
+  (corfu-on-exact-match nil)    ; Don't auto expand tempel snippets
+  (tab-always-indent 'complete) ; First try to indent and then complete
+  ;; Optionally use TAB for cycling, default is `corfu-complete'.
+  :bind (:map corfu-map
+              ("TAB" . corfu-next)
+              ([tab] . corfu-next)
+              ("S-TAB" . corfu-previous)
+              ([backtab] . corfu-previous)
+              ([remap completion-at-point] . corfu-complete)
+              ("RET" . corfu-complete-and-quit)
+              ("<return>" . corfu-complete-and-quit))
+  :init
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode)                ; Popup completion info
   :config
   (defun corfu-complete-and-quit ()
     (interactive)
     (corfu-complete)
     (corfu-quit))
-  :hook (after-init . global-corfu-mode))
+  (add-hook 'eshell-mode-hook
+            (lambda () (setq-local corfu-quit-at-boundary t
+                                   corfu-quit-no-match t
+                                   corfu-auto nil)
+              (corfu-mode))
+            nil
+            t))
 
 (use-package corfu-popupinfo
   :bind ( :map corfu-popupinfo-map
@@ -1332,25 +1341,53 @@ See `cider-find-and-clear-repl-output' for more info."
     (add-to-list 'lsp-language-id-configuration `(,m . "clojure")))
   (setq lsp-clojure-server-command '("/opt/homebrew/bin/clojure-lsp"))
 
+
   :custom
   (lsp-keymap-prefix "C-c l")
-  (lsp-auto-configure t)
+  (lsp-completion-provider :none) ;; we use Corfu
   (lsp-diagnostics-provider :flymake)
-  (lsp-completion-provider :none)
   (lsp-session-file (locate-user-emacs-file ".lsp-session"))
-  (lsp-log-io nil)
-  (lsp-keep-workspace-alive nil)
-  (lsp-idle-delay 0.5)
-  (lsp-enable-xref t)
-  (lsp-signature-doc-lines 1)
+  (lsp-log-io nil)                      ; IMPORTANT! Use only for debugging! Drastically affects performance
+  (lsp-keep-workspace-alive nil)        ; Close LSP server if all project buffers are closed
+  (lsp-idle-delay 0.5)                  ; Debounce timer for `after-change-function'
+  ;; core
+  (lsp-enable-xref t)                   ; Use xref to find references
+  (lsp-auto-configure t)                ; Used to decide between current active servers
+  (lsp-eldoc-enable-hover t)            ; Display signature information in the echo area
+  (lsp-enable-dap-auto-configure t)     ; Debug support
+  (lsp-enable-file-watchers t)
+  (lsp-enable-folding nil)              ; I disable folding since I use origami
+  (lsp-enable-imenu t)
+  (lsp-enable-indentation nil)          ; I use prettier
+  (lsp-enable-links nil)                ; No need since we have `browse-url'
+  (lsp-enable-on-type-formatting nil)   ; Prettier handles this
+  (lsp-enable-suggest-server-download t) ; Useful prompt to download LSP providers
+  (lsp-enable-symbol-highlighting t)     ; Shows usages of symbol at point in the current buffer
+  (lsp-enable-text-document-color nil)   ; This is Treesitter's job
 
+  (lsp-ui-sideline-show-hover nil)      ; Sideline used only for diagnostics
+  (lsp-ui-sideline-diagnostic-max-lines 20) ; 20 lines since typescript errors can be quite big
+  ;; completion
+  (lsp-completion-enable t)
+  (lsp-completion-enable-additional-text-edit t) ; Ex: auto-insert an import for a completion candidate
+  (lsp-enable-snippet t)                         ; Important to provide full JSX completion
+  (lsp-completion-show-kind t)                   ; Optional
   ;; headerline
   (lsp-headerline-breadcrumb-enable t)  ; Optional, I like the breadcrumbs
   (lsp-headerline-breadcrumb-enable-diagnostics nil) ; Don't make them red, too noisy
   (lsp-headerline-breadcrumb-enable-symbol-numbers nil)
   (lsp-headerline-breadcrumb-icons-enable nil)
-
-  (lsp-ui-doc-use-childframe t)
+  ;; modeline
+  (lsp-modeline-code-actions-enable nil) ; Modeline should be relatively clean
+  (lsp-modeline-diagnostics-enable nil)  ; Already supported through `flycheck'
+  (lsp-modeline-workspace-status-enable nil) ; Modeline displays "LSP" when lsp-mode is enabled
+  (lsp-signature-doc-lines 1)                ; Don't raise the echo area. It's distracting
+  (lsp-ui-doc-use-childframe t)              ; Show docs for symbol at point
+  (lsp-eldoc-render-all nil)            ; This would be very useful if it would respect `lsp-signature-doc-lines', currently it's distracting
+  ;; lens
+  (lsp-lens-enable nil)                 ; Optional, I don't need it
+  ;; semantic
+  (lsp-semantic-tokens-enable nil) ; Related to highlighting, and we defer to treesitter
   :init
   (setq lsp-use-plists t)
   ;; Initiate https://github.com/blahgeek/emacs-lsp-booster for performance
@@ -1378,7 +1415,7 @@ See `cider-find-and-clear-repl-output' for more info."
   (lsp-ui-doc-show
    lsp-ui-doc-glance)
   :bind (:map lsp-mode-map
-              ("C-c C-d" . 'lsp-ui-doc-glance))
+              ("C-c l c d" . 'lsp-ui-doc-glance))
   :after (lsp-mode evil)
   :config (setq lsp-ui-doc-enable t
                 evil-lookup-func #'lsp-ui-doc-glance ; Makes K in evil-mode toggle the doc for symbol at point
