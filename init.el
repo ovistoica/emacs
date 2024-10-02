@@ -516,7 +516,11 @@ are defining or executing a macro."
               ("~" . dired-home-directory)
               ("E"                         . wdired-change-to-wdired-mode)
               ([remap beginning-of-buffer] . dired-back-to-top)
-              ([remap end-of-buffer]       . dired-jump-to-bottom)))
+              ([remap end-of-buffer]       . dired-jump-to-bottom))
+  :config
+  (setq insert-directory-program "gls"
+        dired-use-ls-dired t
+        dired-listing-switches "-lAXGh --group-directories-first --sort=extension"))
 
 ;; Dired extra font locking
 (use-package diredfl
@@ -658,6 +662,21 @@ created with `json-hs-extra-create-overlays'."
   :hook (corfu-mode . corfu-popupinfo-mode)
   :custom-face
   (corfu-popupinfo ((t :height 1.0))))
+
+(use-package kind-icon
+  :ensure kind-icon
+  :after (corfu)
+  :defines
+  corfu-margin-formatters ;; this is a lie
+  :functions
+  kind-icon-margin-formatter
+  :custom
+  (kind-icon-use-icons t)
+  (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
+  (kind-icon-blend-background nil)        ; Use midpoint color between foreground and background colors ("blended")?
+  (kind-icon-blend-frac 0.08)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package corfu-terminal
   :ensure t
@@ -1370,22 +1389,14 @@ See `cider-find-and-clear-repl-output' for more info."
          ]
         lsp-tailwindcss-class-attributes ["class" "className" "ngClass" ":class"]))
 
-
-(use-package lsp-clojure
+(use-package lsp-eslint
   :demand t
   :after lsp-mode
-  :hook (cider-mode . cider-toggle-lsp-completion-maybe)
-  :preface
-  (defun cider-toggle-lsp-completion-maybe ()
-    (lsp-completion-mode (if (bound-and-true-p cider-mode) -1 1))))
-
-(use-package lsp-clojure
-  :no-require
-  :hook ((clojure-mode
-          clojurec-mode
-          clojurescript-mode)
-         . lsp))
-
+  :config
+  ;; Use latest LSP from VSCode installed
+  (setq lsp-eslint-server-command `("node"
+                                    "/Users/ovistoica/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
+                                    "--stdio")))
 
 
 ;;;;; Navigation & Editing
@@ -1649,7 +1660,11 @@ mode.")
 (use-package helpful
   :ensure helpful
   :bind
-  ("C-c h" . helpful-at-point))
+  ("C-c h" . helpful-at-point)
+  ("C-h f" . helpful-callable)
+  ("C-h k" . helpful-key)
+  ("C-h v" . helpful-variable)
+  ("C-h x" . helpful-command))
 
 
 (use-package ediff
@@ -2027,6 +2042,31 @@ dependency artifact based on the project's dependencies."
                         :stream t
                         :key os-secret-anthropic-key)
         gptel-model "claude-3-5-sonnet-20240620"))
+
+(use-package copilot
+  :defines
+  copilot-max-char
+  :commands
+  copilot-mode
+  :preface
+  (defun os/activate-copilot ()
+    (if (or (> (buffer-size) 100000)
+            (string-prefix-p "*temp*-" (buffer-name)))
+        ;; Or don't even warn to get rid of it.
+        (message "Buffer size exceeds copilot max char limit or buffer is temporary. Copilot will not be activated.")
+      (copilot-mode)))
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+  :config
+  (setq copilot-enable-predicates nil)
+  (add-to-list 'copilot-major-mode-alist '("tsx-ts" . "typescriptreact"))
+  (add-to-list 'copilot-major-mode-alist '("typescript-ts" . "typescript"))
+  :hook (prog-mode . os/activate-copilot)
+  :bind (:map copilot-completion-map
+              ("C-<tab>" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion)
+              ("S-C-TAB" . 'copilot-accept-completion-by-word)
+              ("S-C-<tab>" . 'copilot-accept-completion-by-word)))
+
 
 
 ;;;; Monitoring
