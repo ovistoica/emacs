@@ -1646,6 +1646,21 @@ mode.")
   :config
   (projectile-cleanup-known-projects))
 
+(use-package helpful
+  :ensure helpful
+  :bind
+  ("C-c h" . helpful-at-point))
+
+
+(use-package ediff
+  :defer t
+  :custom
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
+  :config
+  (advice-add 'ediff-window-display-p :override #'ignore))
+
+
 (use-package magit
   :ensure t
   :hook ((git-commit-mode . flyspell-mode)
@@ -1673,11 +1688,6 @@ mode.")
   :config
   (add-to-list 'project-switch-commands
                '(magit-project-status "Magit") t))
-
-(use-package magit-todos
-  :ensure t
-  :after magit
-  :config (magit-todos-mode 1))
 
 ;;; GIT-GUTTER
 (use-package git-gutter
