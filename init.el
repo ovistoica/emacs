@@ -617,6 +617,10 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package vertico
   :ensure t
+  :custom
+  (vertico-count 20)  ; Number of candidates to display
+  (vertico-cycle t) ; Go from last to first candidate and first to last (cycle)?
+  (vertico-resize t)
   :bind ( :map vertico-map
           ("M-RET" . vertico-exit-input))
   :hook (after-init . vertico-mode))
