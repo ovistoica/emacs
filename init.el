@@ -2121,7 +2121,8 @@ dependency artifact based on the project's dependencies."
       (copilot-mode)))
   :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :config
-  (setq copilot-enable-predicates nil)
+  (setq copilot-enable-predicates nil
+         warning-suppress-types '((copilot copilot--infer-indentation-offset)))
   (add-to-list 'copilot-major-mode-alist '("tsx-ts" . "typescriptreact"))
   (add-to-list 'copilot-major-mode-alist '("typescript-ts" . "typescript"))
   :hook (prog-mode . os/activate-copilot)

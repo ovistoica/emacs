@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: David Table
+# key: <timesheet
+# --
+
+${0:title}
+
+| Day | Hours | Stuff done                            |
+|   1 |     0 | Very important stuff has been done    |
+|     |       |                                       |

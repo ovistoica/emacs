@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Blog post
+# key: <bl
+# --
+
+#+title: $0
+#+author: Ovi Stoica
