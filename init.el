@@ -110,34 +110,34 @@
     (newline)
     (indent-for-tab-command))
 
-(defun open-line-above ()
-  "Open a line above the current line."
-  (interactive)
-  (beginning-of-line)
-  (newline)
-  (forward-line -1)
-  (indent-for-tab-command))
+  (defun open-line-above ()
+    "Open a line above the current line."
+    (interactive)
+    (beginning-of-line)
+    (newline)
+    (forward-line -1)
+    (indent-for-tab-command))
 
-(defun split-pararagraph-into-lines ()
-  "Split the current paragraph into lines with one sentence each."
-  (interactive)
-  (save-excursion
-    (let ((fill-column most-positive-fixnum))
-      (fill-paragraph))
-    (let ((auto-fill-p auto-fill-function)
-          (end (progn (end-of-line) (backward-sentence) (point))))
-      (back-to-indentation)
-      (unless (= (point) end)
-        (auto-fill-mode -1)
-        (while (< (point) end)
-          (forward-sentence)
-          (delete-horizontal-space)
-          (newline-and-indent))
-        (deactivate-mark)
-        (when auto-fill-p
-          (auto-fill-mode t))
-        (when (looking-at "^$")
-          (delete-char -1))))))
+  (defun split-pararagraph-into-lines ()
+    "Split the current paragraph into lines with one sentence each."
+    (interactive)
+    (save-excursion
+      (let ((fill-column most-positive-fixnum))
+        (fill-paragraph))
+      (let ((auto-fill-p auto-fill-function)
+            (end (progn (end-of-line) (backward-sentence) (point))))
+        (back-to-indentation)
+        (unless (= (point) end)
+          (auto-fill-mode -1)
+          (while (< (point) end)
+            (forward-sentence)
+            (delete-horizontal-space)
+            (newline-and-indent))
+          (deactivate-mark)
+          (when auto-fill-p
+            (auto-fill-mode t))
+          (when (looking-at "^$")
+            (delete-char -1))))))
   (defun in-termux-p ()
     "Detect if Emacs is running in Termux."
     (executable-find "termux-info"))
@@ -1119,7 +1119,7 @@ created with `json-hs-extra-create-overlays'."
   (cider-repl-prompt-function #'cider-repl-prompt-newline)
   (cider-auto-inspect-after-eval nil)
   (cider-enrich-classpath nil)   ; when enabled causes troubles behind
-                                 ; proxy and with new add-lib* feature
+                                        ; proxy and with new add-lib* feature
   :config
   (put 'cider-clojure-cli-aliases 'safe-local-variable #'listp)
   (defun cider-disable-linting ()
@@ -1281,7 +1281,7 @@ See `cider-find-and-clear-repl-output' for more info."
   (os/setup-install-grammars))
 
 (use-package combobulate
-  :straight '(combobulate :type git :host github :repo "mickeynp/combobulate")
+  :after (treesit)
   :preface
   ;; You can customize Combobulate's key prefix here.
   ;; Note that you may have to restart Emacs for this to take effect!
@@ -1300,8 +1300,10 @@ See `cider-find-and-clear-repl-output' for more info."
    (yaml-ts-mode . combobulate-mode)
    (typescript-ts-mode . combobulate-mode)
    (json-ts-mode . combobulate-mode)
-   (tsx-ts-mode . combobulate-mode)))
-
+   (tsx-ts-mode . combobulate-mode))
+  ;; Amend this to the directory where you keep Combobulate's source
+  ;; code.
+  :load-path ("~/workspace/combobulate"))
 
 ;;;; LSP
 
@@ -1498,7 +1500,7 @@ See `cider-find-and-clear-repl-output' for more info."
 
 (use-package puni
   :ensure t
-  :hook (((common-lisp-modes-mode nxml-mode json-ts-mode prog-mode) . puni-mode)
+  :hook (((common-lisp-modes-mode nxml-mode json-ts-mode prog-mode org-mode) . puni-mode)
          (puni-mode . electric-pair-local-mode))
   :bind ( :map region-bindings-mode-map
           ("(" . puni-wrap-round)
@@ -1535,7 +1537,7 @@ See `cider-find-and-clear-repl-output' for more info."
           ;; doesn't work in terminal
           ("M-[" . puni-wrap-square)))
 
- (use-package isearch
+(use-package isearch
   :bind ( :map isearch-mode-map
           ("<backspace>" . isearch-del-char)
           ("<left>" . isearch-edit-string)
@@ -1613,8 +1615,8 @@ See `cider-find-and-clear-repl-output' for more info."
 
 (use-package yasnippet
   :ensure t
-  :defer t
-  :delight yas-minor-mode)
+  :delight yas-minor-mode
+  :init (yas-global-mode 1))
 
 ;;;; Tools
 (use-package project
@@ -2122,7 +2124,7 @@ dependency artifact based on the project's dependencies."
   :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
   :config
   (setq copilot-enable-predicates nil
-         warning-suppress-types '((copilot copilot--infer-indentation-offset)))
+        warning-suppress-types '((copilot copilot--infer-indentation-offset)))
   (add-to-list 'copilot-major-mode-alist '("tsx-ts" . "typescriptreact"))
   (add-to-list 'copilot-major-mode-alist '("typescript-ts" . "typescript"))
   :hook (prog-mode . os/activate-copilot)
