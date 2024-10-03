@@ -1291,6 +1291,8 @@ See `cider-find-and-clear-repl-output' for more info."
   ;; Note that you may have to restart Emacs for this to take effect!
   (setq combobulate-key-prefix "C-c o")
 
+  :bind (:map combobulate-key-map
+              ("M-a" . nil))
   ;; Optional, but recommended.
   ;;
   ;; You can manually enable Combobulate with `M-x
