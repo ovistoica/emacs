@@ -13,3 +13,4 @@
 /transient/
 /tree-sitter/
 /workspace/
+flycheck_*.el

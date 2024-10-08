@@ -98,9 +98,7 @@
   :no-require
   :functions (dbus-color-theme-dark-p)
   :init (require 'bind-key)
-  :bind (("M-Q" . split-pararagraph-into-lines)
-         ("C-<return>" . open-line-below)
-         ("M-<return>" . open-line-above))
+  :bind (("M-Q" . split-pararagraph-into-lines))
   :preface
   (require 'subr-x)
   (defun open-line-below ()
@@ -425,12 +423,17 @@ are defining or executing a macro."
 
 (use-package orderless
   :ensure t
-  :defer t
   :custom
-  (completion-category-overrides
-   '((buffer (styles basic orderless))
-     (file (styles basic orderless))
-     (project-file (styles basic orderless)))))
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  (orderless-matching-styles
+   '(orderless-literal
+     orderless-prefixes
+     orderless-initialism
+     orderless-regexp
+     orderless-flex)))
+
+
 
 (use-package bindings
   :bind ( :map ctl-x-map
@@ -2133,6 +2136,14 @@ dependency artifact based on the project's dependencies."
         warning-suppress-types '((copilot copilot--infer-indentation-offset)))
   (add-to-list 'copilot-major-mode-alist '("tsx-ts" . "typescriptreact"))
   (add-to-list 'copilot-major-mode-alist '("typescript-ts" . "typescript"))
+  (add-to-list 'copilot-indentation-alist '(tsx-ts-mode 2))
+  (add-to-list 'copilot-indentation-alist '(typescript-ts-mode 2))
+  (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
+  (add-to-list 'copilot-indentation-alist '(clojurec-mode 2))
+  (add-to-list 'copilot-indentation-alist '(clojurescript-mode 2))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+  (add-to-list 'copilot-indentation-alist '(css-ts-mode 2))
+  (add-to-list 'copilot-indentation-alist '(json-ts-mode 2))
   :hook (prog-mode . os/activate-copilot)
   :bind (:map copilot-completion-map
               ("C-<tab>" . 'copilot-accept-completion)
