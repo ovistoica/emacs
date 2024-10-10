@@ -1088,59 +1088,22 @@ created with `json-hs-extra-create-overlays'."
   :ensure t
   :after clojure-mode
   :delight " CIDER"
-  :commands cider-find-and-clear-repl-buffer
-  :functions (cider-nrepl-request:eval
-              cider-find-and-clear-repl-output
-              cider-random-tip)
   :hook (((cider-repl-mode cider-mode) . eldoc-mode)
-         (cider-repl-mode . common-lisp-modes-mode)
-         (cider-popup-buffer-mode . cider-disable-linting))
+         (cider-repl-mode . common-lisp-modes-mode))
   :bind ( :map cider-repl-mode-map
           ("C-c C-S-o" . cider-repl-clear-buffer)
           :map cider-mode-map
+          ("M-¬" . cider-format-buffer)
           ("C-c C-S-o" . cider-find-and-clear-repl-buffer)
           ("C-c C-p" . cider-pprint-eval-last-sexp-to-comment))
-  :custom-face
-  (cider-result-overlay-face ((t (:box (:line-width -1 :color "grey50")))))
-  (cider-error-highlight-face ((t (:inherit flymake-error))))
-  (cider-warning-highlight-face ((t (:inherit flymake-warning))))
-  (cider-reader-conditional-face ((t (:inherit font-lock-comment-face))))
-  :custom
-  (nrepl-log-messages nil)
-  (cider-repl-display-help-banner nil)
-  (cider-repl-tab-command #'indent-for-tab-command)
-  (nrepl-hide-special-buffers t)
-  (cider-test-show-report-on-success t)
-  (cider-allow-jack-in-without-project t)
-  (cider-use-fringe-indicators nil)
-  (cider-font-lock-dynamically '(macro var deprecated))
-  (cider-save-file-on-load nil)
-  (cider-inspector-fill-frame nil)
-  (cider-auto-select-error-buffer t)
-  (cider-show-eval-spinner t)
-  (nrepl-use-ssh-fallback-for-remote-hosts t)
-  (cider-repl-history-file (expand-file-name "~/.cider-history"))
-  (cider-clojure-cli-global-options "-J-XX:-OmitStackTraceInFastThrow")
-  (cider-use-tooltips nil)
-  (cider-connection-message-fn #'cider-random-tip)
-  (cider-repl-prompt-function #'cider-repl-prompt-newline)
-  (cider-auto-inspect-after-eval nil)
-  (cider-enrich-classpath nil)   ; when enabled causes troubles behind
-                                        ; proxy and with new add-lib* feature
+
   :config
-  (put 'cider-clojure-cli-aliases 'safe-local-variable #'listp)
-  (defun cider-disable-linting ()
-    "Disable linting integrations for current buffer."
-    (when (bound-and-true-p flymake-mode)
-      (flymake-mode -1)))
-  (defun cider-repl-prompt-newline (namespace)
-    "Return a prompt string that mentions NAMESPACE with a newline."
-    (format "%s\n> " namespace))
-  (defun cider-find-and-clear-repl-buffer ()
-    "Find the current REPL buffer and clear it.
-See `cider-find-and-clear-repl-output' for more info."
-    (interactive)
-    (cider-find-and-clear-repl-output 'clear-repl)))
+  (setq cider-show-eval-spinner t
+        cider-allow-jack-in-without-project t
+        cider-preferred-build-tool 'clojure-cli
+        ;; ~make sure we can always debug nrepl issues~
+        ;; Turning this off again, seems it may really blow up memory usage
+        nrepl-log-messages nil))
 
 (use-package ob-clojure
   :after (org clojure-mode)
@@ -1211,6 +1174,7 @@ See `cider-find-and-clear-repl-output' for more info."
 ;; tree-sitter modes
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode)
+         ("\\.py\\'" . python-ts-mode)
          ("\\.cmake\\'" . cmake-ts-mode)
          ("\\.go\\'" . go-ts-mode)
          ("\\.js\\'" . typescript-ts-mode)
@@ -1348,6 +1312,7 @@ See `cider-find-and-clear-repl-output' for more info."
            typescript-ts-mode
            json-ts-mode
            js-ts-mode
+           python-ts-mode
            prisma-ts-mode
            clojure-mode
            clojurec-mode
@@ -1596,6 +1561,8 @@ See `cider-find-and-clear-repl-output' for more info."
   :ensure t
   :bind
   (("S-<mouse-1>" . mc/add-cursor-on-click)
+   ("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
    :map region-bindings-mode-map
    ("n" . mc/mark-next-symbol-like-this)
    ("N" . mc/mark-next-like-this)
