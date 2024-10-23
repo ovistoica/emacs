@@ -3,15 +3,13 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        kill-sexp
+        lsp-ui-doc--handle-mouse-movement
         mark-sexp
         mc/mark-next-lines
         puni-forward-delete-char
         puni-forward-kill-word
+        puni-forward-sexp-or-up-list
         puni-wrap-curly
         undo-only
-        ))
-
-(setq mc/cmds-to-run-once
-      '(
-        puni-backward-delete-char
         ))

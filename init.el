@@ -190,7 +190,11 @@ If LOCAL-PORT is nil, PORT is used as local port."
    load-prefer-newer t
    truncate-lines t
    bidi-paragraph-direction 'left-to-right
-   frame-title-format "Emacs"
+   frame-title-format
+   '((:eval
+      (if (buffer-file-name)
+          (abbreviate-file-name (buffer-file-name))
+        (buffer-name))))
    auto-window-vscroll nil
    mouse-highlight t
    hscroll-step 1
@@ -198,7 +202,8 @@ If LOCAL-PORT is nil, PORT is used as local port."
    scroll-margin 0
    scroll-preserve-screen-position nil
    frame-resize-pixelwise window-system
-   window-resize-pixelwise window-system)
+   window-resize-pixelwise window-system
+   fill-column 80)
   (when (window-system)
     (setq-default
      x-gtk-use-system-tooltips nil
@@ -211,6 +216,7 @@ If LOCAL-PORT is nil, PORT is used as local port."
    enable-recursive-minibuffers t)
   (when (version<= "27.1" emacs-version)
     (setq bidi-inhibit-bpa t))
+  (global-visual-line-mode t)
   (provide 'defaults))
 
 (use-package windmove
@@ -375,6 +381,7 @@ applied to the name.")
   :hook ((before-save . delete-trailing-whitespace)
          (overwrite-mode . overwrite-mode-set-cursor-shape)
          (after-init . column-number-mode)
+         (prog-mode . display-line-numbers-mode)
          (after-init . line-number-mode))
   :custom
   (yank-excluded-properties t)
@@ -1049,6 +1056,13 @@ created with `json-hs-extra-create-overlays'."
   :custom
   (yaml-indent-offset 4))
 
+(use-package docker
+  :ensure t
+  :bind ("C-c d" . docker))
+
+(use-package dockerfile-mode
+  :ensure t)
+
 
 (use-package csv-mode
   :ensure t
@@ -1188,7 +1202,6 @@ created with `json-hs-extra-create-overlays'."
          ("\\.css\\'" . css-ts-mode)
          ("\\.yml\\'" . yaml-ts-mode)
          ("\\.php\\'" . php-ts-mode)
-         ("\\.Dockerfile\\'" . dockerfile-ts-mode)
          ("\\.prisma\\'" . prisma-ts-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.mm\\'" . objc-mode)
@@ -1344,7 +1357,10 @@ created with `json-hs-extra-create-overlays'."
   (lsp-auto-configure t) ; Used to decide between current active servers
   (lsp-eldoc-enable-hover t) ; Display signature information in the echo area
   (lsp-enable-dap-auto-configure t)     ; Debug support
-  (lsp-enable-file-watchers t)
+  (lsp-enable-file-watchers nil) ; This basically means, if you change
+                                        ; the branch, should LSP reload
+                                        ; instantly - it's a big performance
+                                        ; overhead
   (lsp-enable-folding nil)     ; I disable folding since I use origami
   (lsp-enable-imenu t)
   (lsp-enable-indentation nil)    ; I use prettier
@@ -1437,6 +1453,10 @@ created with `json-hs-extra-create-overlays'."
   (setq lsp-eslint-server-command `("node"
                                     "/Users/ovistoica/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
                                     "--stdio")))
+
+(use-package lsp-java
+  :after (lsp-mode)
+  :ensure t)
 
 
 ;;;;; Navigation & Editing
@@ -2111,7 +2131,7 @@ dependency artifact based on the project's dependencies."
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
   (add-to-list 'copilot-indentation-alist '(css-ts-mode 2))
   (add-to-list 'copilot-indentation-alist '(json-ts-mode 2))
-  :hook (prog-mode . os/activate-copilot)
+  (add-to-list 'copilot-indentation-alist '(dockerfile-mode 2))
   :bind (:map copilot-completion-map
               ("C-<tab>" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion)
@@ -2128,6 +2148,9 @@ dependency artifact based on the project's dependencies."
   :custom (setq wakatime-api-key os-secret-wakatime-api-key
                 wakatime-cli-path "~/.wakatime/wakatime-cli")
   :init (global-wakatime-mode))
+
+(use-package keycast
+  :ensure t)
 
 
 ;;;;; Theming
@@ -2352,7 +2375,7 @@ dependency artifact based on the project's dependencies."
          ("C-<f5>" . modus-themes-select))
   :config
   (setq modus-themes-custom-auto-reload nil
-        modus-themes-to-toggle '(modus-operandi modus-vivendi)
+        modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted)
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t
         modus-themes-italic-constructs t
