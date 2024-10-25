@@ -217,6 +217,9 @@ If LOCAL-PORT is nil, PORT is used as local port."
   (when (version<= "27.1" emacs-version)
     (setq bidi-inhibit-bpa t))
   (global-visual-line-mode t)
+  (custom-set-variables
+   '(custom-safe-themes
+     '("ffafb0e9f63935183713b204c11d22225008559fa62133a69848835f4f4a758c" "7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "8d146df8bd640320d5ca94d2913392bc6f763d5bc2bb47bed8e14975017eea91" "99d1e29934b9e712651d29735dd8dcd431a651dfbe039df158aa973461af003e" "c5878086e65614424a84ad5c758b07e9edcf4c513e08a1c5b1533f313d1b17f1" "77fff78cc13a2ff41ad0a8ba2f09e8efd3c7e16be20725606c095f9a19c24d3d" "81f53ee9ddd3f8559f94c127c9327d578e264c574cda7c6d9daddaec226f87bb" "88f7ee5594021c60a4a6a1c275614103de8c1435d6d08cc58882f920e0cec65e" "9f297216c88ca3f47e5f10f8bd884ab24ac5bc9d884f0f23589b0a46a608fe14" "6b91ddbc12b0fc9f43fb9e31be8b76b16e387312232324c48e8c666418fe643c" "014cb63097fc7dbda3edf53eb09802237961cbb4c9e9abd705f23b86511b0a69" default)))
   (provide 'defaults))
 
 (use-package windmove
@@ -313,8 +316,8 @@ applied to the name.")
     "Check if a font with FONT-NAME is available."
     (find-font (font-spec :name font-name)))
   (defun setup-fonts ()
-    (cond ((font-installed-p "JetBrainsMono")
-           (set-face-attribute 'default nil :font "JetBrainsMono"))
+    (cond ((font-installed-p "JetBrainsMono Nerd Font Mono")
+           (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font Mono"))
           ((font-installed-p "Source Code Pro")
            (set-face-attribute 'default nil :font "Source Code Pro")))
     (when (font-installed-p "DejaVu Sans")
@@ -1454,11 +1457,6 @@ created with `json-hs-extra-create-overlays'."
                                     "/Users/ovistoica/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
                                     "--stdio")))
 
-(use-package lsp-java
-  :after (lsp-mode)
-  :ensure t)
-
-
 ;;;;; Navigation & Editing
 
 (use-package whole-line-or-region
@@ -2252,8 +2250,7 @@ dependency artifact based on the project's dependencies."
            :default-height 110)
           (regular) ; like this it uses all the fallback values and is named `regular'
           (medium
-           :default-height 130
-           :bold-weight extrabold)
+           :default-height 130)
           (large
            :inherit medium
            :default-height 140)
@@ -2261,11 +2258,11 @@ dependency artifact based on the project's dependencies."
            :inherit large
            :default-height 150)
           (live-stream
-           :default-family "Iosevka Comfy Wide"
+           :default-family "JetBrains Mono"
            :default-height 150
            :default-weight medium
-           :fixed-pitch-family "Iosevka Comfy Wide Motion"
-           :variable-pitch-family "Iosevka Comfy Wide Duo"
+           :fixed-pitch-family "JetBrains Mono"
+           :variable-pitch-family "JetBrains Mono"
            :bold-weight extrabold)
           (presentation
            :default-height 180)
@@ -2273,12 +2270,12 @@ dependency artifact based on the project's dependencies."
            ;; I keep all properties for didactic purposes, but most can be
            ;; omitted.  See the fontaine manual for the technicalities:
            ;; <https://protesilaos.com/emacs/fontaine>.
-           :default-family "Iosevka Comfy"
+           :default-family "JetBrains Mono"
            :default-weight regular
            :default-slant normal
            :default-height 120
 
-           :fixed-pitch-family "Iosevka Comfy"
+           :fixed-pitch-family "JetBrains Mono"
            :fixed-pitch-weight nil
            :fixed-pitch-slant nil
            :fixed-pitch-height 1.0
@@ -2288,7 +2285,7 @@ dependency artifact based on the project's dependencies."
            :fixed-pitch-serif-slant nil
            :fixed-pitch-serif-height 1.0
 
-           :variable-pitch-family "Iosevka Comfy"
+           :variable-pitch-family "JetBrains Mono"
            :variable-pitch-weight nil
            :variable-pitch-slant nil
            :variable-pitch-height 1.0
@@ -2324,7 +2321,7 @@ dependency artifact based on the project's dependencies."
 
            :tab-line-height 1.0
            :bold-family nil
-           :bold-weight bold
+           :bold-weight extra-bold
            :bold-slant nil
            :bold-height 1.0
 
