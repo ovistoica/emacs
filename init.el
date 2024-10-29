@@ -1,4 +1,3 @@
-
 ;; DEBUG
 ;; (setq debug-on-error t)
 ;; (setq debug-on-quit t)
@@ -255,57 +254,32 @@ If LOCAL-PORT is nil, PORT is used as local port."
                                 map)))
     "Mode line position with goto line binding.")
   (put 'mode-line-interactive-position 'risky-local-variable t)
-  (fset 'abbreviate-file-name-memo (memoize #'abbreviate-file-name))
-  (defvar mode-line-buffer-file-name
-    '(:eval (propertize (if-let ((name (buffer-file-name)))
-                            (abbreviate-file-name-memo name)
-                          (buffer-name))
-                        'help-echo (buffer-name)
-                        'face (when (and (buffer-file-name) (buffer-modified-p))
-                                'font-lock-builtin-face)))
-    "Show file name if buffer is visiting a file, otherwise show
-buffer name.  If file is modified, a `font-lock-builtin-face' is
-applied to the name.")
-  (put 'mode-line-buffer-file-name 'risky-local-variable t)
-  (defvar mode-line-input-method
-    '(:eval (when current-input-method-title
-              (propertize (concat " " current-input-method-title)
-                          'help-echo (concat "Input method: " current-input-method))))
-    "Display input method name in the modeline.")
-  (put 'mode-line-input-method 'risky-local-variable t)
-  (defvar mode-line-buffer-encoding
-    '(:eval (propertize
-             (let ((sys (coding-system-plist buffer-file-coding-system)))
-               (concat " " (if (memq (plist-get sys :category)
-                                     '(coding-category-undecided coding-category-utf-8))
-                               "UTF-8"
-                             (upcase (symbol-name (plist-get sys :name))))))
-             'help-echo 'mode-line-mule-info-help-echo
-             'local-map mode-line-coding-system-map)))
-  (put 'mode-line-buffer-encoding 'risky-local-variable t)
-  (defvar mode-line-line-encoding
-    '(:eval (when-let ((eol (pcase (coding-system-eol-type buffer-file-coding-system)
-                              (0 "LF")
-                              (1 "CRLF")
-                              (2 "CR")
-                              (_ nil))))
-              (propertize
-               (concat " " eol)
-               'help-echo (format "Line ending style: %s"
-                                  (pcase eol
-                                    ("LF" "Unix style LF")
-                                    ("CRLF" "DOS style CRLF")
-                                    ("CR" "Mac style CR")
-                                    (_ "Undecided")))
-               'local-map (let ((map (make-sparse-keymap)))
-                            (define-key map [mode-line mouse-1] 'mode-line-change-eol)
-                            map)))))
-  (put 'mode-line-line-encoding 'risky-local-variable t)
-  (setq-default mode-line-format
-                '(" " mode-line-buffer-file-name mode-line-input-method
-                  mode-line-buffer-encoding mode-line-line-encoding
-                  mode-line-interactive-position (vc-mode vc-mode) " "
-                  mode-line-modes " " mode-line-misc-info))
+  (setq-default mode-line-format ; Sets the default mode-line format for all buffers
+                '(               ; List of elements to display in the mode-line
+                  "%e"         ; Shows error message if there's not enough space
+                  mode-line-front-space ; Space at beginning
+
+                  mode-line-modified ; Shows if buffer is modified (*) or read-only (%)
+                  mode-line-remote   ; Shows @ if file is remote
+                  mode-line-frame-identification ; Shows - if windowed, or terminal name if in terminal
+
+                                        ; Custom project display section
+                  (:propertize ; Adds face properties to the following expression
+                   (:eval ; Evaluates the expression each time mode-line updates
+                    (when-let ((project (project-current))) ; If in a project
+                      (format "[%s] " (project-name project)))) ; Shows [project-name]
+                   face warning)        ; Displays in warning face color
+
+                                        ; Buffer name section
+                  (:propertize "%b" face mode-line-buffer-id) ; Current buffer name with special face
+                  " "                                         ; Space
+                  mode-line-position ; Shows position in buffer (line number, %)
+                  (vc-mode vc-mode)  ; Version control information
+                  " "                ; Space
+                  mode-line-modes    ; Major and minor modes
+                  mode-line-misc-info    ; Misc information
+                  mode-line-end-spaces)) ; Spaces at end
+
   (provide 'mode-line))
 
 (use-package font
@@ -444,6 +418,10 @@ are defining or executing a macro."
      orderless-flex)))
 
 
+(use-package diminish
+  :config
+  (diminish 'whole-line-or-region-local-mode)
+  (diminish 'visual-line-mode))
 
 (use-package bindings
   :bind ( :map ctl-x-map
@@ -1176,7 +1154,7 @@ created with `json-hs-extra-create-overlays'."
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package highlight-indent-guides
-  :diminish t
+  :diminish ""
   :straight '(highlight-indent-guides :type git :host github :repo "DarthFennec/highlight-indent-guides")
   :defines
   highlight-indent-guides-method
@@ -1461,6 +1439,7 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package whole-line-or-region
   :ensure t
+  :diminish ""
   :init
   (whole-line-or-region-global-mode 1))
 
@@ -1775,6 +1754,7 @@ mode.")
 
 (use-package npm-mode
   :straight '(npm-mode :type git :host github :repo "mojochao/npm-mode")
+  :diminish ""
   :init (npm-global-mode))
 
 
@@ -2142,7 +2122,7 @@ dependency artifact based on the project's dependencies."
 
 (use-package wakatime-mode
   :ensure t
-  :diminish t
+  :diminish ""
   :custom (setq wakatime-api-key os-secret-wakatime-api-key
                 wakatime-cli-path "~/.wakatime/wakatime-cli")
   :init (global-wakatime-mode))
