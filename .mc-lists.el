@@ -5,6 +5,7 @@
       '(
         combobulate-envelop-tsx-ts-mode-wrap-parentheses
         combobulate-navigate-up
+        end-of-visual-line
         kill-sexp
         lsp-ui-doc--handle-mouse-movement
         mark-sexp

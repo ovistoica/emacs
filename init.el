@@ -602,6 +602,10 @@ created with `json-hs-extra-create-overlays'."
 (use-package repeat
   :hook (after-init . repeat-mode))
 
+;; TODO Document on this further, possibly disable LSP on very long files
+(use-package so-long
+  :init (global-so-long-mode 1))
+
 
 
 ;;; Completion
@@ -609,7 +613,7 @@ created with `json-hs-extra-create-overlays'."
 (use-package vertico
   :ensure t
   :custom
-  (vertico-count 20)  ; Number of candidates to display
+  (vertico-count 20)                    ; Number of candidates to display
   (vertico-cycle t) ; Go from last to first candidate and first to last (cycle)?
   (vertico-resize t)
   :bind ( :map vertico-map
@@ -993,6 +997,13 @@ created with `json-hs-extra-create-overlays'."
      :height 1200
      :background 'unspecified)
     (setq-local header-line-format " ")))
+
+(use-package writegood-mode
+  :ensure t
+  :hook ((markdown-mode nroff-mode org-mode
+                        mail-mode
+                        git-commit-mode)
+         . writegood-mode))
 
 ;;; Languages
 
