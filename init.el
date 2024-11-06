@@ -679,7 +679,12 @@ created with `json-hs-extra-create-overlays'."
   ;; https://git.genehack.net/os/emacs/issues/2
   (setf (alist-get 'prettier-json apheleia-formatters)
         '("prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'standard-clojure apheleia-formatters)
+        '("npx" "@chrisoakman/standard-clojure-style" "check"))
   (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
+  (setf (alist-get 'clojure-mode apheleia-mode-alist) 'standard-clojure)
+  (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
+  (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
   (apheleia-global-mode +1))
 
 (use-package corfu
