@@ -100,6 +100,9 @@
   :bind (("M-Q" . split-pararagraph-into-lines))
   :preface
   (require 'subr-x)
+  (defun os-code-radio ()
+    (interactive)
+    (browse-url "https://coderadio.freecodecamp.org/"))
   (defun open-line-below ()
     "Open a line below the current line."
     (interactive)
@@ -1093,14 +1096,21 @@ created with `json-hs-extra-create-overlays'."
 (use-package cider
   :ensure t
   :after clojure-mode
+  :preface
+  (defun cider-reset ()
+    (interactive)
+    (with-current-buffer (cider-current-repl)
+      (cider-interactive-eval "(reset)")))
   :delight " CIDER"
   :hook (((cider-repl-mode cider-mode) . eldoc-mode)
          (cider-repl-mode . common-lisp-modes-mode))
   :bind ( :map cider-repl-mode-map
           ("C-c C-S-o" . cider-repl-clear-buffer)
+          ("M-:" . cider-reset)
           :map cider-mode-map
           ("M-¬" . cider-format-buffer)
           ("C-c C-S-o" . cider-find-and-clear-repl-buffer)
+          ("M-:" . cider-reset)
           ("C-c C-p" . cider-pprint-eval-last-sexp-to-comment))
 
   :config
@@ -1677,7 +1687,35 @@ mode.")
 
 (use-package projectile
   :ensure projectile
+  :after nvm
   :diminish
+  :preface
+  (declare-function nvm--installed-versions "nvm")
+  (declare-function nvm-use                 "nvm")
+  (defvar os/node-version "" "Version of Node to use as read from .nvmrc file.")
+  (defvar os/nvmrc-file ".nvmrc" "Path to nvmrc file relative to project root.")
+
+  (defun os/node-project-setup ()
+    "Use nvm to set active Node version if .nvmrc file exists in project root."
+    (interactive)
+    (if (file-exists-p os/nvmrc-file)
+        (progn
+          (setq os/node-version (os/chomp-end
+                                 (with-temp-buffer
+                                   (insert-file-contents os/nvmrc-file)
+                                   (buffer-string))))
+          (os/nvm os/node-version)
+          (message "Set up to use node version %s" os/node-version))))
+  (defun os/nvm (version)
+    "Reconfigure $PATH and function `exec-path' to use a particular Node.js VERSION.
+\(Via nvm.) When called with a prefx argument, use the highest
+Node version locally available."
+    (interactive
+     (list (if (not (consp current-prefix-arg))
+               (read-string "Version: ")
+             (car (car (last (nvm--installed-versions)))))))
+    (nvm-use version)
+    (setq exec-path (parse-colon-path (getenv "PATH"))))
   :defines
   projectile-mode-map
   :functions
@@ -1725,6 +1763,8 @@ mode.")
   :config
   (advice-add 'ediff-window-display-p :override #'ignore))
 
+(use-package transient
+  :ensure t)
 
 (use-package magit
   :ensure t
@@ -2081,7 +2121,7 @@ dependency artifact based on the project's dependencies."
      "SSH_AUTH_SOCK"
      )))
 
-;;;; AI
+;;;; AI STUFF
 
 (use-package gptel
   :straight t
@@ -2127,6 +2167,14 @@ dependency artifact based on the project's dependencies."
               ("S-C-TAB" . 'copilot-accept-completion-by-word)
               ("S-C-<tab>" . 'copilot-accept-completion-by-word)))
 
+
+(use-package aider
+  :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
+  :config
+  (setq aider-args '("--model" "gpt-4o-mini"))
+  (setenv "ANTHROPIC_API_KEY" os-secret-anthropic-key)
+  ;; Optional: Set a key binding for the transient menu
+  (global-set-key (kbd "C-c a") 'aider-transient-menu))
 
 
 ;;;; Monitoring
