@@ -19,3 +19,5 @@ flycheck_*.el
 *.elc
 /.org-id-locations
 /.dap-breakpoints
+.aider*
+.env

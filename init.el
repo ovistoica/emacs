@@ -1490,41 +1490,10 @@ created with `json-hs-extra-create-overlays'."
          ((elfeed-search-mode magit-mode mu4e-headers-mode)
           . region-bindings-off)))
 
-(use-package puni
-  :ensure t
-  :hook (((common-lisp-modes-mode nxml-mode json-ts-mode prog-mode org-mode) . puni-mode)
-         (puni-mode . electric-pair-local-mode))
-  :bind ( :map region-bindings-mode-map
-          ("(" . puni-wrap-round)
-          ("[" . puni-wrap-square)
-          ("{" . puni-wrap-curly)
-          ("<" . puni-wrap-angle)
-          ;; paredit-like keys
-          :map puni-mode-map
-          ("C-M-f" . puni-forward-sexp-or-up-list)
-          ("C-M-b" . puni-backward-sexp-or-up-list)
-          ("C-M-t" . puni-transpose)
-          ;; slurping & barfing
-          ("C-<left>" . puni-barf-forward)
-          ("C-}" . puni-barf-forward)
-          ("C-<right>" . puni-slurp-forward)
-          ("C-)" . puni-slurp-forward)
-          ("C-(" . puni-slurp-backward)
-          ("C-M-<left>" . puni-slurp-backward)
-          ("C-{" . puni-barf-backward)
-          ("C-M-<right>" . puni-barf-backward)
-          ;; depth chaning
-          ("M-r" . puni-raise)
-          ("M-<up>" . puni-splice-killing-backward)
-          ("M-<down>" . puni-splice-killing-forward)
-          ("M-(" . puni-wrap-round)
-          ("M-{" . puni-wrap-curly)
-          ("M-?" . puni-convolute)
-          ("M-S" . puni-split)))
-
 (use-package smartparens
   :ensure t
-  :hook ((prog-mode . smartparens-mode))
+  :hook ((prog-mode . smartparens-mode)
+         (common-lisp-modes-mode . smartparens-strict-mode))
   :bind (:map smartparens-mode-map
               ("C-M-f" . sp-forward-sexp)
               ("C-M-b" . sp-backward-sexp)
@@ -1543,13 +1512,6 @@ created with `json-hs-extra-create-overlays'."
               ("M-[" . sp-wrap-square))
   :config
   (require 'smartparens-config))
-
-
-(use-package puni
-  :when window-system
-  :bind ( :map puni-mode-map
-          ;; doesn't work in terminal
-          ("M-[" . puni-wrap-square)))
 
 (use-package isearch
   :bind ( :map isearch-mode-map
@@ -2193,10 +2155,11 @@ dependency artifact based on the project's dependencies."
 (use-package aider
   :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
   :config
-  (setq aider-args '("--model" "gpt-4o-mini"))
+  (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022"))
   (setenv "ANTHROPIC_API_KEY" os-secret-anthropic-key)
   ;; Optional: Set a key binding for the transient menu
   (global-set-key (kbd "C-c a") 'aider-transient-menu))
+
 
 
 ;;;; Monitoring

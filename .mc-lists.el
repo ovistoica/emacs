@@ -11,6 +11,8 @@
         mark-sexp
         mc/mark-all-in-region-regexp
         mc/mark-next-lines
+        org-end-of-line
+        org-self-insert-command
         puni-backward-delete-char
         puni-forward-delete-char
         puni-forward-kill-word
@@ -22,4 +24,5 @@
 
 (setq mc/cmds-to-run-once
       '(
+        pixel-scroll-precision
         ))
