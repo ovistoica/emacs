@@ -1522,6 +1522,28 @@ created with `json-hs-extra-create-overlays'."
           ("M-?" . puni-convolute)
           ("M-S" . puni-split)))
 
+(use-package smartparens
+  :ensure t
+  :hook ((prog-mode . smartparens-mode))
+  :bind (:map smartparens-mode-map
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-M-t" . sp-transpose-sexp)
+              ("C-<right>" . sp-forward-slurp-sexp)
+              ("C-)" . sp-forward-slurp-sexp)
+              ("C-<left>" . sp-forward-barf-sexp)
+              ("C-}" . sp-forward-barf-sexp)
+              ("C-(" . sp-backward-slurp-sexp)
+              ("C-M-<left>" . sp-backward-slurp-sexp)
+              ("C-{" . sp-backward-barf-sexp)
+              ("C-M-<right>" . sp-backward-barf-sexp)
+              ("M-r" . sp-raise-sexp)
+              ("M-(" . sp-wrap-round)
+              ("M-{" . sp-wrap-curly)
+              ("M-[" . sp-wrap-square))
+  :config
+  (require 'smartparens-config))
+
 
 (use-package puni
   :when window-system
