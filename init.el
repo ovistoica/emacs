@@ -680,7 +680,7 @@ created with `json-hs-extra-create-overlays'."
   (setf (alist-get 'prettier-json apheleia-formatters)
         '("prettier" "--stdin-filepath" filepath))
   (setf (alist-get 'standard-clojure apheleia-formatters)
-        '("npx" "@chrisoakman/standard-clojure-style" "check"))
+        '("standard-clj" "fix" "-"))
   (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
   (setf (alist-get 'clojure-mode apheleia-mode-alist) 'standard-clojure)
   (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
@@ -1495,28 +1495,38 @@ created with `json-hs-extra-create-overlays'."
          ((elfeed-search-mode magit-mode mu4e-headers-mode)
           . region-bindings-off)))
 
-(use-package smartparens
+(use-package puni
   :ensure t
-  :hook ((prog-mode . smartparens-mode)
-         (common-lisp-modes-mode . smartparens-strict-mode))
-  :bind (:map smartparens-mode-map
-              ("C-M-f" . sp-forward-sexp)
-              ("C-M-b" . sp-backward-sexp)
-              ("C-M-t" . sp-transpose-sexp)
-              ("C-<right>" . sp-forward-slurp-sexp)
-              ("C-)" . sp-forward-slurp-sexp)
-              ("C-<left>" . sp-forward-barf-sexp)
-              ("C-}" . sp-forward-barf-sexp)
-              ("C-(" . sp-backward-slurp-sexp)
-              ("C-M-<left>" . sp-backward-slurp-sexp)
-              ("C-{" . sp-backward-barf-sexp)
-              ("C-M-<right>" . sp-backward-barf-sexp)
-              ("M-r" . sp-raise-sexp)
-              ("M-(" . sp-wrap-round)
-              ("M-{" . sp-wrap-curly)
-              ("M-[" . sp-wrap-square))
-  :config
-  (require 'smartparens-config))
+  :hook (((common-lisp-modes-mode nxml-mode json-ts-mode prog-mode org-mode) . puni-mode)
+         (puni-mode . electric-pair-local-mode))
+  :bind ( :map region-bindings-mode-map
+          ("(" . puni-wrap-round)
+          ("[" . puni-wrap-square)
+          ("{" . puni-wrap-curly)
+          ("<" . puni-wrap-angle)
+          ;; paredit-like keys
+          :map puni-mode-map
+          ("C-M-f" . puni-forward-sexp-or-up-list)
+          ("C-M-b" . puni-backward-sexp-or-up-list)
+          ("C-M-t" . puni-transpose)
+          ;; slurping & barfing
+          ("C-<left>" . puni-barf-forward)
+          ("C-}" . puni-barf-forward)
+          ("C-<right>" . puni-slurp-forward)
+          ("C-)" . puni-slurp-forward)
+          ("C-(" . puni-slurp-backward)
+          ("C-M-<left>" . puni-slurp-backward)
+          ("C-{" . puni-barf-backward)
+          ("C-M-<right>" . puni-barf-backward)
+          ;; depth chaning
+          ("M-r" . puni-raise)
+          ("M-<up>" . puni-splice-killing-backward)
+          ("M-<down>" . puni-splice-killing-forward)
+          ("M-(" . puni-wrap-round)
+          ("M-{" . puni-wrap-curly)
+          ("M-?" . puni-convolute)
+          ("M-R" . puni-splice)
+          ("M-S" . puni-split)))
 
 (use-package isearch
   :bind ( :map isearch-mode-map
@@ -2113,7 +2123,7 @@ dependency artifact based on the project's dependencies."
 ;;;; AI STUFF
 
 (use-package gptel
-  :straight t
+  :straight (:host github :repo "karthink/gptel")
   :defines
   gptel-make-anthropic
   gptel-api-key
@@ -2121,7 +2131,7 @@ dependency artifact based on the project's dependencies."
   (setq gptel-backend (gptel-make-anthropic "Claude"
                         :stream t
                         :key os-secret-anthropic-key)
-        gptel-model "claude-3-5-sonnet-20240620"))
+        gptel-model"claude-3-5-sonnet-20241022"))
 
 (use-package copilot
   :defines
