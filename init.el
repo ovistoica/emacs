@@ -601,6 +601,8 @@ created with `json-hs-extra-create-overlays'."
   :when (fboundp 'xwidget-webkit-browse-url)
   :custom (browse-url-browser-function #'xwidget-webkit-browse-url))
 
+(use-package centered-window :ensure t)
+
 
 (use-package repeat
   :hook (after-init . repeat-mode))
@@ -1057,8 +1059,7 @@ created with `json-hs-extra-create-overlays'."
   (yaml-indent-offset 4))
 
 (use-package docker
-  :ensure t
-  :bind ("C-c d" . docker))
+  :ensure t)
 
 (use-package dockerfile-mode
   :ensure t)
@@ -1686,35 +1687,7 @@ mode.")
 
 (use-package projectile
   :ensure projectile
-  :after nvm
   :diminish
-  :preface
-  (declare-function nvm--installed-versions "nvm")
-  (declare-function nvm-use                 "nvm")
-  (defvar os/node-version "" "Version of Node to use as read from .nvmrc file.")
-  (defvar os/nvmrc-file ".nvmrc" "Path to nvmrc file relative to project root.")
-
-  (defun os/node-project-setup ()
-    "Use nvm to set active Node version if .nvmrc file exists in project root."
-    (interactive)
-    (if (file-exists-p os/nvmrc-file)
-        (progn
-          (setq os/node-version (os/chomp-end
-                                 (with-temp-buffer
-                                   (insert-file-contents os/nvmrc-file)
-                                   (buffer-string))))
-          (os/nvm os/node-version)
-          (message "Set up to use node version %s" os/node-version))))
-  (defun os/nvm (version)
-    "Reconfigure $PATH and function `exec-path' to use a particular Node.js VERSION.
-\(Via nvm.) When called with a prefx argument, use the highest
-Node version locally available."
-    (interactive
-     (list (if (not (consp current-prefix-arg))
-               (read-string "Version: ")
-             (car (car (last (nvm--installed-versions)))))))
-    (nvm-use version)
-    (setq exec-path (parse-colon-path (getenv "PATH"))))
   :defines
   projectile-mode-map
   :functions
@@ -2120,6 +2093,124 @@ dependency artifact based on the project's dependencies."
      "SSH_AUTH_SOCK"
      )))
 
+;;;;; NOTE TAKING
+
+
+;;; Denote (simple note-taking and file-naming)
+;; Read the manual: <https://protesilaos.com/emacs/denote>.
+(use-package denote
+  :ensure t
+  :hook
+
+  ;; Highlight Denote file names in Dired buffers.  Below is the
+  ;; generic approach, which is great if you rename files Denote-style
+  ;; in lots of places as I do.
+  ;;
+  ;; If you only want the `denote-dired-mode' in select directories,
+  ;; then modify the variable `denote-dired-directories' and use the
+  ;; following instead:
+  ;;
+  ;;  (dired-mode . denote-dired-mode-in-directories)
+  ((dired-mode . denote-dired-mode)
+
+   ;; If you use Markdown or plain text files you want to fontify links
+   ;; upon visiting the file (Org renders links as buttons right away).
+   (text-mode . denote-fontify-links-mode))
+  :bind
+  ;; Denote DOES NOT define any key bindings.  This is for the user to
+  ;; decide.  For example:
+  ( :map global-map
+    ("C-c d n" . denote)
+    ("C-c d N" . denote-type)
+    ("C-c d d" . denote-date)
+    ("C-c d z" . denote-signature) ; "zettelkasten" mnemonic
+    ("C-c d s" . denote-subdirectory)
+    ("C-c d o" . denote-sort-dired) ; "order" mnemonic
+    ("C-c d j" . denote-journal-extras-new-entry)
+    ("C-c d J" . denote-journal-extras-new-or-existing-entry)
+    ;; Note that `denote-rename-file' can work from any context, not
+    ;; just Dired buffers.  That is why we bind it here to the
+    ;; `global-map'.
+    ;;
+    ;; Also see `denote-rename-file-using-front-matter' further below.
+    ("C-c d r" . denote-rename-file)
+    ;; If you intend to use Denote with a variety of file types, it is
+    ;; easier to bind the link-related commands to the `global-map', as
+    ;; shown here.  Otherwise follow the same pattern for
+    ;; `org-mode-map', `markdown-mode-map', and/or `text-mode-map'.
+    :map text-mode-map
+    ("C-c d i" . denote-link) ; "insert" mnemonic
+    ("C-c d I" . denote-add-links)
+    ("C-c d b" . denote-backlinks)
+    ("C-c d f f" . denote-find-link)
+    ("C-c d f b" . denote-find-backlink)
+    ;; Also see `denote-rename-file' further above.
+    ("C-c d R" . denote-rename-file-using-front-matter)
+
+    ;; I do not bind the Org dynamic blocks, but they are useful:
+    ;;
+    ;; - `denote-org-extras-dblock-insert-links'
+    ;; - `denote-org-extras-dblock-insert-backlinks'
+    ;; - `denote-org-extras-dblock-insert-files'
+    ;; - `denote-org-extras-dblock-insert-missing-links'
+
+    ;; Key bindings specifically for Dired.
+    :map dired-mode-map
+    ("C-c C-d C-i" . denote-link-dired-marked-notes)
+    ("C-c C-d C-r" . denote-dired-rename-marked-files)
+    ("C-c C-d C-k" . denote-dired-rename-marked-files-with-keywords)
+    ("C-c C-d C-f" . denote-dired-rename-marked-files-using-front-matter))
+  :config
+  ;; Remember to check the doc strings of those variables.
+  (setq denote-directory (expand-file-name "~/Documents/notes/"))
+  (setq denote-file-type 'org) ; Org is the default, set others here like I do
+  ;; If you want to have a "controlled vocabulary" of keywords,
+  ;; meaning that you only use a predefined set of them, then you want
+  ;; `denote-infer-keywords' to be nil and `denote-known-keywords' to
+  ;; have the keywords you need.
+  (setq denote-known-keywords '("emacs" "journal" "book" "philosophy" "politics" "economics"))
+  (setq denote-infer-keywords t)
+  (setq denote-sort-keywords t)
+  (setq denote-excluded-directories-regexp nil)
+  (setq denote-date-format nil) ; read its doc string
+  (setq denote-rename-no-confirm t)
+  (setq denote-backlinks-show-context nil)
+  (setq denote-rename-buffer-format "[D] %t")
+
+  ;; Automatically rename Denote buffers when opening them so that
+  ;; instead of their long file name they have a literal "[D]"
+  ;; followed by the file's title.  Read the doc string of
+  ;; `denote-rename-buffer-format' for how to modify this.
+  (denote-rename-buffer-mode 1)
+
+  (setq denote-journal-extras-directory nil) ; use the `denote-directory'
+  (setq denote-journal-extras-title-format nil) ; always prompt for title
+  (setq denote-journal-extras-keyword "journal")
+
+  (with-eval-after-load 'org-capture
+    (setq denote-org-capture-specifiers "%l\n%i\n%?")
+    (add-to-list 'org-capture-templates
+                 '("n" "New note (with denote.el)" plain
+                   (file denote-last-path)
+                   #'denote-org-capture
+                   :no-save t
+                   :immediate-finish nil
+                   :kill-buffer t
+                   :jump-to-captured t))
+
+    ;; This prompts for TITLE, KEYWORDS, and SUBDIRECTORY
+    (add-to-list 'org-capture-templates
+                 '("N" "New note with prompts (with denote.el)" plain
+                   (file denote-last-path)
+                   (function
+                    (lambda ()
+                      (denote-org-capture-with-prompts :title :keywords :signature)))
+                   :no-save t
+                   :immediate-finish nil
+                   :kill-buffer t
+                   :jump-to-captured t))))
+
+
 ;;;; AI STUFF
 
 (use-package gptel
@@ -2131,7 +2222,8 @@ dependency artifact based on the project's dependencies."
   (setq gptel-backend (gptel-make-anthropic "Claude"
                         :stream t
                         :key os-secret-anthropic-key)
-        gptel-model"claude-3-5-sonnet-20241022"))
+        gptel-model "claude-3-5-sonnet-20241022")
+  :bind ("C-c g" . gptel-menu))
 
 (use-package copilot
   :defines

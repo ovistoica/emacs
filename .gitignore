@@ -21,3 +21,4 @@ flycheck_*.el
 /.dap-breakpoints
 .aider*
 .env
+/eshell/
