@@ -2180,6 +2180,11 @@ dependency artifact based on the project's dependencies."
   ;; which is done in init.el.
   (nvm-dir (getenv "NVM_DIR")))
 
+
+(use-package js-pkg-mode
+  :straight (:type git :local-repo "~/workspace/js-pkg-mode")
+  :init (js-pkg-global-mode 1))
+
 (use-package vterm
   :ensure vterm
   :config
