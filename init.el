@@ -1442,6 +1442,7 @@ created with `json-hs-extra-create-overlays'."
   :bind
   (:map lsp-mode-map
         ([remap lsp-treemacs-errors-list] . consult-lsp-diagnostics)
+        ([remap consult-imenu] . consult-lsp-file-symbols)
         ([remap xref-find-apropos] . consult-lsp-symbols)))
 
 (use-package lsp-completion
