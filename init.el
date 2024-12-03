@@ -1,3 +1,6 @@
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file :no-error-if-file-is-missing)
+
 ;; DEBUG
 ;; (setq debug-on-error t)
 ;; (setq debug-on-quit t)
@@ -5,6 +8,22 @@
 
 ;;; ELPA
 (require 'package)
+(package-initialize)
+
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+
+(when (< emacs-major-version 29)
+  (unless (package-installed-p 'use-package)
+    (unless package-archive-contents
+      (package-refresh-contents))
+    (package-install 'use-package)))
+
+;; Don't show byte compilation warnings when installing packages
+(add-to-list 'display-buffer-alist
+             '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
+               (display-buffer-no-window)
+               (allow-no-window . t)))
+
 (require 'use-package)
 
 (defvar os/emacs-tmp-dir (concat user-emacs-directory "tmp/")
@@ -54,9 +73,6 @@
 (use-package delight
   :ensure t)
 
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file)
-
 
 ;;; MAC STUFF
 (when (eq system-type 'darwin)
@@ -65,7 +81,6 @@
   (setq browse-url-browser-function 'browse-url-default-macosx-browser)
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark)))
-
 
 
 
@@ -100,7 +115,8 @@
   :functions (dbus-color-theme-dark-p)
   :init (require 'bind-key)
   :bind (("M-Q" . split-pararagraph-into-lines)
-         ("C-M-;" . mark-end-of-sentence))
+         ("C-M-;" . mark-end-of-sentence)
+         ("C-g" . os/keyboard-quit-dwim))
   :preface
   (require 'subr-x)
   (defun os-clear-xcode-simulator-cache ()
@@ -191,6 +207,24 @@ If LOCAL-PORT is nil, PORT is used as local port."
       (async-shell-command
        (format "ssh -4 -N -L %s:localhost:%s %s" (or local-port port) port host)
        (concat " " name))))
+  (defun os/keyboard-quit-dwim ()
+    "Do-What-I-Mean behaviour for a general `keyboard-quit'
+
+The generic `keyboard-quit' does not do the expected thing when
+the minibuffer is open. Whereas we want it to close the
+minibuffer, even without explicitly focusing it.
+
+The DWIM behaviour of this command is as follows:
+- When the region is active, disable it.
+- When a minibuffer is open, but not focused, close the minibuffer.
+- When the Completions buffer is selected, close it.
+- In every other case use the regular `keyboard-quit'."
+    (interactive)
+    (cond
+     ((region-active-p) (keyboard-quit))
+     ((derived-mode-p 'completion-list-mode) (delete-completion-window))
+     ((> (minibuffer-depth) 0) (abort-recursive-edit))
+     (t (keyboard-quit))))
   (provide 'functions))
 
 (use-package defaults
@@ -233,11 +267,16 @@ If LOCAL-PORT is nil, PORT is used as local port."
      '("ffafb0e9f63935183713b204c11d22225008559fa62133a69848835f4f4a758c" "7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "8d146df8bd640320d5ca94d2913392bc6f763d5bc2bb47bed8e14975017eea91" "99d1e29934b9e712651d29735dd8dcd431a651dfbe039df158aa973461af003e" "c5878086e65614424a84ad5c758b07e9edcf4c513e08a1c5b1533f313d1b17f1" "77fff78cc13a2ff41ad0a8ba2f09e8efd3c7e16be20725606c095f9a19c24d3d" "81f53ee9ddd3f8559f94c127c9327d578e264c574cda7c6d9daddaec226f87bb" "88f7ee5594021c60a4a6a1c275614103de8c1435d6d08cc58882f920e0cec65e" "9f297216c88ca3f47e5f10f8bd884ab24ac5bc9d884f0f23589b0a46a608fe14" "6b91ddbc12b0fc9f43fb9e31be8b76b16e387312232324c48e8c666418fe643c" "014cb63097fc7dbda3edf53eb09802237961cbb4c9e9abd705f23b86511b0a69" default)))
   (provide 'defaults))
 
+
 (use-package windmove
   :config
   (windmove-default-keybindings))
 
 ;;; Core packages
+
+(use-package delsel
+  :ensure nil ;; no need to install it as it is built-in
+  :hook (after-init . delete-selection-mode))
 
 (use-package bind-key
   :ensure t)
@@ -358,6 +397,7 @@ If LOCAL-PORT is nil, PORT is used as local port."
 
 
 (use-package savehist
+  :ensure nil
   :hook (after-init . savehist-mode))
 
 
@@ -540,12 +580,36 @@ are defining or executing a macro."
   :config
   (setq insert-directory-program "gls"
         dired-use-ls-dired t
-        dired-listing-switches "-lAXGh --group-directories-first --sort=extension"))
+        dired-listing-switches "-lAXGh --group-directories-first --sort=extension" ;; directories first
+        dired-recursive-copies 'always
+        dired-recursive-copies 'always
+        delete-by-moving-to-trash t
+        dired-dwim-target t))
+
+(use-package dired-subtree
+  :ensure t
+  :after dired
+  :bind (:map dired-mode-map
+              ("<tab>" . dired-subtree-toggle)
+              ("TAB" . dired-subtree-toggle)
+              ("<backtab>" . dired-subtree-remove)
+              ("S-TAB" . dired-subtree-remove))
+  :config
+  (setq dired-subtree-use-backgrounds nil))
 
 ;; Dired extra font locking
 (use-package diredfl
   :after (dired)
   :hook (dired-mode .diredfl-mode))
+
+(use-package trashed
+  :ensure t
+  :commands (trashed)
+  :config
+  (setq trashed-action-confirmer 'y-or-n-p)
+  (setq trashed-use-header-line t)
+  (setq trashed-sort-key '("Date deleted" . t))
+  (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
 (use-package json-hs-extra
   :after json
@@ -619,6 +683,8 @@ created with `json-hs-extra-create-overlays'."
 ;; TODO Document on this further, possibly disable LSP on very long files
 (use-package so-long
   :init (global-so-long-mode 1))
+
+
 
 
 
@@ -698,44 +764,51 @@ created with `json-hs-extra-create-overlays'."
   (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
   (apheleia-global-mode +1))
 
+(use-package nerd-icons
+  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el")
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-dired
+  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired"))
+
+(use-package nerd-icons-completion
+  :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
+  :after marginalia
+  :config
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+(use-package nerd-icons-corfu
+  :straight '(nerd-icons-corfu :type git :host github :repo "LuigiPiucco/nerd-icons-corfu")
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 (use-package corfu
   :ensure t
-  ;; Optional customizations
-  :custom
-  (corfu-cycle t)            ; Allows cycling through candidates
-  (corfu-auto t)             ; Enable auto completion
-  (corfu-auto-prefix 2)      ; Minimum length of prefix for completion
-  (corfu-auto-delay 0)       ; No delay for completion
-  (corfu-popupinfo-delay '(0.5 . 0.2)) ; Automatically update info popup after that numver of seconds
-  (corfu-preview-current 'insert)      ; insert previewed candidate
-  (corfu-preselect 'prompt)
-  (corfu-on-exact-match nil)    ; Don't auto expand tempel snippets
-  (tab-always-indent 'complete) ; First try to indent and then complete
-  ;; Optionally use TAB for cycling, default is `corfu-complete'.
+  :hook (after-init . global-corfu-mode)
   :bind (:map corfu-map
-              ("TAB" . corfu-next)
-              ([tab] . corfu-next)
-              ("S-TAB" . corfu-previous)
-              ([backtab] . corfu-previous)
-              ([remap completion-at-point] . corfu-complete)
-              ("RET" . corfu-complete-and-quit)
-              ("<return>" . corfu-complete-and-quit))
-  :init
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode)                ; Popup completion info
+              ("<tab>" . corfu-complete)
+              ([remap completion-at-point] . corfu-complete))
   :config
-  (defun corfu-complete-and-quit ()
-    (interactive)
-    (corfu-complete)
-    (corfu-quit))
-  (add-hook 'eshell-mode-hook
-            (lambda () (setq-local corfu-quit-at-boundary t
-                                   corfu-quit-no-match t
-                                   corfu-auto nil)
-              (corfu-mode))
-            nil
-            t))
+  (setq tab-always-indent 'complete)
+  (setq corfu-preview-current nil)
+  (setq corfu-min-width 20)
+  (setq corfu-auto t
+        corfu-auto-prefix 1
+        corfu-auto-delay 0
+        corfu-cycle t
+        corfu-on-exact-match nil) ;; Don't auto insert
+
+  (setq corfu-popupinfo-delay '(0.5 . 0.2))
+  (corfu-popupinfo-mode 1)   ; shows documentation after `corfu-popupinfo-delay'
+
+  ;; Sort by input history (no need to modify `corfu-sort-function').
+  (with-eval-after-load 'savehist
+    (corfu-history-mode 1)
+    (add-to-list 'savehist-additional-variables 'corfu-history)))
+
+
 
 (use-package corfu-popupinfo
   :bind ( :map corfu-popupinfo-map
