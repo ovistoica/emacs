@@ -1,3 +1,10 @@
+;;; init.el --- My personal emacs configuration.
+;;; Author: Ovidiu Stoica
+;;; Commentary:
+;;; The entire configuration is kept here.
+;;; Currently written for Emacs 29.
+;;; Code:
+
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file :no-error-if-file-is-missing)
 
@@ -263,8 +270,22 @@ The DWIM behaviour of this command is as follows:
     (setq bidi-inhibit-bpa t))
   (global-visual-line-mode t)
   (custom-set-variables
-   '(custom-safe-themes
-     '("ffafb0e9f63935183713b204c11d22225008559fa62133a69848835f4f4a758c" "7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e" "8d146df8bd640320d5ca94d2913392bc6f763d5bc2bb47bed8e14975017eea91" "99d1e29934b9e712651d29735dd8dcd431a651dfbe039df158aa973461af003e" "c5878086e65614424a84ad5c758b07e9edcf4c513e08a1c5b1533f313d1b17f1" "77fff78cc13a2ff41ad0a8ba2f09e8efd3c7e16be20725606c095f9a19c24d3d" "81f53ee9ddd3f8559f94c127c9327d578e264c574cda7c6d9daddaec226f87bb" "88f7ee5594021c60a4a6a1c275614103de8c1435d6d08cc58882f920e0cec65e" "9f297216c88ca3f47e5f10f8bd884ab24ac5bc9d884f0f23589b0a46a608fe14" "6b91ddbc12b0fc9f43fb9e31be8b76b16e387312232324c48e8c666418fe643c" "014cb63097fc7dbda3edf53eb09802237961cbb4c9e9abd705f23b86511b0a69" default)))
+   '(safe-local-variable-values
+     '((eval progn
+             (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
+             (add-to-list 'cider-jack-in-nrepl-middlewares "shadow.cljs.devtools.server.nrepl/middleware"))
+       (cider-clojure-cli-aliases . "-A:dev:test:reveal")
+       (eval progn
+             (setq cider-clojure-cli-aliases ":dev:test")
+             (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
+             (add-to-list 'cider-jack-in-nrepl-middlewares "shadow.cljs.devtools.server.nrepl/middleware")
+             (setq cider-format-code-options
+                   '(("indents"
+                      (("$"
+                        (("block" 1))))))))
+       (cider-default-cljs-repl . custom)
+       (cider-clojure-cli-aliases . ":dev:test")
+       (cider-preferred-build-tool . clojure-cli))))
   (provide 'defaults))
 
 
@@ -2591,22 +2612,10 @@ dependency artifact based on the project's dependencies."
           (agenda-date . (variable-pitch regular 1.3))
           (t . (regular 1.15))))
 
-  (setq modus-themes-common-palette-overrides nil))
+  (setq modus-themes-common-palette-overrides modus-themes-preset-overrides-faint))
 
 (use-package ef-themes
   :ensure t)
-
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
-
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
 
 
 (provide 'init)
