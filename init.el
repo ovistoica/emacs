@@ -581,6 +581,7 @@ are defining or executing a macro."
   (setq insert-directory-program "gls"
         dired-use-ls-dired t
         dired-listing-switches "-lAXGh --group-directories-first --sort=extension" ;; directories first
+        dired-hide-details-mode t
         dired-recursive-copies 'always
         dired-recursive-copies 'always
         delete-by-moving-to-trash t
@@ -685,9 +686,6 @@ created with `json-hs-extra-create-overlays'."
   :init (global-so-long-mode 1))
 
 
-
-
-
 ;;; Completion
 
 (use-package vertico
@@ -711,32 +709,6 @@ created with `json-hs-extra-create-overlays'."
 (use-package marginalia
   :ensure t
   :hook (after-init . marginalia-mode))
-
-(use-package all-the-icons
-  :ensure all-the-icons)
-
-(use-package all-the-icons-completion
-  :ensure all-the-icons-completion
-  :after (marginalia all-the-icons)
-  :functions
-  all-the-icons-completion-mode
-  :hook
-  (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init
-  (all-the-icons-completion-mode))
-
-(use-package all-the-icons-dired
-  :ensure all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package all-the-icons-ibuffer
-  :ensure all-the-icons-ibuffer
-  :after (ibuffer)
-  :functions
-  all-the-icons-ibuffer-mode
-  :config
-  (all-the-icons-ibuffer-mode 1))
-
 
 ;;; APHELEIA
 ;; auto-format different source code files extremely intelligently
@@ -765,12 +737,12 @@ created with `json-hs-extra-create-overlays'."
   (apheleia-global-mode +1))
 
 (use-package nerd-icons
-  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el")
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
+  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el"))
 
 (use-package nerd-icons-dired
-  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired"))
+  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired")
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
 
 (use-package nerd-icons-completion
   :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
@@ -800,7 +772,6 @@ created with `json-hs-extra-create-overlays'."
         corfu-cycle t
         corfu-on-exact-match nil) ;; Don't auto insert
 
-  (setq corfu-popupinfo-delay '(0.5 . 0.2))
   (corfu-popupinfo-mode 1)   ; shows documentation after `corfu-popupinfo-delay'
 
   ;; Sort by input history (no need to modify `corfu-sort-function').
@@ -815,23 +786,9 @@ created with `json-hs-extra-create-overlays'."
           ("M-p" . corfu-popupinfo-scroll-down)
           ("M-n" . corfu-popupinfo-scroll-up))
   :hook (corfu-mode . corfu-popupinfo-mode)
+  :config (setq corfu-popupinfo-delay '(0.5 . 0.2))
   :custom-face
   (corfu-popupinfo ((t :height 1.0))))
-
-(use-package kind-icon
-  :ensure kind-icon
-  :after (corfu)
-  :defines
-  corfu-margin-formatters ;; this is a lie
-  :functions
-  kind-icon-margin-formatter
-  :custom
-  (kind-icon-use-icons t)
-  (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
-  (kind-icon-blend-background nil)        ; Use midpoint color between foreground and background colors ("blended")?
-  (kind-icon-blend-frac 0.08)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package corfu-terminal
   :ensure t
