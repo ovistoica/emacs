@@ -803,7 +803,7 @@ created with `json-hs-extra-create-overlays'."
          ("M-y" . consult-yank-pop)                ;; orig. yank-pop
          ;; M-g bindings in `goto-map'
          ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g f" . consult-flycheck)               ;; Alternative: consult-flycheck
          ("M-g g" . consult-goto-line)             ;; orig. goto-line
          ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
@@ -896,6 +896,10 @@ created with `json-hs-extra-create-overlays'."
   ;;;; 5. No project support
   ;; (setq consult-project-function nil)
   )
+
+(use-package consult-lsp
+  :after consult
+  :straight '(consult-lsp :type git :host github :repo "gagbo/consult-lsp"))
 
 (use-package which-key
   :ensure which-key
@@ -1424,6 +1428,7 @@ created with `json-hs-extra-create-overlays'."
   (lsp-lens-enable nil)                 ; Optional, I don't need it
   ;; semantic
   (lsp-semantic-tokens-enable nil) ; Related to highlighting, and we defer to treesitter
+
   :init
   (setq lsp-use-plists t)
   ;; Initiate https://github.com/blahgeek/emacs-lsp-booster for performance
@@ -1434,7 +1439,10 @@ created with `json-hs-extra-create-overlays'."
               :around
               #'lsp-booster--advice-json-parse)
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
-  )
+  :bind
+  (:map lsp-mode-map
+        ([remap lsp-treemacs-errors-list] . consult-lsp-diagnostics)
+        ([remap xref-find-apropos] . consult-lsp-symbols)))
 
 (use-package lsp-completion
   :no-require
