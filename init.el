@@ -93,13 +93,22 @@
     :group 'local-config)
   (provide 'local-config))
 
+
+
 (use-package functions
   :no-require
   :functions (dbus-color-theme-dark-p)
   :init (require 'bind-key)
-  :bind (("M-Q" . split-pararagraph-into-lines))
+  :bind (("M-Q" . split-pararagraph-into-lines)
+         ("C-M-;" . mark-end-of-sentence))
   :preface
   (require 'subr-x)
+  (defun os-clear-xcode-simulator-cache ()
+    (interactive)
+    (shell-command "rm -rf ~/Library/Developer/Xcode/DerivedData")
+    (shell-command "rm -rf ~/Library/Caches/com.apple.dt.Xcode")
+    (shell-command "rm -rf ~/Library/Developer/CoreSimulator/Caches/")
+    (message "Simulator cache cleared succesfully!"))
   (defun os-code-radio ()
     (interactive)
     (browse-url "https://coderadio.freecodecamp.org/"))
@@ -1017,6 +1026,16 @@ created with `json-hs-extra-create-overlays'."
 
 ;;; Languages
 
+(use-package python-ts-mode
+  :preface (defun os/setup-python-environment ()
+             "Custom configuration for Python mode."
+             (yas-minor-mode 1)
+             ;; Set the `python-shell-interpreter' to the python in PATH.
+             ;; At this moment `envrc' should succesfully configure environment.
+             (setq-local python-shell-interpreter (executable-find "python")))
+  :hook (python-ts-mode . os/setup-python-environment))
+
+
 (use-package markdown-mode
   :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
@@ -1192,6 +1211,10 @@ created with `json-hs-extra-create-overlays'."
 (use-package hl-todo
   :straight '(hl-todo :type git :host github :repo "tarsius/hl-todo")
   :init (global-hl-todo-mode))
+
+(use-package envrc
+  :straight '(envrc :type git :host github :repo "purcell/envrc")
+  :init (envrc-global-mode))
 
 ;; tree-sitter modes
 (use-package treesit
@@ -1453,6 +1476,24 @@ created with `json-hs-extra-create-overlays'."
          ]
         lsp-tailwindcss-class-attributes ["class" "className" "ngClass" ":class"]))
 
+
+(use-package lsp-pyright
+  :preface
+  (defun lsp-pyright-hook ()
+    (require 'lsp-pyright)
+    (lsp))
+  (defun os/locate-python-virtualenv ()
+    "Find the Python executable based on the VIRTUAL_ENV environment variable."
+    (when-let ((venv (getenv "VIRTUAL_ENV")))
+      (let ((python-path (expand-file-name "bin/python" venv)))
+        (when (file-executable-p python-path)
+          python-path))))
+  :straight '(lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
+  :config (add-to-list 'lsp-pyright-python-search-functions #'os/locate-python-virtualenv)
+  :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+  :hook ((python-mode . lsp-pyright-hook)
+         (python-ts-mode . lsp-pyright-hook)))
+
 (use-package lsp-eslint
   :demand t
   :after lsp-mode
@@ -1525,6 +1566,7 @@ created with `json-hs-extra-create-overlays'."
           ("M-<down>" . puni-splice-killing-forward)
           ("M-(" . puni-wrap-round)
           ("M-{" . puni-wrap-curly)
+          ("M-[" . puni-wrap-square)
           ("M-?" . puni-convolute)
           ("M-R" . puni-splice)
           ("M-S" . puni-split)))
@@ -1774,13 +1816,6 @@ mode.")
   global-git-gutter-mode
   :config
   (global-git-gutter-mode t))
-
-(use-package npm-mode
-  :straight '(npm-mode :type git :host github :repo "mojochao/npm-mode")
-  :diminish ""
-  :init (npm-global-mode))
-
-
 
 (use-package server
   :commands (server-running-p)
@@ -2223,7 +2258,9 @@ dependency artifact based on the project's dependencies."
                         :stream t
                         :key os-secret-anthropic-key)
         gptel-model "claude-3-5-sonnet-20241022")
-  :bind ("C-c g" . gptel-menu))
+  :bind (("C-c g" . gptel-menu)
+         :map region-bindings-mode-map
+         ("g" . gptel)))
 
 (use-package copilot
   :defines
@@ -2387,7 +2424,7 @@ dependency artifact based on the project's dependencies."
            :default-height 140)
           (extra-large
            :inherit large
-           :default-height 150)
+           :default-height 160)
           (live-stream
            :default-family "JetBrains Mono"
            :default-height 150
