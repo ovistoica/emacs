@@ -5,6 +5,10 @@
 ;;; Currently written for Emacs 29.
 ;;; Code:
 
+(defmacro comment (&rest body)
+  "Ignore forms in BODY, returning nil. Used for rich comments."
+  nil)
+
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file :no-error-if-file-is-missing)
 
@@ -2593,6 +2597,7 @@ dependency artifact based on the project's dependencies."
 
 
 (use-package modus-themes
+  :defines modus-vivendi-tinted-palette-overrides
   :after fontaine
   :commands
   modus-themes-load-theme
@@ -2612,7 +2617,44 @@ dependency artifact based on the project's dependencies."
           (agenda-date . (variable-pitch regular 1.3))
           (t . (regular 1.15))))
 
-  (setq modus-themes-common-palette-overrides modus-themes-preset-overrides-faint))
+  (setq modus-vivendi-tinted-palette-overrides
+        '(
+          (bg-main "#1b1e26")
+          (fg-main "#f0f0f0")))
+
+  (setq modus-themes-common-palette-overrides
+        `(
+          ;; From the section "Make the mode line borderless"
+          (border-mode-line-active unspecified)
+          (border-mode-line-inactive unspecified)
+
+          ;; From the section "Make matching parenthesis more or less intense"
+          (bg-paren-match bg-magenta-intense)
+          (underline-paren-match fg-main)
+
+          (comment yellow-faint)
+          (string green-warmer)
+
+          ,@modus-themes-preset-overrides-warmer))
+  (load-theme 'modus-vivendi-tinted :no-confirm))
+
+(comment
+ (load-theme 'modus-vivendi-tinted :no-confirm)
+ )
+
+(use-package solar
+  :config
+  (setq calendar-latitude 44.426765
+        calendar-longitude 26.102537))
+
+(use-package circadian
+  :ensure t
+  :after solar
+  :config
+  (setq circadian-themes '((:sunrise . modus-operandi-tinted)
+                           (:sunset  . modus-vivendi-tinted)))
+  :hook (after-init . circadian-setup))
+
 
 (use-package ef-themes
   :ensure t)
