@@ -147,26 +147,57 @@
   :init (require 'bind-key)
   :bind (("M-Q" . split-pararagraph-into-lines)
          ("C-M-;" . mark-end-of-sentence)
-         ("C-g" . os/keyboard-quit-dwim))
+         ("C-g" . os/keyboard-quit-dwim)
+         (:map prog-mode-map
+               ("C-<return>" . os/open-line-below)
+               ("M-<return>" . os/open-line-above)))
   :preface
   (require 'subr-x)
+  (defun os/create-file-in-project-root (filename content)
+    (interactive)
+    (let ((file-path (expand-file-name filename (project-root (project-current)))))
+      (with-temp-file file-path
+        (insert content))))
   (defun os-clear-xcode-simulator-cache ()
     (interactive)
     (shell-command "rm -rf ~/Library/Developer/Xcode/DerivedData")
     (shell-command "rm -rf ~/Library/Caches/com.apple.dt.Xcode")
     (shell-command "rm -rf ~/Library/Developer/CoreSimulator/Caches/")
     (message "Simulator cache cleared succesfully!"))
+
+  (defun os/project-shell-command (command)
+    "Runs COMMAND in the current project root"
+    (let ((default-directory (project-root (project-current))))
+      (shell-command command)))
+
+  (defun os/project-file-exists-p (filename)
+    "Checks if FILENAME exists in the project root"
+    (let ((project-file (expand-file-name filename (project-root (project-current)))))
+      (file-exists-p project-file)))
+  (defun os/initialize-python-venv ()
+    "Initiate python venv and load it"
+    (interactive)
+    (os/project-shell-command "python3 -m venv .venv")
+    (os/create-file-in-project-root ".envrc"
+                                    "export VIRTUAL_ENV=.venv\nlayout python3")
+    (envrc-allow)
+    (envrc-reload)
+    (when (os/project-file-exists-p "requirements.txt")
+      (os/project-shell-command "pip install -r requirements.txt"))
+    (message "Python venv initialization finished!"))
+
   (defun os-code-radio ()
     (interactive)
     (browse-url "https://coderadio.freecodecamp.org/"))
-  (defun open-line-below ()
+
+  (defun os/open-line-below ()
     "Open a line below the current line."
     (interactive)
     (end-of-line)
     (newline)
     (indent-for-tab-command))
 
-  (defun open-line-above ()
+  (defun os/open-line-above ()
     "Open a line above the current line."
     (interactive)
     (beginning-of-line)
@@ -1273,6 +1304,9 @@ created with `json-hs-extra-create-overlays'."
   :mode "\\.gradle\\'" ; if you want this mode to be auto-enabled
   )
 
+(use-package protobuf-mode
+  :ensure t)
+
 (use-package rainbow-delimiters
   :ensure t
   :diminish
@@ -2334,6 +2368,13 @@ dependency artifact based on the project's dependencies."
                    :immediate-finish nil
                    :kill-buffer t
                    :jump-to-captured t))))
+
+(use-package elfeed
+  :straight '(elfeed :type git :host github :repo "skeeto/elfeed")
+  :config
+  (setq elfeed-feeds
+        '(("https://www.daily.co/blog/rss/" blog ai voice-ai)
+          ("https://jackrusher.com/feed.xml" blog clojure))))
 
 
 ;;;; AI STUFF
