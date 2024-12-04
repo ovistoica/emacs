@@ -346,6 +346,7 @@ The DWIM behaviour of this command is as follows:
 
 (use-package windmove
   :config
+  (setq windmove-wrap-around t)
   (windmove-default-keybindings))
 
 ;;; Core packages
