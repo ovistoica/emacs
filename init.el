@@ -2665,7 +2665,9 @@ dependency artifact based on the project's dependencies."
 
 
 (use-package modus-themes
-  :defines modus-vivendi-tinted-palette-overrides
+  :defines
+  modus-vivendi-tinted-palette-overrides
+  modus-operandi-palette-overrides
   :after fontaine
   :commands
   modus-themes-load-theme
@@ -2673,7 +2675,7 @@ dependency artifact based on the project's dependencies."
          ("C-<f5>" . modus-themes-select))
   :config
   (setq modus-themes-custom-auto-reload nil
-        modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted)
+        modus-themes-to-toggle '(modus-operandi modus-vivendi-tinted)
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t
         modus-themes-italic-constructs t
@@ -2689,6 +2691,12 @@ dependency artifact based on the project's dependencies."
         '(
           (bg-main "#1b1e26")
           (fg-main "#f0f0f0")))
+
+  (setq modus-operandi-palette-overrides
+        `(
+          (builtin magenta-warmer)
+          (keyword blue)
+          (string green-intense)))
 
   (setq modus-themes-common-palette-overrides
         `(
@@ -2726,6 +2734,10 @@ dependency artifact based on the project's dependencies."
 
 (use-package ef-themes
   :ensure t)
+
+
+(use-package package-lint
+  :straight '(package-lint :type git :host github :repo "purcell/package-lint"))
 
 
 (provide 'init)

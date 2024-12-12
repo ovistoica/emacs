@@ -30,5 +30,6 @@
 
 (setq mc/cmds-to-run-once
       '(
+        helpful-key
         pixel-scroll-precision
         ))
