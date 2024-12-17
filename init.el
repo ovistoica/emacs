@@ -174,17 +174,19 @@
     "Checks if FILENAME exists in the project root"
     (let ((project-file (expand-file-name filename (project-root (project-current)))))
       (file-exists-p project-file)))
+
   (defun os/initialize-python-venv ()
-    "Initiate python venv and load it"
+    "Initiate python venv and load it with specified Python version"
     (interactive)
-    (os/project-shell-command "python3 -m venv .venv")
-    (os/create-file-in-project-root ".envrc"
-                                    "export VIRTUAL_ENV=.venv\nlayout python3")
-    (envrc-allow)
-    (envrc-reload)
-    (when (os/project-file-exists-p "requirements.txt")
-      (os/project-shell-command "pip install -r requirements.txt"))
-    (message "Python venv initialization finished!"))
+    (let* ((python-version (or (completing-read "Python version: " '("python3" "python3.9" "python3.10" "python3.11" "python3.12" "python3.13") nil nil "python3"))))
+      (os/project-shell-command (format "%s -m venv .venv" python-version))
+      (os/create-file-in-project-root ".envrc"
+                                      "export VIRTUAL_ENV=.venv\nlayout python3")
+      (envrc-allow)
+      (envrc-reload)
+      (when (os/project-file-exists-p "requirements.txt")
+        (os/project-shell-command "pip install -r requirements.txt"))
+      (message "Python venv initialization finished!")))
 
   (defun os-code-radio ()
     (interactive)
