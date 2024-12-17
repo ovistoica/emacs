@@ -113,6 +113,13 @@
         compilation-max-output-line-length nil
         compilation-finish-functions (list #'os/compile-autoclose)))
 
+
+
+(use-package emacs
+  :config
+  (push (expand-file-name "plugins/" user-emacs-directory) load-path)
+  (push (expand-file-name "lisp/" user-emacs-directory)  load-path))
+
 ;; ** MAC STUFF
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)

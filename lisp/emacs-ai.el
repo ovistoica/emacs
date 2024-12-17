@@ -24,58 +24,7 @@
   gptel-make-anthropic
   gptel-api-key
   :preface
-  (defvar-local emacs-ai-buffer nil
-    "Buffer for AI interaction in the current project.")
 
-  (defcustom emacs-ai-window-width 80
-    "Width of the AI side panel window."
-    :type 'integer
-    :group 'emacs-ai)
-
-  (defun emacs-ai-buffer-name ()
-    "Generate the AI buffer name for the current project."
-    (if-let ((project (project-current)))
-        (format "*AI: %s*" (project-name project))
-      "*AI*"))
-
-  (defun emacs-ai-get-or-create-buffer ()
-    "Get or create an AI buffer for the current project"
-    (let ((buffer-name (emacs-ai-buffer-name)))
-      (or (get-buffer buffer-name)
-          (with-current-buffer (get-buffer-create buffer-name)
-            (cond ;Set major mode
-             ((eq major-mode gptel-default-mode))
-             ((eq gptel-default-mode 'text-mode)
-              (text-mode)
-              (visual-line-mode 1))
-             (t (funcall gptel-default-mode)))
-            (gptel--sanitize-model :backend (default-value 'gptel-backend)
-                                   :model (default-value 'gptel-model)
-                                   :shoosh nil)
-            (unless gptel-mode (gptel-mode 1))
-            (goto-char (point-max))
-            (skip-chars-backward "\t\r\n")
-            (if (bobp) (gptel-prompt-prefix-string))
-            (current-buffer)))))
-
-  (defun emacs-ai-display-buffer (buffer)
-    "Display BUFFER in a side window."
-    (display-buffer
-     buffer
-     `(display-buffer-in-side-window
-       (side . right)
-       (slot . 1)
-       (window-width . ,emacs-ai-window-width)
-       (preserve-size . (t . nil)))))
-
-  (defun emacs-ai-toggle-ai-panel ()
-    "Toggle the AI panel for the current project."
-    (interactive)
-    (if-let ((window (get-buffer-window (emacs-ai-buffer-name))))
-        (delete-window window)
-      (let ((buffer (emacs-ai-get-or-create-buffer)))
-        (emacs-ai-display-buffer buffer)
-        (select-window (get-buffer-window buffer)))))
   :init
   (setq gptel-default-mode 'org-mode)  ; Use org-mode as the default
   :bind (("C-c <enter>" . gptel-send)
@@ -101,6 +50,10 @@
           ("explain" . "Please explain how the following code works:\n\n")
           ("refactor" . "Please suggest how to refactor this code to improve its quality:\n\n")
           ("document" . "Please help me document this code with appropriate comments:\n\n"))))
+
+(use-package ai-project-agent
+  :after gptel
+  :bind (("C-c c a" . ai-project-agent-toggle-pannel)))
 
 (use-package corsair
   :straight (:host github
