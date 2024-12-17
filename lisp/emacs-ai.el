@@ -52,8 +52,11 @@
           ("document" . "Please help me document this code with appropriate comments:\n\n"))))
 
 (use-package ai-project-agent
-  :after gptel
-  :bind (("C-c c a" . ai-project-agent-toggle-pannel)))
+  :after (gptel flycheck)
+  :bind (("C-c c a" . ai-project-agent-toggle-pannel)
+         ("C-c c d" . ai-project-agent-clear-panel)
+         ("C-c c l" . ai-project-agent-send-lint-feedback)
+         ("C-c c RET" . ai-project-agent-send)))
 
 (use-package corsair
   :straight (:host github

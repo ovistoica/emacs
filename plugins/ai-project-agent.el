@@ -16,6 +16,7 @@
 
 ;;; Code:
 
+(require 'flycheck)
 (require 'gptel)
 
 (defvar-local ai-project-agent-buffer nil
@@ -99,6 +100,65 @@
     (let ((buffer (ai-project-agent-get-or-create-buffer)))
       (ai-project-agent-display-buffer buffer)
       (select-window (get-buffer-window buffer)))))
+
+
+(defun ai-project-agent-send-lint-feedback ()
+  "Send flycheck error at point to AI agent for feedback."
+  (interactive)
+  (when-let* ((errors (flycheck-overlay-errors-at (point)))
+              (error (car errors))
+              (buffer (ai-project-agent-get-or-create-buffer))
+              (context-start (save-excursion
+                               (forward-line -100)
+                               (point)))
+              (context-end (save-excursion
+                             (forward-line 100)
+                             (point)))
+              (surrounding-code (buffer-substring-no-properties context-start context-end))
+              (code (if (use-region-p)
+                        (buffer-substring-no-properties
+                         (region-beginning)
+                         (region-end))
+                      (when-let ((defun-bounds (bounds-of-thing-at-point 'defun)))
+                        (buffer-substring-no-properties
+                         (car defun-bounds)
+                         (cdr defun-bounds))))))
+    (with-current-buffer buffer
+      (goto-char (point-max))
+      (insert (format "\nPlease help me fix this error.\nFile: %s\nCode:\n%s\n\nSurrounding context:\n==============\n%s\n===============\n\nError: \n================\n%s\n=================\n"
+                      (buffer-name)
+                      (or code "No code context found")
+                      surrounding-code
+                      (flycheck-error-message error)))
+      (gptel-send))
+    (ai-project-agent-display-buffer buffer)))
+
+
+
+(defun ai-project-agent-send ()
+  "Send query to AI agent with selected text if any."
+  (interactive)
+  (let* ((buffer (ai-project-agent-get-or-create-buffer))
+         (selection (when (use-region-p)
+                      (buffer-substring-no-properties
+                       (region-beginning)
+                       (region-end))))
+         (instruction (read-string "Instruction: " nil nil)))
+    (with-current-buffer buffer
+      (goto-char (point-max))
+      (insert "\nInstruction: " instruction "\n")
+      (when selection
+        (insert "\nSelected text:\n" selection "\n"))
+      (gptel-send))
+    (ai-project-agent-display-buffer buffer)))
+
+(defun ai-project-agent-clear-panel ()
+  "Clear ai agent panel for current project."
+  (interactive)
+  (when-let ((buffer (get-buffer (ai-project-agent-buffer-name))))
+    (with-current-buffer buffer
+      (erase-buffer))))
+
 
 (with-eval-after-load 'gptel-transient
   ;; Add new menu item to gptel-menu
