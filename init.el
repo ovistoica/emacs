@@ -357,6 +357,11 @@ The DWIM behaviour of this command is as follows:
   :ensure nil ;; no need to install it as it is built-in
   :hook (after-init . delete-selection-mode))
 
+(use-package re-builder
+  :ensure nil
+  :config
+  (setq reb-re-syntax 'string))
+
 (use-package bind-key
   :ensure t)
 (require 'bind-key)
