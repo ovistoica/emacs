@@ -4,6 +4,7 @@
 ;; Author: Ovi Stoica <ovidiu.stoica1094@gmail.com>
 ;; Url: https://github.com/ovistoica/emacs-ai
 ;; Keywords: convenience, project, ai, emacs
+;; Package-Requires: ((emacs "27.1") (gptel "0.9.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -34,33 +35,46 @@
     "*AI*"))
 
 (defun ai-project-agent--detect-project-context ()
-  "Detect the dominant project file and return context information."
-  (when-let ((project-root (project-root (project-current))))
-    (let* ((package-files '(("package.json" . "JavaScript/Node.js")
-                            ("Cargo.toml" . "Rust")
-                            ("go.mod" . "Go")
-                            ("requirements.txt" . "Python")
-                            ("composer.json" . "PHP")
-                            ("Gemfile" . "Ruby")
-                            ("pom.xml" . "Java")
-                            ("build.gradle" . "Java")))
-           (found-file (seq-find (lambda (file)
-                                   (file-exists-p (expand-file-name (car file) project-root)))
-                                 package-files)))
-      (when found-file
-        (cons (car found-file) (cdr found-file))))))
+  "Detect the dominant project type and return (file . language) pair.
+Returns nil if no recognized project file is found."
+  (when-let* ((project (project-current))
+              (root (project-root project))
+              (project-types
+               '(("package.json" . "JavaScript/Node.js")
+                 ("Cargo.toml" . "Rust")
+                 ("go.mod" . "Go")
+                 ("requirements.txt" . "Python")
+                 ("Pipfile" . "Python")
+                 ("pyproject.toml" . "Python")
+                 ("composer.json" . "PHP")
+                 ("Gemfile" . "Ruby")
+                 ("pom.xml" . "Java")
+                 ("build.gradle" . "Java")
+                 ("build.gradle.kts" . "Kotlin")
+                 ("mix.exs" . "Elixir")
+                 ("rebar.config" . "Erlang")
+                 ("CMakeLists.txt" . "C/C++")
+                 ("deps.edn" . "Clojure")
+                 ("shadow-cljs.edn" "ClojureScript")
+                 ("Makefile" . "C/C++")
+                 ("stack.yaml" . "Haskell")
+                 ("package.yaml" . "Haskell")
+                 ("init.el" . "Emacs Lisp")))
+              (found-type
+               (cl-find-if
+                (lambda (type)
+                  (file-exists-p (expand-file-name (car type) root)))
+                project-types)))
+    found-type))
 
-
-(defun ai-project-agent--enhance-prompt (buffer)
+(defun ai-project-agent--project-prompt ()
   "Add project context to the AI prompt in BUFFER."
-  (with-current-buffer buffer
-    (when-let* ((context (ai-project-agent--detect-project-context))
-                (file (car context))
-                (lang (cdr context)))
-      (gptel-request
-          buffer
-        (format "You are a helpful AI assistant with expertise in %s development. The current project uses %s as its package manager. Please provide relevant advice and responses in this context."
-                lang file)))))
+  (when-let* ((context (ai-project-agent--detect-project-context))
+              (file (car context))
+              (lang (cdr context)))
+    (format "You are a helpful AI assistant with expertise in %s development. The current project uses %s as its package manager. Please provide relevant advice and responses in this context."
+            lang file)))
+
 
 (defun ai-project-agent-get-or-create-buffer ()
   "Get or create an AI buffer for the current project."
@@ -79,8 +93,15 @@
           (unless gptel-mode (gptel-mode 1))
           (goto-char (point-max))
           (skip-chars-backward "\t\r\n")
-          (if (bobp) (gptel-prompt-prefix-string))
+          (when (bobp)
+            (progn
+              (insert (ai-project-agent--project-prompt))
+              (gptel-prompt-prefix-string)
+              (newline)
+              (newline)
+              (insert "*** ")))
           (current-buffer)))))
+
 
 (defun ai-project-agent-display-buffer (buffer)
   "Display BUFFER in a side window."
@@ -105,33 +126,34 @@
 (defun ai-project-agent-send-lint-feedback ()
   "Send flycheck error at point to AI agent for feedback."
   (interactive)
-  (when-let* ((errors (flycheck-overlay-errors-at (point)))
-              (error (car errors))
-              (buffer (ai-project-agent-get-or-create-buffer))
-              (context-start (save-excursion
-                               (forward-line -100)
+  (let ((original-buffer-name (current-buffer)))
+    (when-let* ((errors (flycheck-overlay-errors-at (point)))
+                (error (car errors))
+                (buffer (ai-project-agent-get-or-create-buffer))
+                (context-start (save-excursion
+                                 (forward-line -100)
+                                 (point)))
+                (context-end (save-excursion
+                               (forward-line 100)
                                (point)))
-              (context-end (save-excursion
-                             (forward-line 100)
-                             (point)))
-              (surrounding-code (buffer-substring-no-properties context-start context-end))
-              (code (if (use-region-p)
-                        (buffer-substring-no-properties
-                         (region-beginning)
-                         (region-end))
-                      (when-let ((defun-bounds (bounds-of-thing-at-point 'defun)))
-                        (buffer-substring-no-properties
-                         (car defun-bounds)
-                         (cdr defun-bounds))))))
-    (with-current-buffer buffer
-      (goto-char (point-max))
-      (insert (format "\nPlease help me fix this error.\nFile: %s\nCode:\n%s\n\nSurrounding context:\n==============\n%s\n===============\n\nError: \n================\n%s\n=================\n"
-                      (buffer-name)
-                      (or code "No code context found")
-                      surrounding-code
-                      (flycheck-error-message error)))
-      (gptel-send))
-    (ai-project-agent-display-buffer buffer)))
+                (surrounding-code (buffer-substring-no-properties context-start context-end))
+                (code (if (use-region-p)
+                          (buffer-substring-no-properties
+                           (region-beginning)
+                           (region-end))
+                        (when-let ((defun-bounds (bounds-of-thing-at-point 'defun)))
+                          (buffer-substring-no-properties
+                           (car defun-bounds)
+                           (cdr defun-bounds))))))
+      (with-current-buffer buffer
+        (goto-char (point-max))
+        (insert (format "\nPlease help me fix this error.\nFile: %s\nCode:\n#+begin_src\n%s\n#+end_src\nError from linter: \n#+begin_src\n%s\n#+end_src\n\nSurrounding context:\n#+begin_src\n%s\n#+end_src\n"
+                        original-buffer-name
+                        (or code "No code context found")
+                        (flycheck-error-message error)
+                        surrounding-code))
+        (gptel-send))
+      (ai-project-agent-display-buffer buffer))))
 
 
 
