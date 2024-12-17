@@ -91,7 +91,7 @@
      (window-width . ,ai-project-agent-window-width)
      (preserve-size . (t . nil)))))
 
-(defun ai-project-agent-toggle-pannel ()
+(defun ai-project-agent-toggle-panel ()
   "Toggle the AI panel for the current project."
   (interactive)
   (if-let ((window (get-buffer-window (ai-project-agent-buffer-name))))
