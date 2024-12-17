@@ -23,3 +23,6 @@ flycheck_*.el
 .env
 /eshell/
 /url/
+/.clj-kondo/
+/.lsp/
+/tutorial/

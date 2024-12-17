@@ -1,9 +1,13 @@
+;; -*- lexical-binding: t -*-
+;; #+options: prop:t
 ;;; init.el --- My personal emacs configuration.
 ;;; Author: Ovidiu Stoica
 ;;; Commentary:
 ;;; The entire configuration is kept here.
 ;;; Currently written for Emacs 29.
 ;;; Code:
+
+;; * PACKAGE MANAGEMENT
 
 (defmacro comment (&rest body)
   "Ignore forms in BODY, returning nil. Used for rich comments."
@@ -17,12 +21,13 @@
 ;; (setq debug-on-quit t)
 
 
-;;; ELPA
+;; ** ELPA
 (require 'package)
 (package-initialize)
 
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 
+;; ** USE-PACKAGE
 (when (< emacs-major-version 29)
   (unless (package-installed-p 'use-package)
     (unless package-archive-contents
@@ -37,26 +42,18 @@
 
 (require 'use-package)
 
+(use-package use-package
+  :no-require
+  :custom
+  (use-package-enable-imenu-support t))
+
 (defvar os/emacs-tmp-dir (concat user-emacs-directory "tmp/")
   "Scratch space for stuff...")
 
 (setq package-user-dir (concat user-emacs-directory "elpa"))
 (setq package-native-compile t)
 
-
-(defvar os/private-config-file (concat user-emacs-directory "emacs-private.el")
-  "File with configuration info that can't be in public repository.")
-(if (file-readable-p os/private-config-file)
-    (progn
-      (load-library os/private-config-file)
-      (message "Loaded private config")))
-
-
-(use-package use-package
-  :no-require
-  :custom
-  (use-package-enable-imenu-support t))
-
+;; ** STRAIGHT
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -74,6 +71,18 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
+
+;; * PRIVATE CONFIG
+
+(defvar os/private-config-file (concat user-emacs-directory "emacs-private.el")
+  "File with configuration info that can't be in public repository.")
+(if (file-readable-p os/private-config-file)
+    (progn
+      (load-library os/private-config-file)
+      (message "Loaded private config")))
+
+;; * BUILTIN
+
 
 (use-package early-init
   :no-require
@@ -104,8 +113,7 @@
         compilation-max-output-line-length nil
         compilation-finish-functions (list #'os/compile-autoclose)))
 
-
-;;; MAC STUFF
+;; ** MAC STUFF
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
   (setq mac-option-modifier nil)
@@ -139,6 +147,7 @@
     :group 'local-config)
   (provide 'local-config))
 
+;; ** FUNCTIONS
 
 
 (use-package functions
@@ -291,6 +300,8 @@ The DWIM behaviour of this command is as follows:
      (t (keyboard-quit))))
   (provide 'functions))
 
+;; ** DEFAULTS
+
 (use-package defaults
   :no-require
   :preface
@@ -345,13 +356,14 @@ The DWIM behaviour of this command is as follows:
        (cider-preferred-build-tool . clojure-cli))))
   (provide 'defaults))
 
+;; ** WINDMOVE
 
 (use-package windmove
   :config
   (setq windmove-wrap-around t)
   (windmove-default-keybindings))
 
-;;; Core packages
+;; ** CORE PACKAGES
 
 (use-package delsel
   :ensure nil ;; no need to install it as it is built-in
@@ -526,10 +538,6 @@ are defining or executing a macro."
                   executing-kbd-macro)
         (funcall-interactively quit)))))
 
-
-(use-package common-lisp-modes
-  :straight '(common-lisp-modes :type git :host gitlab :repo  "andreyorst/common-lisp-modes.el"))
-
 (use-package minibuffer
   :hook (eval-expression-minibuffer-setup . common-lisp-modes-mode)
   :bind ( :map minibuffer-inactive-mode-map
@@ -541,17 +549,8 @@ are defining or executing a macro."
   :custom-face
   (completions-first-difference ((t (:inherit unspecified)))))
 
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion))))
-  (orderless-matching-styles
-   '(orderless-literal
-     orderless-prefixes
-     orderless-initialism
-     orderless-regexp
-     orderless-flex)))
+
+
 
 
 (use-package diminish
@@ -591,7 +590,6 @@ are defining or executing a macro."
      (internal-border-width . 2)
      (border-width . 1)
      (no-special-glyphs . t))))
-
 
 (use-package uniquify
   :defer t
@@ -770,7 +768,19 @@ created with `json-hs-extra-create-overlays'."
   :init (global-so-long-mode 1))
 
 
-;;; Completion
+;; * COMPLETION
+
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  (orderless-matching-styles
+   '(orderless-literal
+     orderless-prefixes
+     orderless-initialism
+     orderless-regexp
+     orderless-flex)))
 
 (use-package vertico
   :ensure t
@@ -794,51 +804,6 @@ created with `json-hs-extra-create-overlays'."
   :ensure t
   :hook (after-init . marginalia-mode))
 
-;;; APHELEIA
-;; auto-format different source code files extremely intelligently
-;; https://github.com/radian-software/apheleia
-(use-package apheleia
-  :ensure apheleia
-  :diminish ""                          ; Don't show in modeline
-  :defines
-  apheleia-formatters
-  apheleia-mode-alist
-  :functions
-  apheleia-global-mode
-  :config
-  (setf (alist-get 'shfmt apheleia-formatters)
-        '("shfmt" "-i=4" "-sr" "-kp"))
-  (setq apheleia-log-debug-info nil)
-  ;; https://git.genehack.net/os/emacs/issues/2
-  (setf (alist-get 'prettier-json apheleia-formatters)
-        '("prettier" "--stdin-filepath" filepath))
-  (setf (alist-get 'standard-clojure apheleia-formatters)
-        '("standard-clj" "fix" "-"))
-  (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
-  (setf (alist-get 'clojure-mode apheleia-mode-alist) 'standard-clojure)
-  (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
-  (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
-  (apheleia-global-mode +1))
-
-(use-package nerd-icons
-  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el"))
-
-(use-package nerd-icons-dired
-  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired")
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
-(use-package nerd-icons-completion
-  :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
-  :after marginalia
-  :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-
-(use-package nerd-icons-corfu
-  :straight '(nerd-icons-corfu :type git :host github :repo "LuigiPiucco/nerd-icons-corfu")
-  :after corfu
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package corfu
   :ensure t
@@ -890,6 +855,11 @@ created with `json-hs-extra-create-overlays'."
   :ensure t
   :commands (ov-regexp))
 
+(use-package abbrev
+  :delight abbrev-mode
+  :custom
+  (save-abbrevs nil))
+
 (use-package consult
   :ensure t
   :defines
@@ -903,30 +873,30 @@ created with `json-hs-extra-create-overlays'."
          ("C-c i" . consult-info)
          ([remap Info-search] . consult-info)
          ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x M-:" . consult-complex-command) ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)            ;; orig. switch-to-buffer
          ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
+         ("C-x t b" . consult-buffer-other-tab) ;; orig. switch-to-buffer-other-tab
+         ("C-x r b" . consult-bookmark)         ;; orig. bookmark-jump
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("M-'" . consult-register-store) ;; orig. abbrev-prefix-mark (unrelated)
          ("C-M-#" . consult-register)
          ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ("M-y" . consult-yank-pop) ;; orig. yank-pop
          ;; M-g bindings in `goto-map'
          ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flycheck)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g f" . consult-flycheck)    ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)   ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line) ;; orig. goto-line
+         ("M-g o" . consult-outline)     ;; Alternative: consult-org-heading
          ("M-g m" . consult-mark)
          ("M-g k" . consult-global-mark)
          ("M-g i" . consult-imenu)
          ("M-g I" . consult-imenu-multi)
          ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s d" . consult-find) ;; Alternative: consult-fd
          ("M-s c" . consult-locate)
          ("M-s g" . consult-grep)
          ("M-s G" . consult-git-grep)
@@ -938,14 +908,14 @@ created with `json-hs-extra-create-overlays'."
          ;; Isearch integration
          ("M-s e" . consult-isearch-history)
          :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ("M-e" . consult-isearch-history)   ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history) ;; orig. isearch-edit-string
+         ("M-s l" . consult-line) ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi) ;; needed by consult-line to detect isearch
          ;; Minibuffer history
          :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+         ("M-s" . consult-history)  ;; orig. next-matching-history-element
+         ("M-r" . consult-history)) ;; orig. previous-matching-history-element
 
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.
@@ -998,16 +968,16 @@ created with `json-hs-extra-create-overlays'."
 
   ;; By default `consult-project-function' uses `project-root' from project.el.
   ;; Optionally configure a different project root function.
-  ;;;; 1. project.el (the default)
+;;;; 1. project.el (the default)
   ;; (setq consult-project-function #'consult--default-project--function)
-  ;;;; 2. vc.el (vc-root-dir)
+;;;; 2. vc.el (vc-root-dir)
   ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-  ;;;; 3. locate-dominating-file
+;;;; 3. locate-dominating-file
   ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-  ;;;; 4. projectile.el (projectile-project-root)
+;;;; 4. projectile.el (projectile-project-root)
   ;; (autoload 'projectile-project-root "projectile")
   ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-  ;;;; 5. No project support
+;;;; 5. No project support
   ;; (setq consult-project-function nil)
   )
 
@@ -1023,8 +993,59 @@ created with `json-hs-extra-create-overlays'."
   :config
   (which-key-mode))
 
+;; * FORMATTING
 
-;;; Org
+;;; APHELEIA
+;; auto-format different source code files extremely intelligently
+;; https://github.com/radian-software/apheleia
+(use-package apheleia
+  :ensure apheleia
+  :diminish ""                          ; Don't show in modeline
+  :defines
+  apheleia-formatters
+  apheleia-mode-alist
+  :functions
+  apheleia-global-mode
+  :config
+  (setf (alist-get 'shfmt apheleia-formatters)
+        '("shfmt" "-i=4" "-sr" "-kp"))
+  (setq apheleia-log-debug-info nil)
+  ;; https://git.genehack.net/os/emacs/issues/2
+  (setf (alist-get 'prettier-json apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'standard-clojure apheleia-formatters)
+        '("standard-clj" "fix" "-"))
+  (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
+  (setf (alist-get 'clojure-mode apheleia-mode-alist) 'standard-clojure)
+  (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
+  (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
+  (apheleia-global-mode +1))
+
+;; * NERD ICONS
+
+(use-package nerd-icons
+  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el"))
+
+(use-package nerd-icons-dired
+  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired")
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-completion
+  :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
+  :after marginalia
+  :config
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+(use-package nerd-icons-corfu
+  :straight '(nerd-icons-corfu :type git :host github :repo "LuigiPiucco/nerd-icons-corfu")
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+
+
+;; * ORG
 
 (use-package org
   :hook ((org-babel-after-execute . org-redisplay-inline-images))
@@ -1135,6 +1156,8 @@ created with `json-hs-extra-create-overlays'."
      :background 'unspecified)
     (setq-local header-line-format " ")))
 
+;; * WRITING
+
 (use-package writegood-mode
   :ensure t
   :hook ((markdown-mode nroff-mode org-mode
@@ -1142,7 +1165,10 @@ created with `json-hs-extra-create-overlays'."
                         git-commit-mode)
          . writegood-mode))
 
-;;; Languages
+;; * LANGUAGES
+
+(use-package common-lisp-modes
+  :straight '(common-lisp-modes :type git :host gitlab :repo  "andreyorst/common-lisp-modes.el"))
 
 (use-package python-ts-mode
   :preface (defun os/setup-python-environment ()
@@ -1208,10 +1234,7 @@ created with `json-hs-extra-create-overlays'."
   :custom
   (csv-align-max-width most-positive-fixnum))
 
-(use-package abbrev
-  :delight abbrev-mode
-  :custom
-  (save-abbrevs nil))
+
 
 (use-package clojure-mode
   :ensure t
@@ -1337,7 +1360,7 @@ created with `json-hs-extra-create-overlays'."
   :straight '(envrc :type git :host github :repo "purcell/envrc")
   :init (envrc-global-mode))
 
-;; tree-sitter modes
+;; * TREE-SITTER MODES
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode)
          ("\\.py\\'" . python-ts-mode)
@@ -1443,7 +1466,7 @@ created with `json-hs-extra-create-overlays'."
   ;; code.
   :load-path ("~/workspace/combobulate"))
 
-;;;; LSP
+;; * LSP
 
 (use-package lsp-mode
   :ensure t
@@ -1629,7 +1652,7 @@ created with `json-hs-extra-create-overlays'."
                                     "/Users/ovistoica/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
                                     "--stdio")))
 
-;;;;; Navigation & Editing
+;; * Navigation & Editing
 
 (use-package whole-line-or-region
   :ensure t
@@ -1766,6 +1789,24 @@ created with `json-hs-extra-create-overlays'."
      ("C-&" . mc/vertical-align-with-space)
      ("C-#" . mc/insert-numbers))))
 
+(use-package separedit
+  :ensure t
+  :hook (separedit-buffer-creation . separedit-header-line-setup)
+  :bind ( ("C-c '" . separedit)
+          :map separedit-mode-map
+          ("C-c C-c" . separedit-commit)
+          :map edit-indirect-mode-map
+          ("C-c '" . separedit))
+  :custom
+  (separedit-default-mode 'markdown-mode)
+  :config
+  (nconc (assoc '(";+") separedit-comment-delimiter-alist)
+         '(clojure-mode clojurec-mode clojure-script-mode))
+  (defun separedit-header-line-setup ()
+    (setq-local
+     header-line-format
+     (substitute-command-keys
+      "Edit, then exit with `\\[separedit-commit]' or abort with \\<edit-indirect-mode-map>`\\[edit-indirect-abort]'"))))
 
 (use-package vundo
   :ensure t
@@ -1780,7 +1821,8 @@ created with `json-hs-extra-create-overlays'."
   :delight yas-minor-mode
   :init (yas-global-mode 1))
 
-;;;; Tools
+;; * PROJECT
+
 (use-package project
   :ensure t
   :bind ( :map project-prefix-map
@@ -1788,7 +1830,7 @@ created with `json-hs-extra-create-overlays'."
   :custom
   (project-compilation-buffer-name-function 'project-prefixed-buffer-name)
   (project-vc-extra-root-markers
-   '("Cargo.toml" "compile_commands.json"
+   '("Cargo.toml" "compile_commands.json" "pyproject.toml"
      "compile_flags.txt" "project.clj"
      "deps.edn" "shadow-cljs.edn" "package.json"))
   :preface
@@ -1872,8 +1914,6 @@ mode.")
   ("C-c a"   . projectile-ag)
   ("C-c C-o" . projectile-multi-occur)
   (:map projectile-mode-map ("C-c p" . projectile-command-map))
-  :bind*
-  ("C-c C-a" . projectile-ag) ;; fuck you js2-mode
   :init
   (projectile-mode +1)
   :custom
@@ -1895,7 +1935,7 @@ mode.")
   ("C-h v" . helpful-variable)
   ("C-h x" . helpful-command))
 
-
+;; * GIT
 (use-package ediff
   :defer t
   :custom
@@ -1935,7 +1975,7 @@ mode.")
   (add-to-list 'project-switch-commands
                '(magit-project-status "Magit") t))
 
-;;; GIT-GUTTER
+;; ** GIT-GUTTER
 (use-package git-gutter
   :ensure git-gutter
   :diminish ""
@@ -1951,24 +1991,7 @@ mode.")
     (server-start)))
 
 
-(use-package separedit
-  :ensure t
-  :hook (separedit-buffer-creation . separedit-header-line-setup)
-  :bind ( ("C-c '" . separedit)
-          :map separedit-mode-map
-          ("C-c C-c" . separedit-commit)
-          :map edit-indirect-mode-map
-          ("C-c '" . separedit))
-  :custom
-  (separedit-default-mode 'markdown-mode)
-  :config
-  (nconc (assoc '(";+") separedit-comment-delimiter-alist)
-         '(clojure-mode clojurec-mode clojure-script-mode))
-  (defun separedit-header-line-setup ()
-    (setq-local
-     header-line-format
-     (substitute-command-keys
-      "Edit, then exit with `\\[separedit-commit]' or abort with \\<edit-indirect-mode-map>`\\[edit-indirect-abort]'"))))
+
 
 (use-package recentf
   :hook (after-init . recentf-mode)
@@ -1982,6 +2005,7 @@ mode.")
                      (locate-user-emacs-file "workspace/.cache/")))
     (add-to-list 'recentf-exclude (concat (regexp-quote dir) ".*"))))
 
+;; * COMPILE
 (use-package compile
   :hook
   (compilation-filter . ansi-color-compilation-filter)
@@ -2205,7 +2229,7 @@ dependency artifact based on the project's dependencies."
      (fernflower . ,fernflower-path))))
 
 
-;;;;; Node JS
+;; * NODE JS
 (use-package nodejs-repl
   :ensure nodejs-repl
   :commands
@@ -2260,8 +2284,7 @@ dependency artifact based on the project's dependencies."
      "SSH_AUTH_SOCK"
      )))
 
-;;;;; NOTE TAKING
-
+;; * NOTE TAKING
 
 ;;; Denote (simple note-taking and file-naming)
 ;; Read the manual: <https://protesilaos.com/emacs/denote>.
@@ -2290,9 +2313,9 @@ dependency artifact based on the project's dependencies."
     ("C-c d n" . denote)
     ("C-c d N" . denote-type)
     ("C-c d d" . denote-date)
-    ("C-c d z" . denote-signature) ; "zettelkasten" mnemonic
+    ("C-c d z" . denote-signature)      ; "zettelkasten" mnemonic
     ("C-c d s" . denote-subdirectory)
-    ("C-c d o" . denote-sort-dired) ; "order" mnemonic
+    ("C-c d o" . denote-sort-dired)     ; "order" mnemonic
     ("C-c d j" . denote-journal-extras-new-entry)
     ("C-c d J" . denote-journal-extras-new-or-existing-entry)
     ;; Note that `denote-rename-file' can work from any context, not
@@ -2306,7 +2329,7 @@ dependency artifact based on the project's dependencies."
     ;; shown here.  Otherwise follow the same pattern for
     ;; `org-mode-map', `markdown-mode-map', and/or `text-mode-map'.
     :map text-mode-map
-    ("C-c d i" . denote-link) ; "insert" mnemonic
+    ("C-c d i" . denote-link)           ; "insert" mnemonic
     ("C-c d I" . denote-add-links)
     ("C-c d b" . denote-backlinks)
     ("C-c d f f" . denote-find-link)
@@ -2330,7 +2353,7 @@ dependency artifact based on the project's dependencies."
   :config
   ;; Remember to check the doc strings of those variables.
   (setq denote-directory (expand-file-name "~/Documents/notes/"))
-  (setq denote-file-type 'org) ; Org is the default, set others here like I do
+  (setq denote-file-type 'org)   ; Org is the default, set others here like I do
   ;; If you want to have a "controlled vocabulary" of keywords,
   ;; meaning that you only use a predefined set of them, then you want
   ;; `denote-infer-keywords' to be nil and `denote-known-keywords' to
@@ -2339,7 +2362,7 @@ dependency artifact based on the project's dependencies."
   (setq denote-infer-keywords t)
   (setq denote-sort-keywords t)
   (setq denote-excluded-directories-regexp nil)
-  (setq denote-date-format nil) ; read its doc string
+  (setq denote-date-format nil)         ; read its doc string
   (setq denote-rename-no-confirm t)
   (setq denote-backlinks-show-context nil)
   (setq denote-rename-buffer-format "[D] %t")
@@ -2350,7 +2373,7 @@ dependency artifact based on the project's dependencies."
   ;; `denote-rename-buffer-format' for how to modify this.
   (denote-rename-buffer-mode 1)
 
-  (setq denote-journal-extras-directory nil) ; use the `denote-directory'
+  (setq denote-journal-extras-directory nil)    ; use the `denote-directory'
   (setq denote-journal-extras-title-format nil) ; always prompt for title
   (setq denote-journal-extras-keyword "journal")
 
@@ -2385,67 +2408,15 @@ dependency artifact based on the project's dependencies."
           ("https://jackrusher.com/feed.xml" blog clojure))))
 
 
-;;;; AI STUFF
+;; * AI STUFF
+;;;----------------------------------------------------------------
 
-(use-package gptel
-  :straight (:host github :repo "karthink/gptel")
-  :defines
-  gptel-make-anthropic
-  gptel-api-key
-  :config
-  (setq gptel-backend (gptel-make-anthropic "Claude"
-                        :stream t
-                        :key os-secret-anthropic-key)
-        gptel-model "claude-3-5-sonnet-20241022")
-  :bind (("C-c g" . gptel-menu)
-         :map region-bindings-mode-map
-         ("g" . gptel)))
+(load (expand-file-name "lisp/emacs-ai.el" user-emacs-directory))
 
-(use-package copilot
-  :defines
-  copilot-max-char
-  :commands
-  copilot-mode
-  :preface
-  (defun os/activate-copilot ()
-    (if (or (> (buffer-size) 100000)
-            (string-prefix-p "*temp*-" (buffer-name)))
-        ;; Or don't even warn to get rid of it.
-        (message "Buffer size exceeds copilot max char limit or buffer is temporary. Copilot will not be activated.")
-      (copilot-mode)))
-  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
-  :config
-  (setq copilot-enable-predicates nil
-        warning-suppress-types '((copilot copilot--infer-indentation-offset)))
-  (add-to-list 'copilot-major-mode-alist '("tsx-ts" . "typescriptreact"))
-  (add-to-list 'copilot-major-mode-alist '("typescript-ts" . "typescript"))
-  (add-to-list 'copilot-indentation-alist '(tsx-ts-mode 2))
-  (add-to-list 'copilot-indentation-alist '(typescript-ts-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojurec-mode 2))
-  (add-to-list 'copilot-indentation-alist '(clojurescript-mode 2))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-  (add-to-list 'copilot-indentation-alist '(css-ts-mode 2))
-  (add-to-list 'copilot-indentation-alist '(json-ts-mode 2))
-  (add-to-list 'copilot-indentation-alist '(dockerfile-mode 2))
-  :bind (:map copilot-completion-map
-              ("C-<tab>" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion)
-              ("S-C-TAB" . 'copilot-accept-completion-by-word)
-              ("S-C-<tab>" . 'copilot-accept-completion-by-word)))
+;;;----------------------------------------------------------------
 
 
-(use-package aider
-  :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
-  :config
-  (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022"))
-  (setenv "ANTHROPIC_API_KEY" os-secret-anthropic-key)
-  ;; Optional: Set a key binding for the transient menu
-  (global-set-key (kbd "C-c a") 'aider-transient-menu))
-
-
-
-;;;; Monitoring
+;; * MONITORING
 
 (use-package wakatime-mode
   :ensure t
@@ -2458,7 +2429,7 @@ dependency artifact based on the project's dependencies."
   :ensure t)
 
 
-;;;;; Theming
+;; * THEMING
 
 (defvar os/load-theme-family 'modus)
 
@@ -2528,7 +2499,84 @@ dependency artifact based on the project's dependencies."
                                 'help-key-binding)
            :mode-line-inactive window-divider)))
 
-;;;; Fontaine (font configurations)
+(use-package rainbow-mode
+  :ensure t
+  :diminish
+  :hook (prog-mode . rainbow-mode))
+
+
+
+
+
+(use-package modus-themes
+  :defines
+  modus-vivendi-tinted-palette-overrides
+  modus-operandi-palette-overrides
+  :after fontaine
+  :commands
+  modus-themes-load-theme
+  :bind (("<f5>" . modus-themes-toggle)
+         ("C-<f5>" . modus-themes-select))
+  :config
+  (setq modus-themes-custom-auto-reload nil
+        modus-themes-to-toggle '(modus-operandi modus-vivendi-tinted)
+        modus-themes-mixed-fonts t
+        modus-themes-variable-pitch-ui t
+        modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-completions '((t . (extrabold)))
+        modus-themes-prompts '(extrabold)
+        modus-themes-headings
+        '((agenda-structure . (variable-pitch light 2.2))
+          (agenda-date . (variable-pitch regular 1.3))
+          (t . (regular 1.15))))
+
+  (setq modus-vivendi-tinted-palette-overrides
+        '(
+          (bg-main "#1b1e26")
+          (fg-main "#f0f0f0")))
+
+  (setq modus-operandi-palette-overrides
+        `(
+          (builtin magenta-warmer)
+          (keyword blue)
+          (string green-intense)))
+
+  (setq modus-themes-common-palette-overrides
+        `(
+          ;; From the section "Make the mode line borderless"
+          (border-mode-line-active unspecified)
+          (border-mode-line-inactive unspecified)
+
+          ;; From the section "Make matching parenthesis more or less intense"
+          (bg-paren-match bg-magenta-intense)
+          (underline-paren-match fg-main)
+
+          (comment yellow-faint)
+          (string green-warmer)
+
+
+          ,@modus-themes-preset-overrides-warmer))
+  (load-theme 'modus-vivendi-tinted :no-confirm))
+
+(use-package solar
+  :config
+  (setq calendar-latitude 44.426765
+        calendar-longitude 26.102537))
+
+(use-package circadian
+  :ensure t
+  :after solar
+  :config
+  (setq circadian-themes '((:sunrise . modus-operandi-tinted)
+                           (:sunset  . modus-vivendi-tinted)))
+  :hook (after-init . circadian-setup))
+
+
+(use-package ef-themes
+  :ensure t)
+
+;; * FONT CONFIGURATIONS
 ;; Read the manual: <https://protesilaos.com/emacs/fontaine>
 (use-package fontaine
   :ensure t
@@ -2641,13 +2689,6 @@ dependency artifact based on the project's dependencies."
   (with-eval-after-load 'pulsar
     (add-hook 'fontaine-set-preset-hook #'pulsar-pulse-line)))
 
-
-(use-package rainbow-mode
-  :ensure t
-  :diminish
-  :hook (prog-mode . rainbow-mode))
-
-
 (use-package face-remap
   :ensure nil
   :functions os/enable-variable-pitch
@@ -2670,82 +2711,22 @@ dependency artifact based on the project's dependencies."
    ("C-x C-+" . global-text-scale-adjust)
    ("C-x C-0" . global-text-scale-adjust)))
 
-
-(use-package modus-themes
-  :defines
-  modus-vivendi-tinted-palette-overrides
-  modus-operandi-palette-overrides
-  :after fontaine
-  :commands
-  modus-themes-load-theme
-  :bind (("<f5>" . modus-themes-toggle)
-         ("C-<f5>" . modus-themes-select))
-  :config
-  (setq modus-themes-custom-auto-reload nil
-        modus-themes-to-toggle '(modus-operandi modus-vivendi-tinted)
-        modus-themes-mixed-fonts t
-        modus-themes-variable-pitch-ui t
-        modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-completions '((t . (extrabold)))
-        modus-themes-prompts '(extrabold)
-        modus-themes-headings
-        '((agenda-structure . (variable-pitch light 2.2))
-          (agenda-date . (variable-pitch regular 1.3))
-          (t . (regular 1.15))))
-
-  (setq modus-vivendi-tinted-palette-overrides
-        '(
-          (bg-main "#1b1e26")
-          (fg-main "#f0f0f0")))
-
-  (setq modus-operandi-palette-overrides
-        `(
-          (builtin magenta-warmer)
-          (keyword blue)
-          (string green-intense)))
-
-  (setq modus-themes-common-palette-overrides
-        `(
-          ;; From the section "Make the mode line borderless"
-          (border-mode-line-active unspecified)
-          (border-mode-line-inactive unspecified)
-
-          ;; From the section "Make matching parenthesis more or less intense"
-          (bg-paren-match bg-magenta-intense)
-          (underline-paren-match fg-main)
-
-          (comment yellow-faint)
-          (string green-warmer)
-
-          ,@modus-themes-preset-overrides-warmer))
-  (load-theme 'modus-vivendi-tinted :no-confirm))
-
-(comment
- (load-theme 'modus-vivendi-tinted :no-confirm)
- )
-
-(use-package solar
-  :config
-  (setq calendar-latitude 44.426765
-        calendar-longitude 26.102537))
-
-(use-package circadian
-  :ensure t
-  :after solar
-  :config
-  (setq circadian-themes '((:sunrise . modus-operandi-tinted)
-                           (:sunset  . modus-vivendi-tinted)))
-  :hook (after-init . circadian-setup))
-
-
-(use-package ef-themes
-  :ensure t)
-
-
+;; * PACKAGE LINT
 (use-package package-lint
   :straight '(package-lint :type git :host github :repo "purcell/package-lint"))
 
 
 (provide 'init)
 ;;; init.el ends here
+
+;; This is not a literate config tangled from an Org-mode document! So I include
+;; some file-specific settings to make it easier to parse. Specifically, the
+;; outline that you see in this document is represented in the Lisp files as
+;; Org-style collapsible outline headings. See [[*OUTLINE MODE][Outline Mode]].
+
+;; Local Variables:
+;; outline-regexp: ";; \\*+"
+;; page-delimiter: ";; \\**"
+;; eval:(outline-minor-mode 1)
+;; eval:(outline-hide-sublevels 5)
+;; End:
