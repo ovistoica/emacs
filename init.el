@@ -455,6 +455,7 @@ The DWIM behaviour of this command is as follows:
                   "^\\*TeX Help\\*"
                   "^\\*ChatGPT\\*"
                   "^\\*gptel-ask\\*"
+                  "^\\*clojure-compilation\\*"
                   "\\*Shell Command Output\\*"
                   ("\\*Async Shell Command\\*" . hide)
                   ("\\*Detached Shell Command\\*" . hide)
