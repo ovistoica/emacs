@@ -1661,6 +1661,10 @@ created with `json-hs-extra-create-overlays'."
 
 ;; * Navigation & Editing
 
+(use-package easy-kill
+  :ensure t
+  :bind (([remap mark-sexp] .'easy-mark)))
+
 (use-package whole-line-or-region
   :ensure t
   :diminish ""
