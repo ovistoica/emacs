@@ -36,7 +36,6 @@
                         :stream t
                         :key os-secret-anthropic-key)
         gptel-model "claude-3-5-sonnet-20241022"
-        gptel-max-tokens 4096
         gptel-temperature 0.7
         ;; Configure the chat UI
         gptel-window-select t           ; Select the window after creation
@@ -108,13 +107,6 @@ export default function PackingList() {
 - Never provide the answer itself unless I explicitly ask you to.  If my answer is wrong, again provide only hints to correct it.
 - If you use LaTeX notation, enclose math in \\( and \\) or \\[ and \\] delimiters.")
           ))
-  (setq gptel--system-message (alist-get 'default gptel-directives)
-        gptel-default-mode 'org-mode)
-  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "*Prompt*: "
-        (alist-get 'org-mode gptel-response-prefix-alist) "*Response*:\n"
-        (alist-get 'markdown-mode gptel-prompt-prefix-alist) "#### ")
-  (with-eval-after-load 'gptel-org
-    (setq-default gptel-org-branching-context t))
 
   )
 
@@ -122,7 +114,7 @@ export default function PackingList() {
 
 (use-package ai-project-agent
   :after (gptel flycheck)
-  :bind (("C-c c a" . ai-project-agent-toggle-pannel)
+  :bind (("C-c c a" . ai-project-agent-toggle-panel)
          ("C-c c d" . ai-project-agent-clear-panel)
          ("C-c c l" . ai-project-agent-send-lint-feedback)
          ("C-c c RET" . ai-project-agent-send)))

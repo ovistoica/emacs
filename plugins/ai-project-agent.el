@@ -156,7 +156,6 @@ Returns nil if no recognized project file is found."
       (ai-project-agent-display-buffer buffer))))
 
 
-
 (defun ai-project-agent-send ()
   "Send query to AI agent with selected text if any."
   (interactive)

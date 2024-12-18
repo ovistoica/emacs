@@ -1439,8 +1439,6 @@ created with `json-hs-extra-create-overlays'."
   :mode "\\.gradle\\'" ; if you want this mode to be auto-enabled
   )
 
-(use-package protobuf-mode
-  :ensure t)
 
 (use-package rainbow-delimiters
   :ensure t
