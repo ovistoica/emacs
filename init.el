@@ -462,6 +462,10 @@ The DWIM behaviour of this command is as follows:
                   "\\*Completions\\*"
                   ;; "\\*scratch.*\\*$"
                   "[Oo]utput\\*")))
+  (add-to-list 'display-buffer-alist '("\\*ielm\\*"
+                                       (display-buffer-in-side-window)
+                                       (side . left)
+                                       (window-width . 50)))
   (popper-mode +1)
   (popper-echo-mode +1))
 
@@ -1339,6 +1343,8 @@ created with `json-hs-extra-create-overlays'."
   (csv-align-max-width most-positive-fixnum))
 
 
+;; ** CLOJURE
+(load (expand-file-name "plugins/clj-functions.el" user-emacs-directory))
 
 (use-package clojure-mode
   :ensure t
@@ -1348,7 +1354,7 @@ created with `json-hs-extra-create-overlays'."
          . clojure-mode-setup)
   :commands (clojure-project-dir)
   :bind ( :map clojure-mode-map
-          ("C-:" . nil))
+          ("C-:" . clj-functions-hiccup-classes-to-string))
   :config
   (defun clojure-set-compile-command ()
     (let ((project-dir (clojure-project-dir)))
@@ -2519,6 +2525,7 @@ dependency artifact based on the project's dependencies."
 ;;;----------------------------------------------------------------
 
 (load (expand-file-name "lisp/emacs-ai.el" user-emacs-directory))
+(load (expand-file-name "plugins/ai-project-agent.el" user-emacs-directory))
 
 ;;;----------------------------------------------------------------
 

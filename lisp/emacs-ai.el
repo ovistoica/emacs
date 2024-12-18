@@ -26,7 +26,7 @@
   :preface
 
   :init
-  (setq gptel-default-mode 'org-mode)  ; Use org-mode as the default
+  (setq gptel-default-mode 'org-mode)   ; Use org-mode as the default
   :bind (("C-c <enter>" . gptel-send)
          ("C-c RET" . gptel-send)
          ("C-c C-<enter>" . gptel-menu)
@@ -35,7 +35,7 @@
   (setq gptel-backend (gptel-make-anthropic "Claude"
                         :stream t
                         :key os-secret-anthropic-key)
-        gptel-model "claude-3-5-sonnet-20241022"
+        gptel-model 'claude-3-5-sonnet-20241022
         gptel-temperature 0.7
         ;; Configure the chat UI
         gptel-window-select t           ; Select the window after creation
