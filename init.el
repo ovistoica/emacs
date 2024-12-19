@@ -406,7 +406,7 @@ The DWIM behaviour of this command is as follows:
     "^\\*jupyter-repl.*?\\(\\*\\|<[[:digit:]]>\\)$"
     "\\*Inferior .*\\*$"
     "^\\*julia.*\\*$"
-    "^\\*cider-repl.*\\*$"
+    "\\*cider-repl.*\\*$"
     "\\*ielm\\*"
     "\\*nodejs\\*"
     "\\*edebug\\*")
@@ -463,6 +463,10 @@ The DWIM behaviour of this command is as follows:
                   ;; "\\*scratch.*\\*$"
                   "[Oo]utput\\*")))
   (add-to-list 'display-buffer-alist '("\\*ielm\\*"
+                                       (display-buffer-in-side-window)
+                                       (side . left)
+                                       (window-width . 50)))
+  (add-to-list 'display-buffer-alist '("\\*cider-repl.*\\*$"
                                        (display-buffer-in-side-window)
                                        (side . left)
                                        (window-width . 50)))
