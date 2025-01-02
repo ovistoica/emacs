@@ -10,6 +10,7 @@
         corfu-next
         corfu-quit
         down-list
+        end-of-buffer
         end-of-visual-line
         kill-sexp
         lsp-ui-doc--handle-mouse-movement
@@ -22,6 +23,7 @@
         puni-forward-delete-char
         puni-forward-kill-word
         puni-forward-sexp-or-up-list
+        puni-kill-line
         puni-raise
         puni-wrap-curly
         region-bindings-doublequote

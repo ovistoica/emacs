@@ -1309,6 +1309,13 @@ created with `json-hs-extra-create-overlays'."
   :hook (python-ts-mode . os/setup-python-environment))
 
 
+(use-package zmq
+  :ensure t)
+
+(use-package jupyter
+  :ensure t)
+
+
 (use-package markdown-mode
   :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
@@ -1625,6 +1632,9 @@ created with `json-hs-extra-create-overlays'."
             (message "Using emacs-lsp-booster for %s!" orig-result)
             (cons "emacs-lsp-booster" orig-result))
         orig-result)))
+  (defun os/lsp-gopls-hook ()
+    (lsp-register-custom-settings '(("gopls.completeUnimported" t t)
+                                    ("gopls.staticcheck" t t))))
 
   :hook ((lsp-mode . lsp-diagnostics-mode)
          (lsp-mode . lsp-enable-which-key-integration)
@@ -1633,13 +1643,16 @@ created with `json-hs-extra-create-overlays'."
            json-ts-mode
            js-ts-mode
            java-ts-mode
+           go-ts-mode
            python-ts-mode
            prisma-ts-mode
            clojure-mode
            clojurec-mode
            clojurescript-mode
-           go-ts-mode) . lsp))
+           go-ts-mode) . lsp)
+         (go-ts-mode . os/lsp-gopls-hook))
   :config
+
   (define-key lsp-command-map (kbd "d") #'lsp-ui-doc-glance)
   (setenv "PATH" (concat
                   "/usr/local/bin" path-separator
