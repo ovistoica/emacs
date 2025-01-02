@@ -169,6 +169,10 @@
                ("M-<return>" . os/open-line-above)))
   :preface
   (require 'subr-x)
+  (defun os/pfa-invoices-path ()
+    "Returns current invoices path"
+    (interactive)
+    (insert "~/Dropbox/Stoica Ovidiu/2024/chitante"))
   (defun os/create-file-in-project-root (filename content)
     (interactive)
     (let ((file-path (expand-file-name filename (project-root (project-current)))))
@@ -457,7 +461,7 @@ The DWIM behaviour of this command is as follows:
                   "^\\*gptel-ask\\*"
                   "^\\*clojure-compilation\\*"
                   "\\*Shell Command Output\\*"
-                  ("\\*Async Shell Command\\*" . hide)
+                  "\\*Async Shell Command\\*"
                   ("\\*Detached Shell Command\\*" . hide)
                   "\\*Completions\\*"
                   ;; "\\*scratch.*\\*$"
@@ -470,6 +474,16 @@ The DWIM behaviour of this command is as follows:
                                        (display-buffer-in-side-window)
                                        (side . left)
                                        (window-width . 50)))
+  (add-to-list 'display-buffer-alist
+               '("^\\*cider-repl .+\\*"
+                 (display-buffer-in-side-window)
+                 (side . left)
+                 (window-width . 70)))
+  (add-to-list 'display-buffer-alist
+               '("^\\*cider-repl .*\\*"
+                 (display-buffer-in-side-window)
+                 (side . left)
+                 (window-width . 120)))
   (popper-mode +1)
   (popper-echo-mode +1))
 
@@ -738,6 +752,9 @@ are defining or executing a macro."
   :defer t
   :custom
   (eldoc-echo-area-use-multiline-p nil))
+
+
+
 
 
 (use-package dired
@@ -1477,6 +1494,7 @@ created with `json-hs-extra-create-overlays'."
   :mode (("\\.tsx\\'" . tsx-ts-mode)
          ("\\.py\\'" . python-ts-mode)
          ("\\.cmake\\'" . cmake-ts-mode)
+         ("\\.java\\'" . java-ts-mode)
          ("\\.go\\'" . go-ts-mode)
          ("\\.js\\'" . typescript-ts-mode)
          ("\\.mjs\\'" . typescript-ts-mode)
@@ -1502,6 +1520,7 @@ created with `json-hs-extra-create-overlays'."
                (bash "https://github.com/tree-sitter/tree-sitter-bash")
                (html . ("https://github.com/tree-sitter/tree-sitter-html" "v0.20.1"))
                (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "v0.21.2" "src"))
+               (java . ("https://github.com/tree-sitter/tree-sitter-java"))
                (kotlin "https://github.com/fwcd/tree-sitter-kotlin")
                (json . ("https://github.com/tree-sitter/tree-sitter-json" "v0.20.2"))
                (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.20.4"))
@@ -1566,6 +1585,7 @@ created with `json-hs-extra-create-overlays'."
   ;; combobulate-mode'.
   :hook
   ((python-ts-mode . combobulate-mode)
+   (java-ts-mode . combobulate-mode)
    (js-ts-mode . combobulate-mode)
    (go-mode . go-ts-mode)
    (html-ts-mode . combobulate-mode)
@@ -1612,6 +1632,7 @@ created with `json-hs-extra-create-overlays'."
            typescript-ts-mode
            json-ts-mode
            js-ts-mode
+           java-ts-mode
            python-ts-mode
            prisma-ts-mode
            clojure-mode
@@ -1767,8 +1788,9 @@ created with `json-hs-extra-create-overlays'."
 ;; * Navigation & Editing
 
 (use-package easy-kill
+  :disabled t
   :ensure t
-  :bind (([remap mark-sexp] .'easy-mark)))
+  :bind (([remap mark-sexp] .'mark-sexp)))
 
 (use-package whole-line-or-region
   :ensure t
