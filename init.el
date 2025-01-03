@@ -458,6 +458,7 @@ The DWIM behaviour of this command is as follows:
                   "^\\*ielm\\*"
                   "^\\*TeX Help\\*"
                   "^\\*ChatGPT\\*"
+                  "^\\*Input History\\*"
                   "^\\*gptel-ask\\*"
                   "^\\*clojure-compilation\\*"
                   "\\*Shell Command Output\\*"
@@ -2864,6 +2865,10 @@ dependency artifact based on the project's dependencies."
 (use-package package-lint
   :straight '(package-lint :type git :host github :repo "purcell/package-lint"))
 
+;; * LIFE HACKS
+(use-package water-reminder
+  :ensure nil
+  :hook (after-init . water-reminder-mode))
 
 (provide 'init)
 ;;; init.el ends here
