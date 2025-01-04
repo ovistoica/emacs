@@ -70,6 +70,7 @@ Returns a list of cons cells (name . directive) for each .md file."
          ("C-c C-<enter>" . gptel-menu)
          ("C-c C-a" . emacs-ai-toggle-ai-pannel))
   :config
+  (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
   (setq gptel-backend (gptel-make-anthropic "Claude"
                         :stream t
                         :key os-secret-anthropic-key)
