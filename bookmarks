@@ -2,7 +2,13 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("malli-README.md"
+(("emacs-ai.el"
+ (filename . "~/.emacs.d/lisp/emacs-ai.el")
+ (front-context-string . ";;; emacs-ai.el ")
+ (rear-context-string)
+ (position . 1)
+ (last-modified 26493 29332 578751 0))
+("malli-README.md"
  (filename . "~/workspace/malli/README.md")
  (front-context-string . "# malli\n\n[![Buil")
  (rear-context-string)

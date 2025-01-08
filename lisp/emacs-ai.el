@@ -17,10 +17,39 @@
 
 ;;; Code:
 
-(intern (car (split-string "malli-expert.md" "\\.md")))
+
+
+(defun list-project (&optional file-regex)
+  (if-let* ((proj (project-current))
+            (root (project-root proj))
+            (default-regex "\\.\\(el\\|clj\\|cljs\\|cljc\\|js\\|jsx\\|ts\\|tsx\\|rb\\|py\\|go\\|rs\\|cpp\\|c\\|h\\|hpp\\|java\\|php\\)$")
+            (regex (or file-regex default-regex))
+            (files (project-files proj)))
+      (let ((matching-files
+             (cl-remove-if-not
+              (lambda (file)
+                (string-match-p regex (file-relative-name file root)))
+              files)))
+        (concat "Project root: " (abbreviate-file-name root) "\n"
+                "Files:\n"
+                (mapconcat
+                 (lambda (file)
+                   (concat "- " (file-relative-name file root)))
+                 matching-files
+                 "\n")))
+    "No project found or no matching files."))
+
+(defun emacs-ai-get-project-root ()
+  "Get the root directory of the current project.
+Returns the absolute path to the project root or nil if not in a project."
+  (when-let* ((proj (project-current))
+              (root (project-root proj)))
+    (expand-file-name root)))
+
+
 
 (use-package gptel
-  :straight (:host github :repo "karthink/gptel")
+  :straight (:host github :repo "karthink/gptel" :branch "feature-tool-use")
   :after project
   :defines
   gptel-make-anthropic
@@ -62,6 +91,177 @@ Returns a list of cons cells (name . directive) for each .md file."
       (let ((markdown-files (directory-files directory t "\\.md$")))
         (delq nil
               (mapcar #'os/gptel-load-directive-from-markdown markdown-files)))))
+  (gptel-make-tool
+   :function (lambda (url)
+               (with-current-buffer (url-retrieve-synchronously url)
+                 (goto-char (point-min)) (forward-paragraph)
+                 (let ((dom (libxml-parse-html-region (point) (point-max))))
+                   (run-at-time 0 nil #'kill-buffer (current-buffer))
+                   (with-temp-buffer
+                     (shr-insert-document dom)
+                     (buffer-substring-no-properties (point-min) (point-max))))))
+   :name "read_url"
+   :description "Fetch and read the contents of a URL"
+   :args (list '(:name "url"
+                       :type "string"
+                       :description "The URL to read"))
+   :category "web")
+
+  (gptel-make-tool
+   :function
+   (lambda ()
+     (if-let* ((proj (project-current))
+               (root (project-root proj)))
+         (let ((root-path (expand-file-name root)))
+           (format "Project root directory: %s\nDirectory exists: %s\nIs directory: %s"
+                   root-path
+                   (file-exists-p root-path)
+                   (file-directory-p root-path)))
+       "No project found in the current context."))
+   :name "get_project_root"
+   :description "Get the root directory of the current project. This is useful for understanding the project structure and performing operations relative to the project root."
+   :args nil
+   :category "project")
+
+  (gptel-make-tool
+   :function
+   (lambda ()
+     (if-let* ((proj (project-current))
+               (root (project-root proj)))
+         (let ((root-path (expand-file-name root)))
+           (format "Project root directory: %s\nDirectory exists: %s\nIs directory: %s"
+                   root-path
+                   (file-exists-p root-path)
+                   (file-directory-p root-path)))
+       "No project found in the current context."))
+   :name "get_project_root"
+   :description "Get the root directory of the current project. This is useful for understanding the project structure and performing operations relative to the project root."
+   :args nil
+   :category "project")
+
+  (gptel-make-tool
+   :function (lambda ()
+               "End the call"
+               (message "Ending the call succesfully")
+               "Ended call succesfully")
+   :name "end_call"
+   :description "End the call after closing conversation with the customer"
+   :category "vodafone")
+
+  ;; Message buffer logging tool
+  (gptel-make-tool
+   :function (lambda (text)
+               (message "%s" text)
+               (format "Message sent: %s" text))
+   :name "echo_message"
+   :description "Send a message to the *Messages* buffer"
+   :args (list '(:name "text"
+                       :type "string"
+                       :description "The text to send to the messages buffer"))
+   :category "emacs")
+
+  ;; buffer retrieval tool
+  (gptel-make-tool
+   :function (lambda (buffer)
+               (unless (buffer-live-p (get-buffer buffer))
+                 (error "Error: buffer %s is not live." buffer))
+               (with-current-buffer  buffer
+                 (buffer-substring-no-properties (point-min) (point-max))))
+   :name "read_buffer"
+   :description "Return the contents of an Emacs buffer"
+   :args (list '(:name "buffer"
+                       :type "string"
+                       :description "The name of the buffer whose contents are to be retrieved"))
+   :category "emacs")
+
+
+  (gptel-make-tool
+   :function (lambda (directory)
+	       (mapconcat #'identity
+                          (directory-files directory)
+                          "\n"))
+   :name "list_directory"
+   :description "List the contents of a given directory"
+   :args (list '(:name "directory"
+	               :type "string"
+	               :description "The path to the directory to list"))
+   :category "filesystem")
+
+  (gptel-make-tool
+   :function (lambda (parent name)
+               (condition-case nil
+                   (progn
+                     (make-directory (expand-file-name name parent) t)
+                     (format "Directory %s created/verified in %s" name parent))
+                 (error (format "Error creating directory %s in %s" name parent))))
+   :name "make_directory"
+   :description "Create a new directory with the given name in the specified parent directory"
+   :args (list '(:name "parent"
+	               :type "string"
+	               :description "The parent directory where the new directory should be created, e.g. /tmp")
+               '(:name "name"
+	               :type "string"
+	               :description "The name of the new directory to create, e.g. testdir"))
+   :category "filesystem")
+
+  (gptel-make-tool
+   :function (lambda (path filename content)
+               (let ((full-path (expand-file-name filename path)))
+                 (with-temp-buffer
+                   (insert content)
+                   (write-file full-path))
+                 (format "Created file %s in %s" filename path)))
+   :name "create_file"
+   :description "Create a new file with the specified content"
+   :args (list '(:name "path"
+	               :type "string"
+	               :description "The directory where to create the file")
+               '(:name "filename"
+	               :type "string"
+	               :description "The name of the file to create")
+               '(:name "content"
+	               :type "string"
+	               :description "The content to write to the file"))
+   :category "filesystem")
+
+  (gptel-make-tool
+   :function (lambda (filepath)
+	       (with-temp-buffer
+	         (insert-file-contents (expand-file-name filepath))
+	         (buffer-string)))
+   :name "read_file"
+   :description "Read and display the contents of a file"
+   :args (list '(:name "filepath"
+	               :type "string"
+	               :description "Path to the file to read.  Supports relative paths and ~."))
+   :category "filesystem")
+  (gptel-make-tool
+   :function
+   (lambda (&optional file-regex)
+     (if-let* ((proj (project-current))
+               (root (project-root proj))
+               (default-regex "\\.\\(el\\|clj\\|cljs\\|cljc\\|js\\|jsx\\|ts\\|tsx\\|rb\\|py\\|go\\|rs\\|cpp\\|c\\|h\\|hpp\\|java\\|php\\)$")
+               (regex (or file-regex default-regex))
+               (files (project-files proj)))
+         (let ((matching-files
+                (cl-remove-if-not
+                 (lambda (file)
+                   (string-match-p regex (file-relative-name file root)))
+                 files)))
+           (concat "Project root: " (abbreviate-file-name root) "\n"
+                   "Files:\n"
+                   (mapconcat
+                    (lambda (file)
+                      (concat "- " (file-relative-name file root)))
+                    matching-files
+                    "\n")))
+       "No project found or no matching files."))
+   :name "list_project_files"
+   :description "List programming files in the current project directory. Use this function to understand which files you want to read so you can better understand the request from the user."
+   :args (list '(:name "file_regex"
+                       :type "string"
+                       :description "Optional regex pattern to filter files (e.g., \"\\.py$\" for Python files). If not provided, lists common programming files."))
+   :category "project")
 
   :init
   (setq gptel-default-mode 'org-mode)   ; Use org-mode as the default
@@ -70,6 +270,7 @@ Returns a list of cons cells (name . directive) for each .md file."
          ("C-c C-<enter>" . gptel-menu)
          ("C-c C-a" . emacs-ai-toggle-ai-pannel))
   :config
+  (setq gptel-api-key os-secret-openai-key)
   (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
   (setq gptel-backend (gptel-make-anthropic "Claude"
                         :stream t
@@ -106,6 +307,7 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
   :after (gptel flycheck)
   :bind (("C-c c a" . ai-project-agent-toggle-panel)
          ("C-c c d" . ai-project-agent-clear-panel)
+         ("C-c c c" . gptel-add)
          ("C-c c l" . ai-project-agent-send-lint-feedback)
          ("C-c c RET" . ai-project-agent-send)))
 

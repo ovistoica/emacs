@@ -20,6 +20,7 @@
         org-end-of-line
         org-self-insert-command
         puni-backward-delete-char
+        puni-backward-kill-word
         puni-forward-delete-char
         puni-forward-kill-word
         puni-forward-sexp-or-up-list
