@@ -681,6 +681,7 @@ are defining or executing a macro."
 
 
 (use-package diminish
+  :ensure t
   :config
   (diminish 'whole-line-or-region-local-mode)
   (diminish 'visual-line-mode))
@@ -1309,14 +1310,6 @@ created with `json-hs-extra-create-overlays'."
              (setq-local python-shell-interpreter (executable-find "python")))
   :hook (python-ts-mode . os/setup-python-environment))
 
-
-(use-package zmq
-  :ensure t)
-
-(use-package jupyter
-  :ensure t)
-
-
 (use-package markdown-mode
   :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
@@ -1466,12 +1459,10 @@ created with `json-hs-extra-create-overlays'."
          ("<tab>" . sqlite-mode-extras-tab-dwim)
          ("RET" . sqlite-mode-extras-ret-dwim)))
 
-(use-package android-mode
-  :straight '(android-mode :type git :host github :repo "remvee/android-mode"))
 
 (use-package groovy-mode
   :straight '(groovy-mode :type git :host github :repo "Groovy-Emacs-Modes/groovy-emacs-modes")
-  :mode "\\.gradle\\'" ; if you want this mode to be auto-enabled
+  :mode "\\.gradle\\'"                ; if you want this mode to be auto-enabled
   )
 
 
@@ -2659,6 +2650,7 @@ dependency artifact based on the project's dependencies."
   :hook (prog-mode . rainbow-mode))
 
 (use-package modus-themes
+  :ensure t
   :defines
   modus-vivendi-tinted-palette-overrides
   modus-operandi-palette-overrides

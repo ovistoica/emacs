@@ -53,6 +53,7 @@ Returns the absolute path to the project root or nil if not in a project."
   :after project
   :defines
   gptel-make-anthropic
+  gptel-make-tool
   gptel-api-key
   :preface
   (defun os/prompt-file (filename)
@@ -91,6 +92,50 @@ Returns a list of cons cells (name . directive) for each .md file."
       (let ((markdown-files (directory-files directory t "\\.md$")))
         (delq nil
               (mapcar #'os/gptel-load-directive-from-markdown markdown-files)))))
+
+
+
+
+  :init
+  (setq gptel-default-mode 'org-mode)   ; Use org-mode as the default
+  :bind (("C-c <enter>" . gptel-send)
+         ("C-c RET" . gptel-send)
+         ("C-c C-<enter>" . gptel-menu)
+         ("C-c C-a" . emacs-ai-toggle-ai-pannel))
+  :config
+  (setq gptel-api-key os-secret-openai-key)
+  (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
+  (setq gptel-backend (gptel-make-anthropic "Claude"
+                        :stream t
+                        :key os-secret-anthropic-key)
+        gptel-model 'claude-3-5-sonnet-20241022
+        gptel-temperature 0.7
+        ;; Configure the chat UI
+        gptel-window-select t           ; Select the window after creation
+        gptel-window-side 'right        ; Display on the right side
+        gptel-window-width 80           ; Set window width
+        )
+  (setq gptel-directives
+        (let ((markdown-directives (os/gptel-load-all-markdown-directives (expand-file-name "prompts" user-emacs-directory))))
+          `((default . "To assist:  Be terse.  Do not offer unprompted advice or clarifications.  Speak in specific, topic relevant terminology.  Do NOT hedge or qualify.  Speak directly and be willing to make creative guesses.
+
+Explain your reasoning.  if you don’t know, say you don’t know.  Be willing to reference less reputable sources for ideas.  If you use LaTex notation, enclose math in \\( and \\), or \\[ and \\] delimiters.
+
+ Never apologize.  Ask questions when unsure.")
+            (programmer . "You are a careful programmer.  Provide code and only code as output without any additional text, prompt or note.  Do NOT use markdown backticks (```) to format your response.")
+            (cliwhiz . "You are a command line helper.  Generate command line commands that do what is requested, without any additional description or explanation.  Generate ONLY the command, without any markdown code fences.")
+            (emacser . "You are an Emacs maven.  Reply only with the most appropriate built-in Emacs command for the task I specify.  Do NOT generate any additional description or explanation.")
+
+            (explain . "Explain what this code does to a novice programmer.")
+            (tutor . "You are a tutor and domain expert in the domain of my questions.  You will lead me to discover the answer myself by providing hints.  Your instructions are as follows:
+- If the question or notation is not clear to you, ask for clarifying details.
+- At first your hints should be general and vague.
+- If I fail to make progress, provide more explicit hints.
+- Never provide the answer itself unless I explicitly ask you to.  If my answer is wrong, again provide only hints to correct it.
+- If you use LaTeX notation, enclose math in \\( and \\) or \\[ and \\] delimiters.")
+            ,@markdown-directives
+            )))
+  ;; Tools
   (gptel-make-tool
    :function (lambda (url)
                (with-current-buffer (url-retrieve-synchronously url)
@@ -148,81 +193,6 @@ Returns a list of cons cells (name . directive) for each .md file."
    :description "End the call after closing conversation with the customer"
    :category "vodafone")
 
-  ;; Message buffer logging tool
-  (gptel-make-tool
-   :function (lambda (text)
-               (message "%s" text)
-               (format "Message sent: %s" text))
-   :name "echo_message"
-   :description "Send a message to the *Messages* buffer"
-   :args (list '(:name "text"
-                       :type "string"
-                       :description "The text to send to the messages buffer"))
-   :category "emacs")
-
-  ;; buffer retrieval tool
-  (gptel-make-tool
-   :function (lambda (buffer)
-               (unless (buffer-live-p (get-buffer buffer))
-                 (error "Error: buffer %s is not live." buffer))
-               (with-current-buffer  buffer
-                 (buffer-substring-no-properties (point-min) (point-max))))
-   :name "read_buffer"
-   :description "Return the contents of an Emacs buffer"
-   :args (list '(:name "buffer"
-                       :type "string"
-                       :description "The name of the buffer whose contents are to be retrieved"))
-   :category "emacs")
-
-
-  (gptel-make-tool
-   :function (lambda (directory)
-	       (mapconcat #'identity
-                          (directory-files directory)
-                          "\n"))
-   :name "list_directory"
-   :description "List the contents of a given directory"
-   :args (list '(:name "directory"
-	               :type "string"
-	               :description "The path to the directory to list"))
-   :category "filesystem")
-
-  (gptel-make-tool
-   :function (lambda (parent name)
-               (condition-case nil
-                   (progn
-                     (make-directory (expand-file-name name parent) t)
-                     (format "Directory %s created/verified in %s" name parent))
-                 (error (format "Error creating directory %s in %s" name parent))))
-   :name "make_directory"
-   :description "Create a new directory with the given name in the specified parent directory"
-   :args (list '(:name "parent"
-	               :type "string"
-	               :description "The parent directory where the new directory should be created, e.g. /tmp")
-               '(:name "name"
-	               :type "string"
-	               :description "The name of the new directory to create, e.g. testdir"))
-   :category "filesystem")
-
-  (gptel-make-tool
-   :function (lambda (path filename content)
-               (let ((full-path (expand-file-name filename path)))
-                 (with-temp-buffer
-                   (insert content)
-                   (write-file full-path))
-                 (format "Created file %s in %s" filename path)))
-   :name "create_file"
-   :description "Create a new file with the specified content"
-   :args (list '(:name "path"
-	               :type "string"
-	               :description "The directory where to create the file")
-               '(:name "filename"
-	               :type "string"
-	               :description "The name of the file to create")
-               '(:name "content"
-	               :type "string"
-	               :description "The content to write to the file"))
-   :category "filesystem")
 
   (gptel-make-tool
    :function (lambda (filepath)
@@ -262,46 +232,7 @@ Returns a list of cons cells (name . directive) for each .md file."
                        :type "string"
                        :description "Optional regex pattern to filter files (e.g., \"\\.py$\" for Python files). If not provided, lists common programming files."))
    :category "project")
-
-  :init
-  (setq gptel-default-mode 'org-mode)   ; Use org-mode as the default
-  :bind (("C-c <enter>" . gptel-send)
-         ("C-c RET" . gptel-send)
-         ("C-c C-<enter>" . gptel-menu)
-         ("C-c C-a" . emacs-ai-toggle-ai-pannel))
-  :config
-  (setq gptel-api-key os-secret-openai-key)
-  (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
-  (setq gptel-backend (gptel-make-anthropic "Claude"
-                        :stream t
-                        :key os-secret-anthropic-key)
-        gptel-model 'claude-3-5-sonnet-20241022
-        gptel-temperature 0.7
-        ;; Configure the chat UI
-        gptel-window-select t           ; Select the window after creation
-        gptel-window-side 'right        ; Display on the right side
-        gptel-window-width 80           ; Set window width
-        )
-  (setq gptel-directives
-        (let ((markdown-directives (os/gptel-load-all-markdown-directives (expand-file-name "prompts" user-emacs-directory))))
-          `((default . "To assist:  Be terse.  Do not offer unprompted advice or clarifications.  Speak in specific, topic relevant terminology.  Do NOT hedge or qualify.  Speak directly and be willing to make creative guesses.
-
-Explain your reasoning.  if you don’t know, say you don’t know.  Be willing to reference less reputable sources for ideas.  If you use LaTex notation, enclose math in \\( and \\), or \\[ and \\] delimiters.
-
- Never apologize.  Ask questions when unsure.")
-            (programmer . "You are a careful programmer.  Provide code and only code as output without any additional text, prompt or note.  Do NOT use markdown backticks (```) to format your response.")
-            (cliwhiz . "You are a command line helper.  Generate command line commands that do what is requested, without any additional description or explanation.  Generate ONLY the command, without any markdown code fences.")
-            (emacser . "You are an Emacs maven.  Reply only with the most appropriate built-in Emacs command for the task I specify.  Do NOT generate any additional description or explanation.")
-
-            (explain . "Explain what this code does to a novice programmer.")
-            (tutor . "You are a tutor and domain expert in the domain of my questions.  You will lead me to discover the answer myself by providing hints.  Your instructions are as follows:
-- If the question or notation is not clear to you, ask for clarifying details.
-- At first your hints should be general and vague.
-- If I fail to make progress, provide more explicit hints.
-- Never provide the answer itself unless I explicitly ask you to.  If my answer is wrong, again provide only hints to correct it.
-- If you use LaTeX notation, enclose math in \\( and \\) or \\[ and \\] delimiters.")
-            ,@markdown-directives
-            ))))
+  )
 
 (use-package ai-project-agent
   :after (gptel flycheck)
