@@ -372,7 +372,8 @@ The DWIM behaviour of this command is as follows:
 (use-package windmove
   :config
   (setq windmove-wrap-around t)
-  (windmove-default-keybindings))
+
+  (windmove-default-keybindings '(shift meta)))
 
 
 ;; ** POPPER
@@ -510,6 +511,7 @@ The DWIM behaviour of this command is as follows:
   (add-to-list
    'display-buffer-alist
    '("\\*Calendar*" (display-buffer-at-bottom))))
+
 
 (use-package mouse
   :bind (("<mode-line> <mouse-2>" . nil)
@@ -1179,9 +1181,16 @@ created with `json-hs-extra-create-overlays'."
 ;; * ORG
 
 (use-package org
+  :preface
+  (defconst os/user-name (getenv "USER") "Current user name from environment")
+  (defun os/path-with-dynamic-user (path)
+    "Build a PATH with the current user's home directory.
+     Useful when $HOME doesn't work."
+    (expand-file-name (format path os/user-name) "/"))
   :hook ((org-babel-after-execute . org-redisplay-inline-images))
-  :bind ( :map org-mode-map
-          ("C-c l" . org-store-link))
+  :bind (("C-c A" . org-agenda)
+         :map org-mode-map
+         ("C-c l" . org-store-link))
   :custom-face
   (org-block ((t (:extend t))))
   (org-block-begin-line
@@ -1198,17 +1207,20 @@ created with `json-hs-extra-create-overlays'."
          :extend t))))
   (org-drawer ((t (:foreground unspecified :inherit shadow))))
   :custom
-  (org-tags-column -120)
-  (org-startup-folded 'content)
+  (org-support-shift-select t)
   (org-highlight-latex-and-related '(latex))
   (org-preview-latex-default-process 'dvisvgm)
   (org-src-fontify-natively t)
-  (org-preview-latex-image-directory ".ltximg/")
+
   (org-confirm-babel-evaluate nil)
   (org-log-done 'time)
   (org-image-actual-width nil)
   (org-edit-src-content-indentation 0)
   (org-src-preserve-indentation t)
+  (org-agenda-files (list
+                     "~/org/todo_agenda.org"
+                     "~/workspace/voice-fn/TODO.org"
+                     (os/path-with-dynamic-user "Users/%s/Library/CloudStorage/Dropbox/todo/todo.org")))
   :config
   (defun org-babel-edit-prep:emacs-lisp (_)
     "Setup Emacs Lisp buffer for Org Babel."

@@ -6,6 +6,7 @@
         cljr-slash
         combobulate-envelop-tsx-ts-mode-wrap-parentheses
         combobulate-navigate-up
+        corfu-complete
         corfu-complete-and-quit
         corfu-next
         corfu-quit
