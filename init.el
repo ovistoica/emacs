@@ -1395,6 +1395,9 @@ created with `json-hs-extra-create-overlays'."
 (use-package cider
   :ensure t
   :after clojure-mode
+  :defines
+  cider-current-repl
+  cider-interractive-eval
   :preface
   (defun cider-reset ()
     (interactive)
@@ -1418,7 +1421,8 @@ created with `json-hs-extra-create-overlays'."
         cider-preferred-build-tool 'clojure-cli
         ;; ~make sure we can always debug nrepl issues~
         ;; Turning this off again, seems it may really blow up memory usage
-        nrepl-log-messages nil))
+        nrepl-log-messages nil)
+  (setq cider-download-java-sources t))
 
 (use-package ob-clojure
   :after (org clojure-mode)
