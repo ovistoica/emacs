@@ -96,27 +96,102 @@ Based on these perspectives, a balanced conclusion would be:")
         (insert (format "Preview of prompt '%s':\n\n" prompt-key))
         (insert content)))))
 
-;; Then, update the transient menu definition
+(defclass ai-prompt-snippets--action-switch (transient-switch)
+  ((action :initarg :action)
+   (argument :initarg :argument))       ; Add the argument slot
+  "Class used for action switches in the prompt menu.")
+
+(defvar ai-prompt-snippets--action 'copy
+  "Current action to perform on prompt selection (copy or insert).")
+
+(cl-defmethod transient-infix-set ((obj ai-prompt-snippets--action-switch) value)
+  "Set the action VALUE for OBJ and update the global action state."
+  (when value
+    (setq ai-prompt-snippets--action (oref obj action)))
+  (oset obj value value))
+
+(cl-defmethod transient-format-value ((obj ai-prompt-snippets--action-switch))
+  "Format the switch display for OBJ."
+  (let ((value (eq ai-prompt-snippets--action (oref obj action))))
+    (concat
+     (propertize "(" 'face 'transient-delimiter)
+     (propertize (if value "*" " ") 'face 'transient-value)
+     (propertize ")" 'face 'transient-delimiter))))
+
+(cl-defmethod transient-infix-set ((obj ai-prompt-snippets--action-switch) value)
+  "Set the action VALUE for OBJ and update the global action state."
+  (when value
+    (setq ai-prompt-snippets--action (oref obj action)))
+  (oset obj value value))
+
+(cl-defmethod transient-format-value ((obj ai-prompt-snippets--action-switch))
+  "Format the switch display for OBJ."
+  (let ((value (eq ai-prompt-snippets--action (oref obj action))))
+    (concat
+     (propertize "(" 'face 'transient-delimiter)
+     (propertize (if value "*" " ") 'face 'transient-value)
+     (propertize ")" 'face 'transient-delimiter))))
+
 (transient-define-prefix ai-prompt-snippets-menu ()
   "Menu for managing and using LLM prompts."
   [:description
-   (lambda () (propertize "LLM Prompt Library" 'face 'transient-heading))
+   (lambda ()
+     (propertize "LLM Prompt Library" 'face 'transient-heading))
 
-   ["Actions"
-    ("c" "Copy to clipboard" ai-prompt-snippets-copy)
-    ("i" "Insert at point" ai-prompt-snippets-insert)]
+   ["Action"
+    ("c" "Copy to clipboard"
+     (lambda () (interactive)
+       (setq ai-prompt-snippets--action 'copy)
+       (message "AI Prompt Action: Copy")
+       (transient-setup 'ai-prompt-snippets-menu))
+     :class ai-prompt-snippets--action-switch
+     :argument ""  ; Add empty argument
+     :action 'copy)
+    ("i" "Insert at point"
+     (lambda () (interactive)
+       (setq ai-prompt-snippets--action 'insert)
+       (message "AI Prompt Action: Insert")
+       (transient-setup 'ai-prompt-snippets-menu))
+     :class ai-prompt-snippets--action-switch
+     :argument ""  ; Add empty argument
+     :action 'insert)]
 
    ["Prompts"
-    ("d" "Debate (pros/cons)" (lambda () (interactive)
-                                (ai-prompt-snippets--copy-to-clipboard "Debate")))
-    ("s" "Summarize discussion" (lambda () (interactive)
-                                  (ai-prompt-snippets--copy-to-clipboard "Summarize")))
-    ("r" "Code review" (lambda () (interactive)
-                         (ai-prompt-snippets--copy-to-clipboard "Code Review")))]
+    ("d" "Debate (pros/cons)"
+     (lambda ()
+       (interactive)
+       (pcase ai-prompt-snippets--action
+         ('copy (ai-prompt-snippets--copy-to-clipboard "Debate"))
+         ('insert (ai-prompt-snippets--insert-at-point "Debate")))
+       (transient-quit-one)))
 
-   ["Preview"
-    ("p" "Preview prompt" ai-prompt-snippets--preview-cmd)]])
+    ("s" "Summarize discussion"
+     (lambda ()
+       (interactive)
+       (pcase ai-prompt-snippets--action
+         ('copy (ai-prompt-snippets--copy-to-clipboard "Summarize"))
+         ('insert (ai-prompt-snippets--insert-at-point "Summarize")))
+       (transient-quit-one)))
 
+    ("r" "Code review"
+     (lambda ()
+       (interactive)
+       (pcase ai-prompt-snippets--action
+         ('copy (ai-prompt-snippets--copy-to-clipboard "Code Review"))
+         ('insert (ai-prompt-snippets--insert-at-point "Code Review")))
+       (transient-quit-one)))]
+
+   ["Other"
+    ("p" "Preview prompt" ai-prompt-snippets--preview-cmd)
+    ("RET" "Select from all prompts"
+     (lambda ()
+       (interactive)
+       (let ((prompt-key (completing-read "Prompt: "
+                                          (mapcar #'car ai-prompt-snippets-prompts)
+                                          nil t)))
+         (pcase ai-prompt-snippets--action
+           ('copy (ai-prompt-snippets--copy-to-clipboard prompt-key))
+           ('insert (ai-prompt-snippets--insert-at-point prompt-key))))))]])
 
 
 (cl-defmethod transient-init-value ((obj ai-prompt-snippets--preview))
