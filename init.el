@@ -372,7 +372,6 @@ The DWIM behaviour of this command is as follows:
 (use-package windmove
   :config
   (setq windmove-wrap-around t)
-
   (windmove-default-keybindings '(shift meta)))
 
 
@@ -1188,14 +1187,15 @@ created with `json-hs-extra-create-overlays'."
     "Build a PATH with the current user's home directory.
      Useful when $HOME doesn't work."
     (expand-file-name (format path os/user-name) "/"))
-  :hook ((org-babel-after-execute . org-redisplay-inline-images))
+  :hook ((org-babel-after-execute . org-redisplay-inline-images)
+         (org-mode . org-indent-mode)
+         )
   :bind (("C-c A" . org-agenda)
          :map org-mode-map
          ("C-c l" . org-store-link))
   :custom
   ;; Your existing custom settings remain unchanged
   (org-M-RET-may-split-line '((default . nil)))
-  (org-insert-heading-respect-content t)
   (org-support-shift-select t)
   (org-highlight-latex-and-related '(latex))
   (org-preview-latex-default-process 'dvisvgm)
@@ -1209,13 +1209,34 @@ created with `json-hs-extra-create-overlays'."
                      "~/org/todo_agenda.org"
                      "~/workspace/voice-fn/TODO.org"
                      "~/Dropbox/todo/todo.org"))
-  :config
+  (setq org-auto-align-tags nil)
+  (setq org-tags-column 0)
+  (setq org-special-ctrl-a/e t)
+  (setq org-insert-heading-respect-content t)
 
+  ;; Org styling, hide markup etc
+  (setq org-hide-emphasis-markers t)
+  (setq org-pretty-entities t)
+  (setq org-agenda-tags-column 0)
+  ;; Ellipsis styling
+  (setq org-ellipsis "...")
+  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
+  :config
   (defun org-babel-edit-prep:emacs-lisp (_)
     "Setup Emacs Lisp buffer for Org Babel."
     (setq lexical-binding t))
   (unless (version<= org-version "9.1.9")
     (add-to-list 'org-modules 'org-tempo)))
+
+(use-package org-modern
+  :disabled t
+  :init (global-org-modern-mode)
+  :config
+  (setq org-modern-star 'replace)
+  (setq org-modern-timestamp nil))
+
+(use-package org-pomodoro
+  :ensure t)
 
 (use-package ob-shell :after org)
 
