@@ -242,6 +242,10 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
          ("C-c c l" . ai-project-agent-send-lint-feedback)
          ("C-c c RET" . ai-project-agent-send)))
 
+(use-package ai-prompt-snippets
+  :after transient
+  :bind (("C-c P" . ai-prompt-snippets)))
+
 (use-package corsair
   :straight (:host github
                    :repo "rob137/Corsair"
