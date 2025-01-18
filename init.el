@@ -815,6 +815,7 @@ are defining or executing a macro."
 
 ;; Dired extra font locking
 (use-package diredfl
+  :ensure t
   :after (dired)
   :hook (dired-mode .diredfl-mode))
 
@@ -1191,37 +1192,25 @@ created with `json-hs-extra-create-overlays'."
   :bind (("C-c A" . org-agenda)
          :map org-mode-map
          ("C-c l" . org-store-link))
-  :custom-face
-  (org-block ((t (:extend t))))
-  (org-block-begin-line
-   ((t ( :slant unspecified
-         :weight normal
-         :background unspecified
-         :inherit (org-block shadow)
-         :extend t))))
-  (org-block-end-line
-   ((t ( :slant unspecified
-         :weight normal
-         :background unspecified
-         :inherit org-block-begin-line
-         :extend t))))
-  (org-drawer ((t (:foreground unspecified :inherit shadow))))
   :custom
+  ;; Your existing custom settings remain unchanged
+  (org-M-RET-may-split-line '((default . nil)))
+  (org-insert-heading-respect-content t)
   (org-support-shift-select t)
   (org-highlight-latex-and-related '(latex))
   (org-preview-latex-default-process 'dvisvgm)
   (org-src-fontify-natively t)
-
   (org-confirm-babel-evaluate nil)
   (org-log-done 'time)
+  (org-log-into-drawer t)
   (org-image-actual-width nil)
-  (org-edit-src-content-indentation 0)
   (org-src-preserve-indentation t)
   (org-agenda-files (list
                      "~/org/todo_agenda.org"
                      "~/workspace/voice-fn/TODO.org"
-                     (os/path-with-dynamic-user "Users/%s/Library/CloudStorage/Dropbox/todo/todo.org")))
+                     "~/Dropbox/todo/todo.org"))
   :config
+
   (defun org-babel-edit-prep:emacs-lisp (_)
     "Setup Emacs Lisp buffer for Org Babel."
     (setq lexical-binding t))
