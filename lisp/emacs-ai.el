@@ -288,6 +288,7 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
               ("S-C-<tab>" . 'copilot-accept-completion-by-word)))
 
 (use-package aider
+  :disabled t
   :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
   :config
   (setq aider-args '("--model" "anthropic/claude-3-5-sonnet-20241022"))

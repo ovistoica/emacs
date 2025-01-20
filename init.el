@@ -117,6 +117,7 @@
 
 (use-package emacs
   :config
+  (ffap-bindings)
   (push (expand-file-name "plugins/" user-emacs-directory) load-path)
   (push (expand-file-name "lisp/" user-emacs-directory)  load-path))
 
@@ -173,6 +174,11 @@
     "Returns current invoices path"
     (interactive)
     (insert "~/Dropbox/Stoica Ovidiu/2024/chitante"))
+  (defconst os/user-name (getenv "USER") "Current user name from environment")
+  (defun os/path-with-dynamic-user (path)
+    "Build a PATH with the current user's home directory.
+     Useful when $HOME doesn't work."
+    (expand-file-name (format path os/user-name) "/"))
   (defun os/create-file-in-project-root (filename content)
     (interactive)
     (let ((file-path (expand-file-name filename (project-root (project-current)))))
@@ -1182,14 +1188,14 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package org
   :preface
+
   (defconst os/user-name (getenv "USER") "Current user name from environment")
   (defun os/path-with-dynamic-user (path)
     "Build a PATH with the current user's home directory.
      Useful when $HOME doesn't work."
     (expand-file-name (format path os/user-name) "/"))
   :hook ((org-babel-after-execute . org-redisplay-inline-images)
-         (org-mode . org-indent-mode)
-         )
+         (org-mode . org-indent-mode))
   :bind (("C-c A" . org-agenda)
          :map org-mode-map
          ("C-c l" . org-store-link))
@@ -1813,7 +1819,7 @@ created with `json-hs-extra-create-overlays'."
   :config
   ;; Use latest LSP from VSCode installed
   (setq lsp-eslint-server-command `("node"
-                                    "/Users/ovistoica/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
+                                    "~/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
                                     "--stdio")))
 
 ;; * Navigation & Editing
@@ -2590,6 +2596,7 @@ dependency artifact based on the project's dependencies."
 ;; * MONITORING
 
 (use-package wakatime-mode
+  :disabled t
   :ensure t
   :diminish ""
   :custom (setq wakatime-api-key os-secret-wakatime-api-key
