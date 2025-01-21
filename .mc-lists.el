@@ -14,6 +14,7 @@
         end-of-buffer
         end-of-visual-line
         kill-sexp
+        kmacro-end-or-call-macro
         lsp-ui-doc--handle-mouse-movement
         mark-sexp
         mc/mark-all-in-region-regexp

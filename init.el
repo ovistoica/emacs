@@ -378,7 +378,7 @@ The DWIM behaviour of this command is as follows:
 (use-package windmove
   :config
   (setq windmove-wrap-around t)
-  (windmove-default-keybindings '(shift meta)))
+  (windmove-default-keybindings ))
 
 
 ;; ** POPPER
@@ -1821,6 +1821,9 @@ created with `json-hs-extra-create-overlays'."
   (setq lsp-eslint-server-command `("node"
                                     "~/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
                                     "--stdio")))
+
+(use-package lsp-java
+  :ensure t)
 
 ;; * Navigation & Editing
 
