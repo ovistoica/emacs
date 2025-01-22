@@ -1190,11 +1190,7 @@ created with `json-hs-extra-create-overlays'."
 (use-package org
   :preface
 
-  (defconst os/user-name (getenv "USER") "Current user name from environment")
-  (defun os/path-with-dynamic-user (path)
-    "Build a PATH with the current user's home directory.
-     Useful when $HOME doesn't work."
-    (expand-file-name (format path os/user-name) "/"))
+
   :hook ((org-babel-after-execute . org-redisplay-inline-images)
          (org-mode . org-indent-mode))
   :bind (("C-c A" . org-agenda)
@@ -1820,7 +1816,7 @@ created with `json-hs-extra-create-overlays'."
   :config
   ;; Use latest LSP from VSCode installed
   (setq lsp-eslint-server-command `("node"
-                                    "~/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js"
+                                    (os/path-with-dynamic-user "/Users/%s/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js")
                                     "--stdio")))
 
 (use-package lsp-java

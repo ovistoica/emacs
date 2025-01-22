@@ -296,12 +296,35 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
   ;; Optional: Set a key binding for the transient menu
   (global-set-key (kbd "C-c a") 'aider-transient-menu))
 
-(require 'project)
 
+(use-package dash
+  :ensure t)
 
+(use-package plz
+  :ensure t)
 
+(use-package minuet
+  :defines minuet-active-mode-map
+  :after (dash plz)
+  :straight (:host github :repo "milanglacier/minuet-ai.el" :type git)
 
-
+  :config
+  (setq minuet-provider 'openai-fim-compatible)
+  :hook
+  (prog-mode . minuet-auto-suggestion-mode)
+  :init
+  (setenv "DEEPSEEK_API_KEY" os-secret-deepseek-api-key )
+  :bind
+  (("C-<tab>" . #'minuet-complete-with-minibuffer)
+   :map minuet-active-mode-map
+   ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
+   ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
+   ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
+   ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+   ;; Accept the first line of completion, or N lines with a numeric-prefix:
+   ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
+   ("M-a" . #'minuet-accept-suggestion-line)
+   ("M-e" . #'minuet-dismiss-suggestion)))
 
 (provide 'emacs-ai)
 ;;; emacs-ai.el ends here
