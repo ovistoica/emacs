@@ -1148,16 +1148,17 @@ created with `json-hs-extra-create-overlays'."
   :config
   (setf (alist-get 'shfmt apheleia-formatters)
         '("shfmt" "-i=4" "-sr" "-kp"))
-  (setq apheleia-log-debug-info nil)
-  ;; https://git.genehack.net/os/emacs/issues/2
+  (setq apheleia-log-debug-info t)
   (setf (alist-get 'prettier-json apheleia-formatters)
-        '("prettier" "--stdin-filepath" filepath))
+        '("apheleia-npx" "prettier" "--stdin-filepath" filepath))
   (setf (alist-get 'standard-clojure apheleia-formatters)
         '("standard-clj" "fix" "-"))
   (setf (alist-get 'python-mode apheleia-mode-alist) 'ruff)
   (setf (alist-get 'clojure-mode apheleia-mode-alist) 'standard-clojure)
   (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
   (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
+  (setf (alist-get 'json-mode apheleia-mode-alist) 'prettier-json)
+
   (apheleia-global-mode +1))
 
 ;; * NERD ICONS
