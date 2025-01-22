@@ -1158,6 +1158,10 @@ created with `json-hs-extra-create-overlays'."
   (setf (alist-get 'clojurec-mode apheleia-mode-alist) 'standard-clojure)
   (setf (alist-get 'clojurescript-mode apheleia-mode-alist) 'standard-clojure)
   (setf (alist-get 'json-mode apheleia-mode-alist) 'prettier-json)
+  (setf (alist-get 'prettier-css apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'css-mode apheleia-mode-alist) 'prettier-css)
+  (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettier-css)
 
   (apheleia-global-mode +1))
 
@@ -1194,6 +1198,7 @@ created with `json-hs-extra-create-overlays'."
   :hook ((org-babel-after-execute . org-redisplay-inline-images)
          (org-mode . org-indent-mode))
   :bind (("C-c A" . org-agenda)
+         ("C-c C-l" . org-store-link)
          :map org-mode-map
          ("C-c l" . org-store-link))
   :custom
