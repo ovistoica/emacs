@@ -13,6 +13,7 @@
         down-list
         end-of-buffer
         end-of-visual-line
+        indent-for-tab-command
         kill-sexp
         kmacro-end-or-call-macro
         lsp-ui-doc--handle-mouse-movement

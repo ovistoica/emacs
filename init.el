@@ -469,6 +469,7 @@ The DWIM behaviour of this command is as follows:
                   "^\\*clojure-compilation\\*"
                   "\\*Shell Command Output\\*"
                   "\\*Async Shell Command\\*"
+                  "\\*[cC]ausal-[^*]+\\*"
                   ("\\*Detached Shell Command\\*" . hide)
                   "\\*Completions\\*"
                   ;; "\\*scratch.*\\*$"
@@ -493,8 +494,6 @@ The DWIM behaviour of this command is as follows:
                  (window-width . 120)))
   (popper-mode +1)
   (popper-echo-mode +1))
-
-
 
 ;; ** CORE PACKAGES
 

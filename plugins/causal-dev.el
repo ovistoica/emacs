@@ -52,40 +52,35 @@
       (kill-process (get-buffer-process buf))
       (message "Killed process in buffer: %s" (buffer-name buf)))))
 
+(defun causal-run (name)
+  "Run NAME process."
+  (let ((buf (causal--create-process-buffer name)))
+    (async-shell-command (format "causal %s" name) buf)))
+
+;;;###autoload
+(defun causal-run-frontend ()
+  "Start just causal frontend."
+  (interactive)
+  (causal-run "frontend"))
+
+;;;###autoload
+(defun causal-run-cow ()
+  "Start just causal frontend."
+  (interactive)
+  (causal-run "cow"))
+
+;;;###autoload
+(defun causal-run-backend ()
+  "Start just causal frontend."
+  (interactive)
+  (causal-run "backend"))
+
 ;;;###autoload
 (defun causal-run-all ()
   "Run all Causal commands in parallel."
   (interactive)
-  ;; Reset the process buffers list
-  (setq causal--process-buffers nil)
-
-  ;; Create and store buffers for each process
-  (dolist (cmd-pair causal-buffer-names)
-    (let* ((name (car cmd-pair))
-           (command (cdr cmd-pair))
-           (buf (causal--create-process-buffer name)))
-      (push buf causal--process-buffers)
-
-      ;; Run the async process
-      (with-current-buffer buf
-        (async-shell-command command buf (format "*Causal-%s-error*" name))
-
-        ;; Set up process sentinel
-        (set-process-sentinel
-         (get-buffer-process buf)
-         (lambda (process event)
-           (when (string-match-p "finished\\|exited" event)
-             (causal--cleanup-buffers)))))))
-
-  ;; Display all buffers
-  (delete-other-windows)
-  (when causal--process-buffers
-    (let* ((window-count (length causal--process-buffers))
-           (split-height (/ (frame-height) window-count)))
-      (dolist (buf causal--process-buffers)
-        (split-window-below split-height)
-        (other-window 1)
-        (switch-to-buffer buf)))
-    (other-window 1)))
+  (causal-run-cow)
+  (causal-run-backend)
+  (causal-run-frontend))
 
 (provide 'causal-dev)
