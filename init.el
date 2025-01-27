@@ -1819,9 +1819,9 @@ created with `json-hs-extra-create-overlays'."
   :after lsp-mode
   :config
   ;; Use latest LSP from VSCode installed
-  (setq lsp-eslint-server-command `("node"
-                                    (os/path-with-dynamic-user "/Users/%s/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js")
-                                    "--stdio")))
+  (setq lsp-eslint-server-command (list "node"
+                                        (os/path-with-dynamic-user "/Users/%s/.vscode/extensions/dbaeumer.vscode-eslint-3.0.10/server/out/eslintServer.js")
+                                        "--stdio")))
 
 (use-package lsp-java
   :ensure t)

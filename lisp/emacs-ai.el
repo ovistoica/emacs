@@ -310,8 +310,8 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
 
   :config
   (setq minuet-provider 'openai-fim-compatible)
-  :hook
-  (prog-mode . minuet-auto-suggestion-mode)
+  ;; :hook
+  ;;(prog-mode . minuet-auto-suggestion-mode)
   :init
   (setenv "DEEPSEEK_API_KEY" os-secret-deepseek-api-key )
   :bind
