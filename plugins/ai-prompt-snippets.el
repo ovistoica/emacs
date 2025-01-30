@@ -27,29 +27,21 @@
   :group 'ai-prompt-snippets)
 
 (defvar ai-prompt-snippets-prompts
-  '(("Debate"
+  '(("objective 50/50"
      :description "Argue pros and cons"
-     :content "Please analyze this topic from two perspectives:
+     :content "# objective 50/50
+BEFORE YOU ANSWER, I want you to write two detailed paragraphs, one arguing for each of these solutions - do not jump to conclusions, seriously consider both approaches.
 
-Perspective 1 (Pros):
--
--
--
-
-Perspective 2 (Cons):
--
--
--
-
-Based on these perspectives, a balanced conclusion would be:")
+After you finish, tell me wherer of these solutions is obviously better than the other and why. ")
 
     ("Summarize"
      :description "Summarize the discussion"
-     :content "Please provide a clear and concise summary of the key points discussed above, highlighting:
+     :content "Please summarize the current discussion including what we just did, what did not work, which files were created/updated, what mistakes to avoid, any key insights/lessons we've learned, what problems/errors we are facing, ... and anything else a programmer might need to work productively on this project.
 
-1. Main topics covered
-2. Key decisions or conclusions
-3. Action items or next steps")
+Write in a conversational yet informative tone, something like a README file that is information dense and without any fluff or noise. DO NOT include any assumptions or theories, just the facts.
+
+I expect to see three concise paragraphs, written as if you were giving instructions to another programmer and this was ALL you could tell him.
+")
 
     ("Code Review"
      :description "Review code with best practices"

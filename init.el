@@ -2781,7 +2781,7 @@ dependency artifact based on the project's dependencies."
 
   (setq fontaine-presets
         '((small
-           :default-height 110)
+           :default-height 120)
           (regular) ; like this it uses all the fallback values and is named `regular'
           (medium
            :default-height 130)

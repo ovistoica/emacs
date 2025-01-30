@@ -28,3 +28,5 @@ flycheck_*.el
 /tutorial/
 /prompts/vodafone-outbound.md
 /org-persist/
+/prompts/vodafone-proactive-retention.md
+/prompts/deepseek-proactive-retention.md

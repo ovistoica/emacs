@@ -49,7 +49,7 @@ Returns the absolute path to the project root or nil if not in a project."
 
 
 (use-package gptel
-  :straight (:host github :repo "karthink/gptel" :branch "feature-tool-use")
+  :straight (:host github :repo "karthink/gptel")
   :after project
   :defines
   gptel-make-anthropic
@@ -310,7 +310,7 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
 
   :config
   (setq minuet-provider 'openai-fim-compatible)
-  ;; :hook
+  ;;:hook
   ;;(prog-mode . minuet-auto-suggestion-mode)
   :init
   (setenv "DEEPSEEK_API_KEY" os-secret-deepseek-api-key )
