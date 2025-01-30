@@ -105,10 +105,17 @@ Returns a list of cons cells (name . directive) for each .md file."
   :config
   (setq gptel-api-key os-secret-openai-key)
   (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
-  (setq gptel-backend (gptel-make-anthropic "Claude"
+  (gptel-make-anthropic "Claude"
+    :stream t
+    :key os-secret-anthropic-key)
+
+  (setq gptel-backend (gptel-make-openai "DeepSeek"         ;Any name you want
+                        :host "api.deepseek.com"
+                        :endpoint "/chat/completions"
                         :stream t
-                        :key os-secret-anthropic-key)
-        gptel-model 'claude-3-5-sonnet-20241022
+                        :key os-secret-deepseek-api-key
+                        :models '(deepseek-chat deepseek-reasoner))
+        gptel-model 'deepseek-chat
         gptel-temperature 0.7
         ;; Configure the chat UI
         gptel-window-select t           ; Select the window after creation

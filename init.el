@@ -354,6 +354,8 @@ The DWIM behaviour of this command is as follows:
   (when (version<= "27.1" emacs-version)
     (setq bidi-inhibit-bpa t))
   (global-visual-line-mode t)
+  (custom-safe-themes
+   '("712dda0818312c175a60d94ba676b404fc815f8c7e6c080c9b4061596c60a1db" default))
   (custom-set-variables
    '(safe-local-variable-values
      '((eval progn
@@ -1472,6 +1474,9 @@ created with `json-hs-extra-create-overlays'."
 (use-package clj-decompiler
   :ensure t
   :hook (cider-mode . clj-decompiler-setup))
+
+(use-package babashka
+  :ensure t)
 
 (use-package lisp-mode
   :hook ((lisp-mode lisp-data-mode) . common-lisp-modes-mode))
