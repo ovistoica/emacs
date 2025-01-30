@@ -1615,7 +1615,9 @@ created with `json-hs-extra-create-overlays'."
   (setq combobulate-key-prefix "C-c o")
 
   :bind (:map combobulate-key-map
-              ("M-a" . nil))
+              ("M-a" . nil)
+              ("M-n" . nil)
+              ("M-p" . nil))
   ;; Optional, but recommended.
   ;;
   ;; You can manually enable Combobulate with `M-x
