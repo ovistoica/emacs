@@ -67,13 +67,13 @@
 (defun causal-run-cow ()
   "Start just causal frontend."
   (interactive)
-  (causal-run "cow"))
+  (causal-run "cow --verbose"))
 
 ;;;###autoload
 (defun causal-run-backend ()
   "Start just causal frontend."
   (interactive)
-  (causal-run "backend"))
+  (causal-run "backend --verbose"))
 
 ;;;###autoload
 (defun causal-run-all ()
