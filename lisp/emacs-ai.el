@@ -102,7 +102,13 @@ Returns a list of cons cells (name . directive) for each .md file."
          ("C-c RET" . gptel-send)
          ("C-c C-<enter>" . gptel-menu)
          ("C-c C-a" . emacs-ai-toggle-ai-pannel))
+
   :config
+  (add-hook 'gptel-mode-hook
+            (lambda ()
+              (when (and (derived-mode-p 'org-mode)
+                         (bound-and-true-p org-indent-mode))
+                (org-indent-mode -1))))
   (setq gptel-api-key os-secret-openai-key)
   (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
   (gptel-make-anthropic "Claude"

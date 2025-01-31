@@ -354,7 +354,9 @@ The DWIM behaviour of this command is as follows:
   (when (version<= "27.1" emacs-version)
     (setq bidi-inhibit-bpa t))
   (global-visual-line-mode t)
+
   (custom-set-variables
+
    '(safe-local-variable-values
      '((eval progn
              (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
