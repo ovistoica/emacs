@@ -1401,6 +1401,7 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package clojure-mode
   :ensure t
+  :defines put-clojure-indent
   :hook ((clojure-mode
           clojurec-mode
           clojurescript-mode)
@@ -1420,7 +1421,11 @@ created with `json-hs-extra-create-overlays'."
   (defun clojure-mode-setup ()
     "Setup Clojure buffer."
     (common-lisp-modes-mode 1)
-    (clojure-set-compile-command)))
+    (clojure-set-compile-command))
+
+  ;; Custom indentation for Midje's fact and facts
+  (put-clojure-indent 'fact 1)
+  (put-clojure-indent 'facts 1))
 
 (use-package cider
   :ensure t
@@ -1447,6 +1452,7 @@ created with `json-hs-extra-create-overlays'."
 
   :config
   (setq cider-show-eval-spinner t
+        cider-dynamic-indentation nil
         cider-allow-jack-in-without-project t
         cider-preferred-build-tool 'clojure-cli
         ;; ~make sure we can always debug nrepl issues~
