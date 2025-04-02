@@ -4,7 +4,7 @@
 ;;; Author: Ovidiu Stoica
 ;;; Commentary:
 ;;; The entire configuration is kept here.
-;;; Currently written for Emacs 29.
+;;; Currently written for Emacs 30.
 ;;; Code:
 
 ;; * PACKAGE MANAGEMENT
@@ -26,13 +26,6 @@
 (package-initialize)
 
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-
-;; ** USE-PACKAGE
-(when (< emacs-major-version 29)
-  (unless (package-installed-p 'use-package)
-    (unless package-archive-contents
-      (package-refresh-contents))
-    (package-install 'use-package)))
 
 ;; Don't show byte compilation warnings when installing packages
 (add-to-list 'display-buffer-alist
@@ -71,6 +64,9 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
+
+(setq config-dir (expand-file-name "lisp" user-emacs-directory))
+(add-to-list 'load-path config-dir)
 
 ;; * PRIVATE CONFIG
 
@@ -2033,6 +2029,9 @@ created with `json-hs-extra-create-overlays'."
   :delight yas-minor-mode
   :init (yas-global-mode 1))
 
+;; * WEB
+(require 'setup-web)
+
 ;; * PROJECT
 
 (use-package project
@@ -2442,27 +2441,6 @@ dependency artifact based on the project's dependencies."
      (fernflower . ,fernflower-path))))
 
 
-;; * NODE JS
-(use-package nodejs-repl
-  :ensure nodejs-repl
-  :commands
-  nodejs-repl)
-
-(use-package nvm
-  :ensure nvm
-  :commands
-  nvm-use
-  :functions
-  nvm--installed-versions
-  :custom
-  ;; this bit depends on pulling this in from exec-shell,
-  ;; which is done in init.el.
-  (nvm-dir (getenv "NVM_DIR")))
-
-
-(use-package js-pkg-mode
-  :straight (:type git :local-repo "~/workspace/js-pkg-mode")
-  :init (js-pkg-global-mode 1))
 
 (use-package vterm
   :ensure vterm

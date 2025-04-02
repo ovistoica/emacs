@@ -345,15 +345,3 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
 
 (provide 'emacs-ai)
 ;;; emacs-ai.el ends here
-
-;; This is not a literate config tangled from an Org-mode document! So I include
-;; some file-specific settings to make it easier to parse. Specifically, the
-;; outline that you see in this document is represented in the Lisp files as
-;; Org-style collapsible outline headings. See [[*OUTLINE MODE][Outline Mode]].
-
-;; Local Variables:
-;; outline-regexp: ";; \\*+"
-;; page-delimiter: ";; \\**"
-;; eval:(outline-minor-mode 1)
-;; eval:(outline-hide-sublevels 5)
-;; End:
