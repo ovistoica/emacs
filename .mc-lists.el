@@ -33,8 +33,10 @@
         puni-raise
         puni-splice
         puni-wrap-curly
+        puni-wrap-round
         region-bindings-doublequote
         undo-only
+        whole-line-or-region-kill-ring-save
         ))
 
 (setq mc/cmds-to-run-once

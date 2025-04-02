@@ -111,17 +111,18 @@ Returns a list of cons cells (name . directive) for each .md file."
                 (org-indent-mode -1))))
   (setq gptel-api-key os-secret-openai-key)
   (gptel-make-gemini "Gemini" :key os-secret-google-gemini-api-key :stream t)
-  (gptel-make-anthropic "Claude"
-    :stream t
-    :key os-secret-anthropic-key)
 
-  (setq gptel-backend (gptel-make-openai "DeepSeek"         ;Any name you want
-                        :host "api.deepseek.com"
-                        :endpoint "/chat/completions"
-                        :stream t
-                        :key os-secret-deepseek-api-key
-                        :models '(deepseek-chat deepseek-reasoner))
-        gptel-model 'deepseek-chat
+  (gptel-make-openai "DeepSeek"         ;Any name you want
+    :host "api.deepseek.com"
+    :endpoint "/chat/completions"
+    :stream t
+    :key os-secret-deepseek-api-key
+    :models '(deepseek-chat deepseek-reasoner))
+
+  (setq gptel-backend  (gptel-make-anthropic "Claude"
+                         :stream t
+                         :key os-secret-anthropic-key)
+        gptel-model 'claude-3-7-sonnet-20250219
         gptel-temperature 0.7
         ;; Configure the chat UI
         gptel-window-select t           ; Select the window after creation
@@ -247,6 +248,7 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
    :category "project")
   )
 
+
 (use-package ai-project-agent
   :after (gptel flycheck)
   :bind (("C-c c a" . ai-project-agent-toggle-panel)
@@ -320,24 +322,26 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
   :defines minuet-active-mode-map
   :after (dash plz)
   :straight (:host github :repo "milanglacier/minuet-ai.el" :type git)
-
-  :config
-  (setq minuet-provider 'openai-fim-compatible)
-  ;;:hook
-  ;;(prog-mode . minuet-auto-suggestion-mode)
+  ;; :hook
+  ;; (prog-mode . minuet-auto-suggestion-mode)
   :init
-  (setenv "DEEPSEEK_API_KEY" os-secret-deepseek-api-key )
+  (setenv "ANTHROPIC_API_KEY" os-secret-anthropic-key)
+  (setenv "GEMINI_API_KEY" os-secret-google-gemini-api-key)
+  ;; :config
+  ;; (setq minuet-provider 'claude)
+
   :bind
   (("C-<tab>" . #'minuet-complete-with-minibuffer)
    :map minuet-active-mode-map
    ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
    ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
    ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-   ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+   ("<tab>" . #'minuet-accept-suggestion) ;; accept whole completion
    ;; Accept the first line of completion, or N lines with a numeric-prefix:
    ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
    ("M-a" . #'minuet-accept-suggestion-line)
    ("M-e" . #'minuet-dismiss-suggestion)))
+
 
 (provide 'emacs-ai)
 ;;; emacs-ai.el ends here

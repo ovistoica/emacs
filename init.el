@@ -636,8 +636,7 @@ The DWIM behaviour of this command is as follows:
   :bind (("M-z" . zap-up-to-char)
          ("M-S-z" . zap-to-char)
          ("C-x k" . kill-current-buffer)
-         ("C-h C-f" . describe-face)
-         ([remap undo] . undo-only))
+         ("C-h C-f" . describe-face))
   :hook ((before-save . delete-trailing-whitespace)
          (overwrite-mode . overwrite-mode-set-cursor-shape)
          (after-init . column-number-mode)
@@ -1252,6 +1251,10 @@ created with `json-hs-extra-create-overlays'."
 (use-package org-capture
   :bind ( :map mode-specific-map
           ("o c" . org-capture)))
+
+(use-package dslide
+  :straight '(dslide :type git :host github
+                     :repo "positron-solutions/dslide"))
 
 
 (use-package ol
@@ -2008,6 +2011,23 @@ created with `json-hs-extra-create-overlays'."
   (vundo-roll-back-on-quit nil)
   (vundo--window-max-height 10))
 
+;; Predictable undo/redo
+(use-package undo-fu
+  :ensure t
+  :config
+  ;; Source: https://github.com/magnars/emacsd-reboot/blob/main/packages/setup-undo-fu.el
+  (setq undo-limit 400000               ; 400kb (default is 160kb)
+        undo-strong-limit 3000000       ; 3mb   (default is 240kb)
+        undo-outer-limit 48000000)      ; 48mb  (default is 24mb)
+
+  :bind (("M-z" . undo-fu-only-undo)
+         ("M-Z" . undo-fu-only-redo)
+         ("C-M-z" . undo-fu-only-redo-all)))
+
+(use-package goto-chg
+  :ensure t
+  :bind ("M-`" . goto-last-change))
+
 (use-package yasnippet
   :ensure t
   :delight yas-minor-mode
@@ -2613,7 +2633,6 @@ dependency artifact based on the project's dependencies."
 ;; * MONITORING
 
 (use-package wakatime-mode
-  :disabled t
   :ensure t
   :diminish ""
   :custom (setq wakatime-api-key os-secret-wakatime-api-key
