@@ -34,6 +34,7 @@
         puni-splice
         puni-wrap-curly
         puni-wrap-round
+        region-bindings-disable
         region-bindings-doublequote
         undo-only
         whole-line-or-region-kill-ring-save

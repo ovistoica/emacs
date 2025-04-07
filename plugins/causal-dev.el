@@ -13,10 +13,21 @@
 
 (require 'cl-lib)
 
+(defmacro with-location (directory &rest body)
+  "Execute BODY with DIRECTORY as the default directory.
+DIRECTORY should be a string specifying the path to the directory.
+The original `default-directory' is restored after BODY executes."
+  (declare (indent 1) (debug t))
+  `(let ((default-directory (expand-file-name ,directory)))
+     ,@body))
+
+
+
 (defgroup causal nil
   "Run Causal commands."
   :group 'tools
   :prefix "causal-")
+
 
 (defcustom causal-buffer-names
   '(("frontend" . "causal frontend")
@@ -52,28 +63,49 @@
       (kill-process (get-buffer-process buf))
       (message "Killed process in buffer: %s" (buffer-name buf)))))
 
-(defun causal-run (name)
-  "Run NAME process."
-  (let ((buf (causal--create-process-buffer name)))
-    (async-shell-command (format "causal %s" name) buf)))
+;;;###autoload
+(defun causal-run (cmd)
+  "Execute a causal cli CMD."
+  (interactive "sEnter causal command to run: ")
+  (let ((compilation-buffer-name-function (lambda (_mode)
+                                            (format "%s" cmd))))
+    (compile (format "%s" cmd))))
+
+(defun causal-run-frontend-sandbox ()
+  (interactive)
+  "Run causal in sandbox mode"
+  (causal-run "causal frontend --environment sandbox-01"))
 
 ;;;###autoload
 (defun causal-run-frontend ()
   "Start just causal frontend."
   (interactive)
-  (causal-run "frontend"))
+  (with-location "~/workspace/causal/workspace/"
+    (causal-run "SKIP_YARN=true causal frontend")))
+
+(defun causal-install ()
+  "Install causal yarn deps"
+  (interactive)
+  (with-location "~/workspace/causal/workspace/"
+    (causal-run "yarn")))
+;;;###autoload
+(defun causal-run-frontend-federated ()
+  "Run frontend in federated mode."
+  (interactive)
+  (with-location "~/workspace/causal/workspace/"
+    (causal-run "MODULE_FEDERATION=true RUNNING_IN_LUCANET=true PORT=4000 yarn workspace @causal/frontend dev")))
 
 ;;;###autoload
 (defun causal-run-cow ()
   "Start just causal frontend."
   (interactive)
-  (causal-run "cow --verbose"))
+  (causal-run "causal cow --verbose"))
 
 ;;;###autoload
 (defun causal-run-backend ()
   "Start just causal frontend."
   (interactive)
-  (causal-run "backend --verbose"))
+  (causal-run "causal backend --verbose"))
 
 ;;;###autoload
 (defun causal-run-all ()
@@ -84,3 +116,4 @@
   (causal-run-frontend))
 
 (provide 'causal-dev)
+;;; causal-dev.el ends here
