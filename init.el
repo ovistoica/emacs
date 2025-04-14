@@ -1215,6 +1215,8 @@ created with `json-hs-extra-create-overlays'."
                      "~/Dropbox/todo/todo.org"))
   (setq org-auto-align-tags nil)
   (setq org-tags-column 0)
+  (add-to-list 'org-src-lang-modes '("typescript" . typescript-ts))
+  (add-to-list 'org-src-lang-modes '("ts" . typescript-ts))
   (setq org-special-ctrl-a/e t)
   (setq org-insert-heading-respect-content t)
 

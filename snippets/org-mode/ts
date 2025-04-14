@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: ts
+# key: ts_
+# --
+#+begin_src ts
+$0
+#+end_src
