@@ -23,7 +23,7 @@
 
 ;; ** ELPA
 (require 'package)
-(package-initialize)
+
 
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 
@@ -2024,6 +2024,7 @@ created with `json-hs-extra-create-overlays'."
 
 (use-package goto-chg
   :ensure t
+  :disabled t
   :bind ("M-`" . goto-last-change))
 
 (use-package yasnippet
