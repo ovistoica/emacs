@@ -1234,6 +1234,10 @@ created with `json-hs-extra-create-overlays'."
   (unless (version<= org-version "9.1.9")
     (add-to-list 'org-modules 'org-tempo)))
 
+(use-package ox-gfm
+  :after org
+  :ensure t)
+
 (use-package org-modern
   :disabled t
   :init (global-org-modern-mode)
