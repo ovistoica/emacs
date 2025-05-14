@@ -34,6 +34,7 @@
   :ensure nil
   :hook (after-init . water-reminder-mode))
 
+;; TODO Document on this further, possibly disable LSP on very long files
 (use-package so-long
   :init (global-so-long-mode 1))
 
