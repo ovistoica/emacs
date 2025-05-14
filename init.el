@@ -290,8 +290,7 @@ created with `json-hs-extra-create-overlays'."
 
 
 ;; TODO Document on this further, possibly disable LSP on very long files
-(use-package so-long
-  :init (global-so-long-mode 1))
+
 
 
 ;; * COMPLETION
@@ -460,196 +459,32 @@ created with `json-hs-extra-create-overlays'."
 
 ;; * NERD ICONS
 
-(use-package nerd-icons
-  :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el"))
 
-(use-package nerd-icons-dired
-  :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired")
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
-(use-package nerd-icons-completion
-  :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
-  :after marginalia
-  :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-
-(use-package nerd-icons-corfu
-  :straight '(nerd-icons-corfu :type git :host github :repo "LuigiPiucco/nerd-icons-corfu")
-  :after corfu
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 
 
 ;; * ORG
-(require 'setup-org)
-
-;; * WRITING
-
-(use-package writegood-mode
-  :ensure t
-  :hook ((markdown-mode nroff-mode org-mode
-                        mail-mode
-                        git-commit-mode)
-         . writegood-mode))
-
-;; * LANGUAGES
-
-(use-package common-lisp-modes
-  :straight '(common-lisp-modes :type git :host gitlab :repo  "andreyorst/common-lisp-modes.el"))
-
-(use-package python-ts-mode
-  :preface (defun os/setup-python-environment ()
-             "Custom configuration for Python mode."
-             (yas-minor-mode 1)
-             ;; Set the `python-shell-interpreter' to the python in PATH.
-             ;; At this moment `envrc' should succesfully configure environment.
-             (setq-local python-shell-interpreter (executable-find "python")))
-  :hook (python-ts-mode . os/setup-python-environment))
-
-(use-package markdown-mode
-  :ensure t
-  :mode (("README\\.md\\'" . gfm-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :bind ( :map markdown-mode-map
-          ("M-Q" . split-pararagraph-into-lines))
-  :custom
-  (markdown-fontify-code-blocks-natively t)
-  (markdown-command "pandoc")
-  (markdown-hr-display-char nil)
-  (markdown-list-item-bullets '("-")))
-
-(use-package elisp-mode
-  :hook ((emacs-lisp-mode . eldoc-mode)
-         (emacs-lisp-mode . common-lisp-modes-mode)))
-
-(use-package csv-mode
-  :ensure t
-  :hook ((csv-mode . csv-guess-set-separator))
-  :custom
-  (csv-align-max-width most-positive-fixnum))
-
-(use-package cc-mode
-  :hook (c-mode-common . cc-mode-setup)
-  :custom
-  (c-basic-offset 4)
-  (c-default-style "linux")
-  :config
-  (defun cc-mode-setup ()
-    (c-set-offset 'case-label '+)
-    (setq-local comment-start "//"
-                comment-end ""
-                tab-width 4)))
-
-(use-package yaml-mode
-  :ensure t
-  :defer t
-  :custom
-  (yaml-indent-offset 4))
-
-(use-package docker
-  :ensure t)
-
-(use-package dockerfile-mode
-  :ensure t)
 
 
-(use-package csv-mode
-  :ensure t
-  :hook ((csv-mode . csv-guess-set-separator))
-  :custom
-  (csv-align-max-width most-positive-fixnum))
 
-
-;; ** CLOJURE
-
-(require 'setup-clojure)
-
-(use-package lisp-mode
-  :hook ((lisp-mode lisp-data-mode) . common-lisp-modes-mode))
-
-(use-package sql-indent
-  :defer t
-  :ensure t)
-
-(use-package sqlite-mode-extras
-  :straight '(sqlite-mode-extras :type git :host github :repo "xenodium/sqlite-mode-extras")
-  :defines sqlite-mode-map
-  :hook ((sqlite-mode . sqlite-extras-minor-mode))
-  :bind (:map
-         sqlite-mode-map
-         ("n" . next-line)
-         ("p" . previous-line)
-         ("<backtab>" . sqlite-mode-extras-backtab-dwim)
-         ("<tab>" . sqlite-mode-extras-tab-dwim)
-         ("RET" . sqlite-mode-extras-ret-dwim)))
-
-
-(use-package groovy-mode
-  :straight '(groovy-mode :type git :host github :repo "Groovy-Emacs-Modes/groovy-emacs-modes")
-  :mode "\\.gradle\\'"                ; if you want this mode to be auto-enabled
-  )
-
-
-(use-package rainbow-delimiters
-  :ensure t
-  :diminish
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package highlight-indent-guides
-  :diminish ""
-  :straight '(highlight-indent-guides :type git :host github :repo "DarthFennec/highlight-indent-guides")
-  :defines
-  highlight-indent-guides-method
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :config (setq highlight-indent-guides-method 'character))
-
-
-(use-package hl-todo
-  :straight '(hl-todo :type git :host github :repo "tarsius/hl-todo")
-  :init (global-hl-todo-mode))
-
-(use-package envrc
-  :straight '(envrc :type git :host github :repo "purcell/envrc")
-  :init (envrc-global-mode))
 
 
 (require 'setup-treesitter)
 (require 'setup-lsp)
+(require 'setup-org)
 (require 'setup-navigation-editing)
 (require 'setup-web)
 (require 'setup-project)
+(require 'setup-clojure)
 (require 'setup-notetaking)
 (require 'setup-shell)
 (require 'setup-git)
-
-(use-package helpful
-  :ensure helpful
-  :bind
-  ("C-c h" . helpful-at-point)
-  ("C-h f" . helpful-callable)
-  ("C-h k" . helpful-key)
-  ("C-h v" . helpful-variable)
-  ("C-h x" . helpful-command))
-
-;; * GIT
+(require 'setup-languages)
+(require 'setup-icons)
+(require 'setup-ai)
 
 
 
-
-
-;; * NOTE TAKING
-
-
-
-(use-package elfeed
-  :straight '(elfeed :type git :host github :repo "skeeto/elfeed")
-  :config
-  (setq elfeed-feeds
-        '(("https://www.daily.co/blog/rss/" blog ai voice-ai)
-          ("https://jackrusher.com/feed.xml" blog clojure))))
 
 
 ;; * AI STUFF
@@ -663,28 +498,19 @@ created with `json-hs-extra-create-overlays'."
 
 ;; * MONITORING
 
-(use-package wakatime-mode
-  :ensure t
-  :diminish ""
-  :custom (setq wakatime-api-key os-secret-wakatime-api-key
-                wakatime-cli-path "~/.wakatime/wakatime-cli")
-  :init (global-wakatime-mode))
 
-(use-package keycast
-  :ensure t)
+
+
 
 
 ;; * THEMING
 (require 'setup-theme)
 
 ;; * PACKAGE LINT
-(use-package package-lint
-  :straight '(package-lint :type git :host github :repo "purcell/package-lint"))
+
 
 ;; * LIFE HACKS
-(use-package water-reminder
-  :ensure nil
-  :hook (after-init . water-reminder-mode))
+
 
 (provide 'init)
 ;;; init.el ends here

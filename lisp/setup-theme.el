@@ -21,6 +21,18 @@
       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans")))
   (provide 'font))
 
+(use-package hl-todo
+  :straight '(hl-todo :type git :host github :repo "tarsius/hl-todo")
+  :init (global-hl-todo-mode))
+
+(use-package highlight-indent-guides
+  :diminish ""
+  :straight '(highlight-indent-guides :type git :host github :repo "DarthFennec/highlight-indent-guides")
+  :defines
+  highlight-indent-guides-method
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :config (setq highlight-indent-guides-method 'character))
+
 (use-package pulsar
   :ensure t
   :config

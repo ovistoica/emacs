@@ -119,5 +119,13 @@
                    :kill-buffer t
                    :jump-to-captured t))))
 
+
+(use-package writegood-mode
+  :ensure t
+  :hook ((markdown-mode nroff-mode org-mode
+                        mail-mode
+                        git-commit-mode)
+         . writegood-mode))
+
 (provide 'setup-notetaking)
 ;;; setup-notetaking.el ends here

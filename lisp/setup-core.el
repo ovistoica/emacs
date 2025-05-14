@@ -438,5 +438,14 @@ are defining or executing a macro."
   (unless (server-running-p)
     (server-start)))
 
+(use-package helpful
+  :ensure helpful
+  :bind
+  ("C-c h" . helpful-at-point)
+  ("C-h f" . helpful-callable)
+  ("C-h k" . helpful-key)
+  ("C-h v" . helpful-variable)
+  ("C-h x" . helpful-command))
+
 (provide 'setup-core)
 ;;; setup-core.el ends here
