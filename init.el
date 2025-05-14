@@ -98,22 +98,9 @@
   (add-to-list 'default-frame-alist '(ns-appearance . dark)))
 
 
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode)
-  :bind (:map flycheck-mode-map
-              ("M-n" . flycheck-next-error)
-              ("M-p" . flycheck-previous-error)))
-
-(use-package flyspell
-  :ensure t
-  :when (or (executable-find "ispell")
-            (executable-find "aspell")
-            (executable-find "hunspell"))
-  :hook ((org-mode git-commit-mode markdown-mode) . flyspell-mode))
-
 (require 'setup-functions)
 (require 'setup-core)
+(require 'setup-lint)
 (require 'setup-treesitter)
 (require 'setup-completions)
 (require 'setup-lsp)
@@ -132,12 +119,6 @@
 (require 'setup-popper)
 (require 'setup-theme)
 (require 'setup-formatting)
-
-
-
-(load (expand-file-name "plugins/ai-project-agent.el" user-emacs-directory))
-
-
 
 
 (provide 'init)
