@@ -1,19 +1,10 @@
-;;; emacs-ai.el --- Minor mode for interacting with AI agents.
+;;; setup-ai.el --- Configuration for AI development
 
 ;; Version: 1.0.0
 ;; Author: Ovi Stoica <ovidiu.stoica1094@gmail.com>
-;; Url: https://github.com/ovistoica/emacs-ai
 ;; Keywords: convenience, project, ai, emacs
 
-;; This file is NOT part of GNU Emacs.
-
 ;;; Commentary:
-
-;; This package allows you to easily work with AI agents.  It tries to emulate
-;; many of the useful functionalities from modern editors like Cursor or Windsurf.
-
-;; It provides an AI chat window and helpful commands around it
-
 
 ;;; Code:
 
@@ -343,5 +334,5 @@ Explain your reasoning.  if you don’t know, say you don’t know.  Be willing 
    ("M-e" . #'minuet-dismiss-suggestion)))
 
 
-(provide 'emacs-ai)
-;;; emacs-ai.el ends here
+(provide 'setup-ai)
+;;; setup-ai.el ends here

@@ -5,6 +5,22 @@
 ;;; Code:
 (defvar os/load-theme-family 'modus)
 
+(use-package font
+  :no-require
+  :hook (after-init . setup-fonts)
+  :preface
+  (defun font-installed-p (font-name)
+    "Check if a font with FONT-NAME is available."
+    (find-font (font-spec :name font-name)))
+  (defun setup-fonts ()
+    (cond ((font-installed-p "JetBrainsMono Nerd Font Mono")
+           (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font Mono"))
+          ((font-installed-p "Source Code Pro")
+           (set-face-attribute 'default nil :font "Source Code Pro")))
+    (when (font-installed-p "DejaVu Sans")
+      (set-face-attribute 'variable-pitch nil :font "DejaVu Sans")))
+  (provide 'font))
+
 (use-package pulsar
   :ensure t
   :config
@@ -25,7 +41,7 @@
   ;; preference.  Remember to read the manual on the matter.  Evaluate:
   ;;
   ;; (info "(elisp) Key Binding Conventions")
-  (("C-x l" . pulsar-pulse-line)       ; override `count-lines-page'
+  (("C-x l" . pulsar-pulse-line)        ; override `count-lines-page'
    ("C-x L" . pulsar-highlight-dwim))) ; or use `pulsar-highlight-line'
 
 ;;;; Lin

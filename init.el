@@ -117,7 +117,7 @@
   (push (expand-file-name "plugins/" user-emacs-directory) load-path)
   (push (expand-file-name "lisp/" user-emacs-directory)  load-path))
 
-;; ** MAC STUFF
+;; ** MAC Stuff
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
   (setq mac-option-modifier nil)
@@ -400,22 +400,6 @@
                   mode-line-end-spaces)) ; Spaces at end
 
   (provide 'mode-line))
-
-(use-package font
-  :no-require
-  :hook (after-init . setup-fonts)
-  :preface
-  (defun font-installed-p (font-name)
-    "Check if a font with FONT-NAME is available."
-    (find-font (font-spec :name font-name)))
-  (defun setup-fonts ()
-    (cond ((font-installed-p "JetBrainsMono Nerd Font Mono")
-           (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font Mono"))
-          ((font-installed-p "Source Code Pro")
-           (set-face-attribute 'default nil :font "Source Code Pro")))
-    (when (font-installed-p "DejaVu Sans")
-      (set-face-attribute 'variable-pitch nil :font "DejaVu Sans")))
-  (provide 'font))
 
 (use-package cus-edit
   :custom
@@ -927,142 +911,7 @@ created with `json-hs-extra-create-overlays'."
 
 
 ;; * ORG
-
-(use-package org
-  :preface
-
-
-  :hook ((org-babel-after-execute . org-redisplay-inline-images)
-         (org-mode . org-indent-mode))
-  :bind (("C-c A" . org-agenda)
-         ("C-c C-l" . org-store-link)
-         :map org-mode-map
-         ("C-c l" . org-store-link))
-  :custom
-  ;; Your existing custom settings remain unchanged
-  (org-M-RET-may-split-line '((default . nil)))
-  (org-support-shift-select t)
-  (org-highlight-latex-and-related '(latex))
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-src-fontify-natively t)
-  (org-confirm-babel-evaluate nil)
-  (org-log-done 'time)
-  (org-log-into-drawer t)
-  (org-image-actual-width nil)
-  (org-src-preserve-indentation t)
-  (org-agenda-files (list
-                     "~/org/todo_agenda.org"
-                     "~/workspace/voice-fn/TODO.org"
-                     "~/Dropbox/todo/todo.org"))
-  (setq org-auto-align-tags nil)
-  (setq org-tags-column 0)
-  (add-to-list 'org-src-lang-modes '("typescript" . typescript-ts))
-  (add-to-list 'org-src-lang-modes '("ts" . typescript-ts))
-  (setq org-special-ctrl-a/e t)
-  (setq org-insert-heading-respect-content t)
-
-  ;; Org styling, hide markup etc
-  (setq org-hide-emphasis-markers t)
-  (setq org-pretty-entities t)
-  (setq org-agenda-tags-column 0)
-  ;; Ellipsis styling
-  (setq org-ellipsis "...")
-  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
-  :config
-  (defun org-babel-edit-prep:emacs-lisp (_)
-    "Setup Emacs Lisp buffer for Org Babel."
-    (setq lexical-binding t))
-  (unless (version<= org-version "9.1.9")
-    (add-to-list 'org-modules 'org-tempo)))
-
-(use-package ox-gfm
-  :after org
-  :ensure t)
-
-(use-package org-modern
-  :disabled t
-  :init (global-org-modern-mode)
-  :config
-  (setq org-modern-star 'replace)
-  (setq org-modern-timestamp nil))
-
-(use-package org-pomodoro
-  :ensure t)
-
-(use-package ob-shell :after org)
-
-(use-package org-capture
-  :bind ( :map mode-specific-map
-          ("o c" . org-capture)))
-
-(use-package dslide
-  :straight '(dslide :type git :host github
-                     :repo "positron-solutions/dslide"))
-
-
-(use-package ol
-  :after org-capture
-  :functions (org-link-set-parameters)
-  :preface
-  (defun blog-follow-html-link (path arg)
-    (funcall browse-url-browser-function path arg))
-  (defun blog-export-hmtl-link (path description _backend _properties)
-    "Export link directly to HTML."
-    (format "<a href=\"%s\">%s</a>" path (or description path)))
-  (defun blog-create-html-link (&optional _)
-    "Create a file link using completion."
-    (let ((link (read-string "Link: ")))
-      (concat "blog-html:" link)))
-  :config
-  (org-link-set-parameters
-   "org"
-   :export #'blog-export-static-org-link
-   :complete #'blog-create-static-org-link)
-  (org-link-set-parameters
-   "blog-html"
-   :follow #'blog-follow-html-link
-   :export #'blog-export-hmtl-link
-   :complete #'blog-create-html-link))
-
-(use-package ox-hugo
-  :ensure t
-  :after ox
-  :preface
-  (declare-function org-export-data "ext:ox")
-  (declare-function org-export-get-node-property "ext:ox")
-  (define-advice org-hugo-heading (:around (fn heading contents info) patch)
-    (if (and (org-export-get-node-property :BLOG-COLLAPSABLE heading) (not (string-empty-p contents)))
-        (let ((title (org-export-data (org-element-property :title heading) info)))
-          (concat "<details class=\"foldlist\"><summary>" title
-                  "</summary><div class=\"foldlistdata\">\n\n"
-                  contents
-                  "</div></details>"))
-      (funcall fn heading contents info))))
-
-(use-package ox-latex
-  :after ox)
-
-(use-package epresent
-  :ensure t
-  :custom
-  (epresent-text-scale 200)
-  (epresent-format-latex-scale 2)
-  :hook
-  (epresent-start-presentation . epresent-setup)
-  :preface
-  (defun epresent-setup ()
-    (interactive)
-    (visual-line-mode 1)
-    (flyspell-mode -1)
-    (set-window-fringes (selected-window) 600 600)
-    (set-face-attribute
-     'org-block (selected-frame)
-     :background (modus-themes-get-color-value 'bg-dim))
-    (set-face-attribute
-     'header-line (selected-frame)
-     :height 1200
-     :background 'unspecified)
-    (setq-local header-line-format " ")))
+(require 'setup-org)
 
 ;; * WRITING
 
@@ -1194,310 +1043,15 @@ created with `json-hs-extra-create-overlays'."
   :straight '(envrc :type git :host github :repo "purcell/envrc")
   :init (envrc-global-mode))
 
-;; * Treesitter
+
 (require 'setup-treesitter)
-
-;; * LSP
 (require 'setup-lsp)
-;; * Navigation & Editing
-
-(use-package easy-kill
-  :disabled t
-  :ensure t
-  :bind (([remap mark-sexp] .'mark-sexp)))
-
-(use-package whole-line-or-region
-  :ensure t
-  :diminish ""
-  :init
-  (whole-line-or-region-global-mode 1))
-
-(use-package common-lisp-modes
-  :delight common-lisp-modes-mode
-  :preface
-  (defun indent-sexp-or-fill ()
-    "Indent an s-expression or fill string/comment."
-    (interactive)
-    (let ((ppss (syntax-ppss)))
-      (if (or (nth 3 ppss)
-              (nth 4 ppss))
-          (fill-paragraph)
-        (save-excursion
-          (mark-sexp)
-          (indent-region (point) (mark))))))
-  :bind ( :map common-lisp-modes-mode-map
-          ("M-q" . indent-sexp-or-fill)))
-
-(use-package region-bindings
-  :straight '(region-bindings :type git :host gitlab :repo "andreyorst/region-bindings.el")
-  :commands (region-bindings-mode)
-  :preface
-  (defun region-bindings-off ()
-    (region-bindings-mode -1))
-  :hook ((after-init . global-region-bindings-mode)
-         ((elfeed-search-mode magit-mode mu4e-headers-mode)
-          . region-bindings-off)))
-
-(use-package puni
-  :ensure t
-  :hook (((common-lisp-modes-mode nxml-mode json-ts-mode prog-mode org-mode) . puni-mode)
-         (puni-mode . electric-pair-local-mode))
-  :bind ( :map region-bindings-mode-map
-          ("(" . puni-wrap-round)
-          ("[" . puni-wrap-square)
-          ("{" . puni-wrap-curly)
-          ("<" . puni-wrap-angle)
-          ;; paredit-like keys
-          :map puni-mode-map
-          ("C-M-f" . puni-forward-sexp-or-up-list)
-          ("C-M-b" . puni-backward-sexp-or-up-list)
-          ("C-M-t" . puni-transpose)
-          ;; slurping & barfing
-          ("C-<left>" . puni-barf-forward)
-          ("C-}" . puni-barf-forward)
-          ("C-<right>" . puni-slurp-forward)
-          ("C-)" . puni-slurp-forward)
-          ("C-(" . puni-slurp-backward)
-          ("C-M-<left>" . puni-slurp-backward)
-          ("C-{" . puni-barf-backward)
-          ("C-M-<right>" . puni-barf-backward)
-          ;; depth chaning
-          ("M-r" . puni-raise)
-          ("M-<up>" . puni-splice-killing-backward)
-          ("M-<down>" . puni-splice-killing-forward)
-          ("M-(" . puni-wrap-round)
-          ("M-{" . puni-wrap-curly)
-          ("M-[" . puni-wrap-square)
-          ("M-?" . puni-convolute)
-          ("M-R" . puni-splice)
-          ("M-S" . puni-split)))
-
-(use-package isearch
-  :bind ( :map isearch-mode-map
-          ("<backspace>" . isearch-del-char)
-          ("<left>" . isearch-edit-string)
-          ("<right>" . isearch-edit-string)
-          :map minibuffer-local-isearch-map
-          ("<left>" . backward-char)
-          ("<right>" . forward-char))
-  :custom
-  (isearch-lazy-highlight t))
-
-(use-package phi-search
-  :ensure t
-  :defer t)
-
-(use-package avy
-  :ensure t
-  :bind
-  ( :map avy-map
-    ("M-w l" . avy-kill-ring-save-whole-line)
-    ("M-k l" . avy-kill-whole-line)
-    ("M-w r" . avy-kill-ring-save-region)
-    ("M-k r" . avy-kill-region)
-    ("c" . avy-goto-char-timer)
-    ("l" . avy-goto-line)
-    ("n" . avy-next)
-    ("p" . avy-prev))
-  :preface
-  (defalias 'avy-map-prefix (make-sparse-keymap))
-  (defvar avy-map (symbol-function 'avy-map-prefix)
-    "Keymap for characters following \\`M-a'.")
-  (define-key global-map (kbd "M-a") 'avy-map-prefix))
-
-
-(use-package expand-region
-  :ensure t
-  :bind ("C-=" . er/expand-region))
-
-(bind-key "M-o"         #'other-window)
-(bind-key "M-i"         #'consult-imenu)
-
-(use-package isayt
-  :straight '(isayt :type git :host gitlab :repo "andreyorst/isayt.el")
-  :delight isayt-mode
-  :hook (common-lisp-modes-mode . isayt-mode))
-
-(use-package multiple-cursors
-  :ensure t
-  :bind
-  (("S-<mouse-1>" . mc/add-cursor-on-click)
-   ("C->" . mc/mark-next-like-this)
-   ("C-<" . mc/mark-previous-like-this)
-   :map region-bindings-mode-map
-   ("n" . mc/mark-next-symbol-like-this)
-   ("N" . mc/mark-next-like-this)
-   ("p" . mc/mark-previous-symbol-like-this)
-   ("P" . mc/mark-previous-like-this)
-   ("a" . mc/mark-all-symbols-like-this)
-   ("A" . mc/mark-all-like-this)
-   ("s" . mc/mark-all-in-region-regexp)
-   ("l" . mc/edit-ends-of-lines)))
-
-(use-package multiple-cursors-core
-  :bind
-  (( :map mc/keymap
-     ("<return>" . nil)
-     ("C-&" . mc/vertical-align-with-space)
-     ("C-#" . mc/insert-numbers))))
-
-(use-package separedit
-  :ensure t
-  :hook (separedit-buffer-creation . separedit-header-line-setup)
-  :bind ( ("C-c '" . separedit)
-          :map separedit-mode-map
-          ("C-c C-c" . separedit-commit)
-          :map edit-indirect-mode-map
-          ("C-c '" . separedit))
-  :custom
-  (separedit-default-mode 'markdown-mode)
-  :config
-  (nconc (assoc '(";+") separedit-comment-delimiter-alist)
-         '(clojure-mode clojurec-mode clojure-script-mode))
-  (defun separedit-header-line-setup ()
-    (setq-local
-     header-line-format
-     (substitute-command-keys
-      "Edit, then exit with `\\[separedit-commit]' or abort with \\<edit-indirect-mode-map>`\\[edit-indirect-abort]'"))))
-
-(use-package vundo
-  :ensure t
-  :bind ( :map mode-specific-map
-          ("u" . vundo))
-  :custom
-  (vundo-roll-back-on-quit nil)
-  (vundo--window-max-height 10))
-
-;; Predictable undo/redo
-(use-package undo-fu
-  :ensure t
-  :config
-  ;; Source: https://github.com/magnars/emacsd-reboot/blob/main/packages/setup-undo-fu.el
-  (setq undo-limit 400000               ; 400kb (default is 160kb)
-        undo-strong-limit 3000000       ; 3mb   (default is 240kb)
-        undo-outer-limit 48000000)      ; 48mb  (default is 24mb)
-
-  :bind (("M-z" . undo-fu-only-undo)
-         ("M-Z" . undo-fu-only-redo)
-         ("C-M-z" . undo-fu-only-redo-all)))
-
-(use-package goto-chg
-  :ensure t
-  :disabled t
-  :bind ("M-`" . goto-last-change))
-
-(use-package yasnippet
-  :ensure t
-  :delight yas-minor-mode
-  :init (yas-global-mode 1))
-
-;; * WEB
+(require 'setup-navigation-editing)
 (require 'setup-web)
-
-;; * PROJECT
-
-(use-package project
-  :ensure t
-  :bind ( :map project-prefix-map
-          ("s" . project-save-some-buffers))
-  :custom
-  (project-compilation-buffer-name-function 'project-prefixed-buffer-name)
-  (project-vc-extra-root-markers
-   '("Cargo.toml" "compile_commands.json" "pyproject.toml"
-     "compile_flags.txt" "project.clj"
-     "deps.edn" "shadow-cljs.edn" "package.json"))
-  :preface
-  (defcustom project-compilation-mode nil
-    "Mode to run the `compile' command with."
-    :type 'symbol
-    :group 'project
-    :safe #'symbolp
-    :local t)
-  (defun project-save-some-buffers (&optional arg)
-    "Save some modified file-visiting buffers in the current project.
-
-Optional argument ARG (interactively, prefix argument) non-nil
-means save all with no questions."
-    (interactive "P")
-    (let* ((project-buffers (project-buffers (project-current)))
-           (pred (lambda () (memq (current-buffer) project-buffers))))
-      (funcall-interactively #'save-some-buffers arg pred)))
-  (defvar project-compilation-modes nil
-    "List of functions to check for specific compilation mode.
-
-The function must return a symbol of an applicable compilation
-mode.")
-  (define-advice compilation-start
-      (:filter-args (args) use-project-compilation-mode)
-    (let ((cmd (car args))
-          (mode (cadr args))
-          (rest (cddr args)))
-      (catch 'args
-        (when (null mode)
-          (dolist (comp-mode-p project-compilation-modes)
-            (when-let ((mode (funcall comp-mode-p)))
-              (throw 'args (append (list cmd mode) rest)))))
-        args)))
-  (define-advice project-root (:filter-return (project) abbreviate-project-root)
-    (abbreviate-file-name project))
-  (defun project-make-predicate-buffer-in-project-p ()
-    (let ((project-buffers (project-buffers (project-current))))
-      (lambda () (memq (current-buffer) project-buffers))))
-  (define-advice project-compile (:around (fn) save-project-buffers-only)
-    "Only ask to save project-related buffers."
-    (defvar compilation-save-buffers-predicate)
-    (let ((compilation-save-buffers-predicate
-           (project-make-predicate-buffer-in-project-p)))
-      (funcall fn)))
-  (define-advice recompile
-      (:around (fn &optional edit-command) save-project-buffers-only)
-    "Only ask to save project-related buffers if inside of a project."
-    (defvar compilation-save-buffers-predicate)
-    (let ((compilation-save-buffers-predicate
-           (if (project-current)
-               (project-make-predicate-buffer-in-project-p)
-             compilation-save-buffers-predicate)))
-      (funcall fn edit-command)))
-  :config
-  (add-to-list 'project-switch-commands
-               '(project-dired "Dired"))
-  (add-to-list 'project-switch-commands
-               '(project-switch-to-buffer "Switch buffer"))
-  (add-to-list 'project-switch-commands
-               '(project-compile "Compile"))
-  (add-to-list 'project-switch-commands
-               '(project-save-some-buffers "Save") t))
+(require 'setup-project)
 
 
-(use-package projectile
-  :ensure projectile
-  :diminish
-  :defines
-  projectile-mode-map
-  :functions
-  projectile-cleanup-known-projects
-  projectile-find-file
-  projectile-mode
-  projectile-parent
-  projectile-project-p
-  projectile-project-root
-  :hook
-  (projectile-after-switch-project . os/node-project-setup)
-  :bind
-  ("C-c a"   . projectile-ag)
-  ("C-c C-o" . projectile-multi-occur)
-  (:map projectile-mode-map ("C-c p" . projectile-command-map))
-  :init
-  (projectile-mode +1)
-  :custom
-  (projectile-cache-file
-   (expand-file-name ".projectile.cache" os/emacs-tmp-dir))
-  (projectile-globally-ignored-files '("TAGS" ".git" ".DS_Store"))
-  (projectile-known-projects-file
-   (expand-file-name "projectile-bookmarks.eld" os/emacs-tmp-dir))
-  (projectile-switch-project-action 'projectile-dired)
-  :config
-  (projectile-cleanup-known-projects))
+
 
 (use-package helpful
   :ensure helpful
@@ -1964,7 +1518,7 @@ dependency artifact based on the project's dependencies."
 ;; * AI STUFF
 ;;;----------------------------------------------------------------
 
-(load (expand-file-name "lisp/emacs-ai.el" user-emacs-directory))
+(load (expand-file-name "lisp/setup-ai.el" user-emacs-directory))
 (load (expand-file-name "plugins/ai-project-agent.el" user-emacs-directory))
 
 ;;;----------------------------------------------------------------
@@ -1984,7 +1538,6 @@ dependency artifact based on the project's dependencies."
 
 
 ;; * THEMING
-
 (require 'setup-theme)
 
 ;; * PACKAGE LINT
