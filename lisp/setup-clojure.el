@@ -92,6 +92,25 @@
 (use-package babashka
   :ensure t)
 
+(use-package jdecomp
+  :ensure t
+  :mode ("\\.class\\'" . jdecomp-mode)
+  :preface
+  (defvar cfr-path
+    (file-truename "~/.local/lib/cfr.jar")
+    "Path to the cfr Java decompiler library.")
+  (defvar fernflower-path
+    (file-truename "~/.local/lib/fernflower.jar")
+    "Path to the FernFlower library.")
+  :when (or (file-exists-p cfr-path)
+            (file-exists-p fernflower-path))
+  :custom
+  (jdecomp-decompiler-type
+   (cond ((file-exists-p cfr-path) 'cfr)
+         ((file-exists-p fernflower-path) 'fernflower)))
+  (jdecomp-decompiler-paths
+   `((cfr . ,cfr-path)
+     (fernflower . ,fernflower-path))))
 
 (provide 'setup-clojure)
 ;;; setup-clojure.el ends here
