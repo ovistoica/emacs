@@ -683,26 +683,10 @@ created with `json-hs-extra-create-overlays'."
   :config
   (global-git-gutter-mode t))
 
-(use-package server
-  :commands (server-running-p)
-  :init
-  (unless (server-running-p)
-    (server-start)))
 
 
 
 
-(use-package recentf
-  :hook (after-init . recentf-mode)
-  :defines (recentf-exclude)
-  :custom
-  (recentf-max-menu-items 100)
-  (recentf-max-saved-items 100)
-  :config
-  (add-to-list 'recentf-exclude "\\.gpg\\")
-  (dolist (dir (list (locate-user-emacs-file ".cache/")
-                     (locate-user-emacs-file "workspace/.cache/")))
-    (add-to-list 'recentf-exclude (concat (regexp-quote dir) ".*"))))
 
 ;; * COMPILE
 
