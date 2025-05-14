@@ -15,6 +15,7 @@
         end-of-visual-line
         ignore-preserving-kill-region
         indent-for-tab-command
+        keyboard-escape-quit
         kill-sexp
         kmacro-end-or-call-macro
         lsp-ui-doc--handle-mouse-movement

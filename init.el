@@ -1430,7 +1430,8 @@ created with `json-hs-extra-create-overlays'."
 
   ;; Custom indentation for Midje's fact and facts
   (put-clojure-indent 'fact 1)
-  (put-clojure-indent 'facts 1))
+  (put-clojure-indent 'facts 1)
+  (put-clojure-indent 'vthread-loop 1))
 
 (use-package cider
   :ensure t
