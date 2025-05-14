@@ -100,7 +100,9 @@
 
 (require 'setup-functions)
 (require 'setup-core)
+(require 'setup-misc)
 (require 'setup-lint)
+(require 'setup-compilation)
 (require 'setup-treesitter)
 (require 'setup-completions)
 (require 'setup-lsp)
