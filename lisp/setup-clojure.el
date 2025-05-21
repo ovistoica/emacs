@@ -6,6 +6,7 @@
 ;;; Code:
 (load (expand-file-name "plugins/clj-functions.el" user-emacs-directory))
 
+
 (use-package clojure-mode
   :ensure t
   :defines put-clojure-indent
@@ -28,7 +29,10 @@
   (defun clojure-mode-setup ()
     "Setup Clojure buffer."
     (common-lisp-modes-mode 1)
-    (clojure-set-compile-command))
+    (clojure-set-compile-command)
+    (clj-refactor-mode 1)
+    (yas-minor-mode 1)
+    (cljr-add-keybindings-with-prefix "C-c r"))
 
   ;; Custom indentation for Midje's fact and facts
   (put-clojure-indent 'fact 1)
@@ -90,7 +94,20 @@
   :hook (cider-mode . clj-decompiler-setup))
 
 (use-package babashka
-  :ensure t)
+  :ensure t
+  :bind (("C-c b t" . babashka-tasks)))
+
+(setq mac-right-command-modifier 'hyper) ; Set right command key as Hyper
+
+
+(use-package html-to-hiccup
+  :ensure t
+  :bind (:map clojure-mode-map
+              ("H-h" . html-to-hiccup-convert-region)
+              ("H-y" . html-to-hiccup-yank))
+  :config
+  (setq html-to-hiccup-use-shorthand-p t))
+
 
 (use-package jdecomp
   :ensure t
@@ -111,6 +128,38 @@
   (jdecomp-decompiler-paths
    `((cfr . ,cfr-path)
      (fernflower . ,fernflower-path))))
+
+(require 'transient)
+
+(use-package context-transient
+  :ensure t
+  :bind ("<f6>" . context-transient)
+  :custom
+  (context-transient-require-defclj)
+
+  (defclj my-sync-deps (sync-deps) "Sync project deps")
+  (defclj my-portal (user/portal))
+  (defclj my-portal-clear (user/portal-clear))
+  (defclj my-require-snitch (require '[snitch.core :refer [defn* defmethod* *fn *let]]))
+  (defclj my-restart-sync (user/restart-sync))
+  (defclj my-stop-sync (user/stop-sync))
+
+  (context-transient-define
+      my-clj-transient
+    :doc "Transient for clojure envs"
+    :repo "shipclojure-datom"
+    :menu
+    [["REPL"
+      ("c" "Connect REPL" (lambda () (interactive) (cider-connect-clj '(:host "localhost" :port 63000))) :transient nil)
+      ("d" "Sync deps" my-sync-deps)]
+     ["Debug"
+      ("p" "Start portal" my-portal)
+      ("P" "Clear portal" my-portal-clear)
+      ("S" "Require snitch" my-require-snitch)]
+     ["Systems"
+      ("a" "(Re)start main system" my-restart-sync)
+      ("A" "Stop main system" my-stop-sync)]])
+  )
 
 (provide 'setup-clojure)
 ;;; setup-clojure.el ends here

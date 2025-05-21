@@ -3,9 +3,11 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        backward-up-list
         cljr-slash
         combobulate-envelop-tsx-ts-mode-wrap-parentheses
         combobulate-navigate-up
+        consult-buffer
         corfu-complete
         corfu-complete-and-quit
         corfu-next
@@ -35,6 +37,7 @@
         puni-splice
         puni-wrap-curly
         puni-wrap-round
+        puni-wrap-square
         region-bindings-disable
         region-bindings-doublequote
         undo-only
