@@ -92,7 +92,7 @@
 ;; ** MAC Stuff
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
-  (setq mac-option-modifier nil)
+  (setq mac-option-modifier 'super)
   (setq browse-url-browser-function 'browse-url-default-macosx-browser)
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark)))
