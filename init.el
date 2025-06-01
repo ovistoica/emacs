@@ -21,6 +21,10 @@
 ;; Configure the package manager
 (require 'packages)
 
+;; Configure Emacs for OSX
+(when (string= "darwin" system-type)
+  (require 'setup-mac))
+
 ;; Lets start with a smattering of sanity
 (require 'sane-defaults)
 
