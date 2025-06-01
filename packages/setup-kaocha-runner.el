@@ -1,5 +1,6 @@
 ;; Kaocha Runner
-;; An emacs package for running Kaocha tests via CIDER
+;;
+;; An emacs package for running Kaocha tests via CIDER.
 
 (use-package kaocha-runner
   :after (cider-mode)
@@ -24,15 +25,17 @@
   (interactive)
   (when (cljr--project-depends-on-p "kaocha")
     (if (kaocha-runner--is-test? (buffer-file-name))
-        (kaocha-runner-run-tests
+        (kaocha-runner--run-tests
          (kaocha-runner--testable-sym (cider-current-ns) nil nil)
          nil t)
       (let ((original-buffer (current-buffer)))
         (save-window-excursion
           (when-let ((file (kaocha-runner--significant-other-find-existing-test)))
             (find-file file)
-            (kaocha-runner-run-tests
+            (kaocha-runner--run-tests
              (kaocha-runner--testable-sym (cider-current-ns) nil nil)
              nil t original-buffer)))))))
 
-(add-hook 'cider-file-loaded-hook #'kaocha-runner-run-tests)
+(add-hook 'cider-file-loaded-hook #'kaocha-runner-run-relevant-tests)
+
+(provide 'setup-kaocha-runner)
