@@ -8,7 +8,11 @@
      (interactive)
      ,@body))
 
-(global-set-key (kbd "s-l") (λ (insert "\u03bb")))
+(defun my/insert-lambda-symbol ()
+  (interactive)
+  (insert "\u03bb"))
+
+(global-set-key (kbd "s-l") 'my/insert-lambda-symbol)
 
 ;; Set up a keybinding for the very next command invocation
 (defun one-shot-keybinding (key command)
@@ -28,6 +32,10 @@
        (setq-local my/previous-window-configuration my/prev))))
 
 (defvar my/previous-window-configuration nil)
+
+(defun my/insert-lambda-symbol ()
+  (interactive)
+  (insert "\u03bb"))
 
 ;; No need to remind me about eldoc-mode all the time
 (diminish 'eldoc-mode)
