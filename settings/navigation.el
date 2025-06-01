@@ -9,6 +9,7 @@
 (global-set-key (kbd "S-<left>") 'windmove-left)
 (global-set-key (kbd "S-<up>") 'windmove-up)
 (global-set-key (kbd "S-<down>") 'windmove-down)
+(global-set-key (kbd "M-o") 'other-window)
 
 ;: Keep them windows nice and balanced
 (global-set-key (kbd "C-x 0") 'my/delete-window)
