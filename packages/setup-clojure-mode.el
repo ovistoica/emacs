@@ -37,16 +37,12 @@
 
 (defun setup-clojure-mode-so ()
   (with-significant-others file-name 
-    ("/portfolio/.+/components/" (list (s-with filename
-                                         (s-replace "/portfolio/" "/src")
-                                         (s-replace "_scenes.cljs" ".cljc"))))
-    ;; UI components
     ("/src/cljc/.+/ui/" (list (s-with file-name
-                                (s-replace "/src/" "/portfolio/")
-                                (s-replace ".cljc" "_scenes.cljs"))
-                              (s-with filename
-                                (s-replace "/src/" "/test/")
-                                (s-replace ".cljc" "_test.clj"))))
+                                (s-replace "/src/cljc/" "/portfolio/")
+                                (s-replace ".cljc" "_scenes.cljs"))))
+    ("/portfolio/.+/ui/" (list (s-with file-name
+                                 (s-replace "/portfolio/" "/src/cljc/")
+                                 (s-replace "_scenes.cljs" ".cljc"))))
     ("/src/.+\.cljc" (list (s-with file-name
                              (s-replace "/src/" "/test/")
                              (s-replace ".cljc" "_test.clj"))

@@ -7,6 +7,13 @@
   ;; Move files between split panes
   (setq dired-dwim-target t)
 
+  ;; Sort directories first
+  (setq dired-use-ls-dired t)
+  (setq dired-listing-switches "-lAXGh --group-directories-first --sort=name")
+
+  ;; Don't ask me for recursive copies
+  (setq dired-recursive-copies 'always)
+
   ;; C-a is nicer in dired if it moves back to start of files
   (define-key dired-mode-map (kbd "C-a") 'dired-back-to-start-of-files)
 
