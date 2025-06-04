@@ -16,15 +16,15 @@
 
 (defun cssc/read-project-css-file-contents ()
   (apply #'concat
-         (-map #'cssc/read-files-into-string
+         (-map #'cssc/read-file-into-string
                (cssc/find-css-files-in-project))))
 
 (setq cssc/well-known-file-endings
       '("jpg" "jpeg" "png" "svg"))
 
 (defun cssc/extract-css-class-names (string)
-  "Extract all css class names from STRING."
-  (let ((pattern "\\.[a-zA-z][a-zA-Z0-9_-]+\\b")
+  "Extract all CSS class names from STRING."
+  (let ((pattern "\\.[a-zA-Z][a-zA-Z0-9_-]+\\b")
         (pos 0)
         (hash (make-hash-table :test 'equal)))
     (while (string-match pattern string pos)
@@ -35,7 +35,7 @@
     (hash-table-keys hash)))
 
 (defun cssc/inside-clojure-class-structure? ()
-  (or 
+  (or
    ;; matches {:class :bar}
    (save-excursion (ignore-errors (paredit-backward 2)
                                   (looking-at ":class")))
@@ -43,7 +43,6 @@
    (save-excursion (ignore-errors (paredit-backward-up)
                                   (paredit-backward)
                                   (looking-at ":class")))
-
    ;; matches (into class [:bar])
    (save-excursion (ignore-errors (paredit-backward-up 2)
                                   (paredit-backward)
@@ -63,16 +62,6 @@
              (cdr bounds)
              ".")))))))
 
-(defun cssc/find-string-class-name-position ()
-  "Are we completing a symbol in a string inside some structure assigning to :class?"
-  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
-    (when (and (cider-in-string-p)
-               (cssc/inside-clojure-class-structure?))
-      (list 
-       (car bounds)
-       (cdr bounds)
-       ""))))
-
 (defun cssc/find-keyword-class-name-position ()
   "Are we completing a Clojure keyword inside some structure assigning to :class?"
   (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
@@ -87,22 +76,32 @@
            (cdr bounds)
            ":"))))))
 
+(defun cssc/find-string-class-name-position ()
+  "Are we completing a symbol in a string inside some structure assigning to :class?"
+  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
+    (when (and (cider-in-string-p)
+               (cssc/inside-clojure-class-structure?))
+      (list
+       (car bounds)
+       (cdr bounds)
+       ""))))
+
 (defun cssc/find-html-class-name-position ()
   (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
     (when (and (nth 3 (syntax-ppss))
                (save-excursion
                  (goto-char (nth 8 (syntax-ppss)))
                  (looking-back "class=" (- (point) 10))))
-      (list 
+      (list
        (car bounds)
        (cdr bounds)
        ""))))
 
-(defvar cssc/find-class-name-posittion-fns ())
+(defvar cssc/find-class-name-position-fns ())
 (make-variable-buffer-local 'cssc/find-class-name-position-fns)
 
 (defun cssc/css-classes-completion-at-point ()
-  (when-let ((res (--some (funcall it) cssc/find-class-name-posittion-fns)))
+  (when-let ((res (--some (funcall it) cssc/find-class-name-position-fns)))
     (-let [(beg end prefix) res]
       (list beg end
             (--map (concat prefix it)
@@ -113,7 +112,7 @@
   "Sets up current buffer for clojure css completions. Run in a hook."
   (add-to-list 'completion-at-point-functions
                #'cssc/css-classes-completion-at-point)
-  (setq cssc/find-class-name-posittion-fns
+  (setq cssc/find-class-name-position-fns
         (list #'cssc/find-hiccup-class-name-position
               #'cssc/find-keyword-class-name-position
               #'cssc/find-string-class-name-position)))
@@ -123,7 +122,6 @@
                #'cssc/css-classes-completion-at-point)
   (setq cssc/find-class-name-position-fns
         (list #'cssc/find-html-class-name-position)))
-
 
 (defun cssc/skip-in-front-of-the-completion-chain ()
   (when (-contains? completion-at-point-functions
@@ -138,4 +136,3 @@
 (add-hook 'cider-mode-hook 'cssc/skip-in-front-of-the-completion-chain)
 
 (provide 'css-completions)
-  

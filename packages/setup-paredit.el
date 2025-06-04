@@ -32,8 +32,8 @@
                ("C-d" . paredit-forward-delete)
                ("M-(" . paredit-wrap-round)
                ("M-)" . paredit-wrap-round-from-behind)
-               ("M-s-8" . paredit-wrap-square)
-               ("M-s-9" . paredit-wrap-square-from-behind)
+               ("M-[" . paredit-wrap-square)
+               ("M-]" . paredit-wrap-square-from-behind)
                ("M-s-(" . paredit-wrap-curly)
                ("M-s-)" . paredit-wrap-curly-from-behind))))
 
