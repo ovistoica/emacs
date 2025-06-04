@@ -36,28 +36,28 @@
 (require 'significant-other)
 
 (defun setup-clojure-mode-so ()
-  (with-significant-others filename 
-    ("/src/cljc/.+/ui/" (list (s-with filename
+  (with-significant-others file-name
+    ("/src/cljc/.+/ui/" (list (s-with file-name
                                 (s-replace "/src/cljc/" "/portfolio/")
                                 (s-replace ".cljc" "_scenes.cljs"))))
-    ("/portfolio/.+/ui/" (list (s-with filename
+    ("/portfolio/.+/ui/" (list (s-with file-name
                                  (s-replace "/portfolio/" "/src/cljc/")
                                  (s-replace "_scenes.cljs" ".cljc"))))
-    ("/src/.+\.cljc" (list (s-with filename
+    ("/src/.+\.cljc" (list (s-with file-name
                              (s-replace "/src/" "/test/")
                              (s-replace ".cljc" "_test.clj"))
-                           (s-with filename
+                           (s-with file-name
                              (s-replace "/src/" "/test/")
                              (s-replace ".cljc" "_test.cljc"))))
-    ("/src/.+\.clj" (list (s-with filename
+    ("/src/.+\.clj" (list (s-with file-name
                             (s-replace "/src/" "/test/")
                             (s-replace ".clj" "_test.clj"))))
 
     ("/test/.+\.clj" (list
-                      (s-with filename
+                      (s-with file-name
                         (s-replace "/test/" "/src/")
                         (s-replace "_test.clj" ".clj"))
-                      (s-with filename
+                      (s-with file-name
                         (s-replace "/test/" "/src/")
                         (s-replace "_test.clj" ".cljc"))))))
 

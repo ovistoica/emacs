@@ -5,6 +5,7 @@
       '(
         mc/mark-next-lines
         paredit-forward-delete
+        paredit-forward-kill-word
         ))
 
 (setq mc/cmds-to-run-once
