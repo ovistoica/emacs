@@ -59,6 +59,10 @@
   (define-key clojure-mode-map (kbd "s-:") 'cider-run-in-dev-namespace)
   (define-key cider-repl-mode-map (kbd "s-:") 'cider-run-in-dev-namespace)
 
+  ;; Keybind for reset system
+  (define-key clojure-mode-map (kbd "C-:") 'my/cider-run-reset)
+  (define-key cider-mode-map (kbd "C-:") 'my/cider-run-reset)
+
   (define-key cider-mode-map (kbd "C-c M-w") 'my/cider-eval-to-clipboard)
   (define-key cider-mode-map (kbd "C-c C-M-w") 'my/cider-eval-defun-to-clipboard)
 
@@ -93,6 +97,11 @@
    (s-equals? (plist-get (cider--gather-session-params session) :project-dir)
               (plist-get (cider--gather-session-params it) :project-dir))
    sessions))
+
+(defun my/cider-run-reset ()
+  (interactive)
+  (with-current-buffer (cider-current-repl)
+    (cider-interactive-eval "(reset)")))
 
 (defun my/cider-select-repl-buffer ()
   (interactive)
