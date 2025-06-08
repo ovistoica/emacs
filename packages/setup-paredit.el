@@ -34,8 +34,8 @@
                ("M-)" . paredit-wrap-round-from-behind)
                ("M-[" . paredit-wrap-square)
                ("M-]" . paredit-wrap-square-from-behind)
-               ("M-s-(" . paredit-wrap-curly)
-               ("M-s-)" . paredit-wrap-curly-from-behind))))
+               ("M-{" . paredit-wrap-curly)
+               ("M-}" . paredit-wrap-curly-from-behind))))
 
 (defun paredit-wrap-round-from-behind ()
   (interactive)
