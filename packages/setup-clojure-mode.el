@@ -2,15 +2,18 @@
   :hook ((clojure-mode . setup-clojure-mode-so)
          (clojurescript-mode-hook . setup-clojure-mode-so)
          (clojurec-mode-hook . setup-clojure-mode-so))
-  
-  :custom 
+
+  :custom
   (clojure-toplevel-inside-comment-form t)
+
   :config
-  (unbind-key (kbd "C-:")  clojure-mode-map)
+  ;; don't steal hippie-expand-lines keybinding
+  (unbind-key (kbd "C-:") clojure-mode-map)
+
   (require 'i18n-edn)
 
-  ;; After threading all forms, check if we should maybe unwind once according
-  ;; to my tastes
+  ;; After threading all forms, check if we should maybe unwind once
+  ;; according to my tastes
   (defadvice clojure--thread-all (after possibly-unwind-once activate)
     (when (my/clojure-should-unwind-once?)
       (clojure-unwind)))
@@ -20,7 +23,7 @@
               ([remap paredit-backward] . clojure-backward-logical-sexp)
               ("C-\"" . clojure-toggle-keyword-string)
               ("C-x M-e" . my/cider-eval-including-lets)
-              ("C-." . cqlj-hippie-expand-no-case-fold)
+              ("C-." . clj-hippie-expand-no-case-fold)
               ("C-c i 1 8 n" . i18n-edn-edit-in-multifile)
               ("<f7>" . cider-eval-last-sexp)
               ("<f6>" . cider-pprint-eval-last-sexp)
@@ -68,7 +71,7 @@
   :ensure nil
   :defer t
   :commands (cssc/enable-for-clojure)
-  :init 
+  :init
   (add-hook 'clojure-mode-hook 'cssc/enable-for-clojure)
   (add-hook 'clojurescript-mode-hook 'cssc/enable-for-clojure)
   (add-hook 'clojurec-mode-hook 'cssc/enable-for-clojure)
@@ -81,7 +84,7 @@
     (ignore-errors
       (when (looking-at "(")
         (forward-char 1)
-        (forward-sexp-1)))
+        (forward-sexp 1)))
     (let ((forms nil))
       (while (not (looking-at ")"))
         (clojure-forward-logical-sexp)
@@ -91,7 +94,8 @@
       (and (--any? (s-equals? it "(") forms)
            (< 2 (length forms))))))
 
-;; eval-current-sexp while also including lets
+;; eval-current-sexp while also including surrounding lets
+
 (defun my/cider-looking-at-lets? ()
   (or (looking-at "(let ")
       (looking-at "(letfn ")
@@ -99,4 +103,69 @@
       (looking-at "(if-let ")))
 
 (defun my/cider-collect-lets (&optional max-point)
-  (let* ((beg-of-defun (save-excursion)))))
+  (let* ((beg-of-defun (save-excursion (beginning-of-defun) (point)))
+         (lets nil))
+    (save-excursion
+      (while (not (= (point) beg-of-defun))
+        (paredit-backward-up 1)
+        (when (my/cider-looking-at-lets?)
+          (save-excursion
+            (let ((beg (point)))
+              (paredit-forward-down 1)
+              (paredit-forward 2)
+              (when (and max-point (< max-point (point)))
+                (goto-char max-point))
+              (setq lets (cons (concat (buffer-substring-no-properties beg (point))
+                                       (if max-point "]" ""))
+                               lets))))))
+      lets)))
+
+(defun my/inside-let-block? ()
+  (save-excursion
+    (paredit-backward-up 2)
+    (my/cider-looking-at-lets?)))
+
+(defun my/cider-eval-including-lets (&optional output-to-current-buffer)
+  "Evaluates the current sexp form, wrapped in all parent lets."
+  (interactive "P")
+  (let* ((beg-of-sexp (save-excursion (paredit-backward 1) (point)))
+         (code (buffer-substring-no-properties beg-of-sexp (point)))
+         (lets (my/cider-collect-lets (when (my/inside-let-block?)
+                                        (save-excursion (paredit-backward 2) (point)))))
+         (code (concat (s-join " " lets)
+                       " " code
+                       (s-repeat (length lets) ")"))))
+    (cider-interactive-eval code
+                            (when output-to-current-buffer
+                              (cider-eval-print-handler))
+                            nil
+                            (cider--nrepl-pr-request-map))))
+
+(defun clj-hippie-expand-no-case-fold ()
+  "Consider / as whitespace when doing hippie-expand i clojure-mode"
+  (interactive)
+  (let ((old-syntax (char-to-string (char-syntax ?/))))
+    (modify-syntax-entry ?/ " ")
+    (hippie-expand-no-case-fold)
+    (modify-syntax-entry ?/ old-syntax)))
+
+(defun clerk-show ()
+  (interactive)
+  (when-let
+      ((filename
+        (buffer-file-name)))
+    (save-buffer)
+    (cider-interactive-eval
+     (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+(defun my/cider-unload-current-namespace-aliases ()
+  ;; A clojure.tools.namespace.refresh can leave namespaces with aliases that
+  ;; point to nothingness! Those namespaces pointing to nothingness prevent the
+  ;; (ns ,,,) form from evaluating. A workaround is to unload the aliases for
+  ;; your currently open namespace.
+  (interactive)
+  (cider-interactive-eval "(doseq [a (keys (ns-aliases *ns*))] (ns-unalias (symbol (str *ns*)) a))"))
+
+(use-package neil :defer t) ;; M-x neil-find-clojure-package
+
+(provide 'setup-clojure-mode)
