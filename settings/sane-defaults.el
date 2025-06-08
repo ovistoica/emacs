@@ -96,6 +96,12 @@
 
 ;; Don't zoom individual buffers
 (global-unset-key (kbd "C-x C-+"))
+(global-unset-key (kbd "s-t"))
+
+;; Disable mouse zooming
+(global-set-key (kbd "<pinch>") 'ignore)
+(global-set-key (kbd "<C-wheel-up>") 'ignore)
+(global-set-key (kbd "<C-wheel-down>") 'ignore)
 
 ;; Write backup files to own directory
 (setq backup-directory-alist
