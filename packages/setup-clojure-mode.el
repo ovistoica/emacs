@@ -42,7 +42,13 @@
   (with-significant-others file-name
     ("/src/cljc/.+/ui/" (list (s-with file-name
                                 (s-replace "/src/cljc/" "/portfolio/")
-                                (s-replace ".cljc" "_scenes.cljs"))))
+                                (s-replace ".cljc" "_scenes.cljs"))
+                              (s-with file-name
+                                (s-replace "/src/" "/test/")
+                                (s-replace ".cljc" "_test.clj"))
+                              (s-with file-name
+                                (s-replace "/src/" "/test/")
+                                (s-replace ".cljc" "_test.cljc"))))
     ("/portfolio/.+/ui/" (list (s-with file-name
                                  (s-replace "/portfolio/" "/src/cljc/")
                                  (s-replace "_scenes.cljs" ".cljc"))))

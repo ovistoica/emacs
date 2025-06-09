@@ -2,6 +2,8 @@
 
 (require 'kaocha-runner)
 (require 'projectile)
+(require 'dash)
+(require 's)
 
 (defvar cider-run--out-buffer "*cider-run-output*")
 (defvar ns-regex "^(ns \\([^\s]+\\)")

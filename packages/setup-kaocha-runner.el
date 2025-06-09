@@ -16,10 +16,7 @@
   (string-match-p "/test/.+\.clj" s))
 
 (defun kaocha-runner--significant-other-find-existing-test ()
-  (--first
-   (and (file-exists-p it)
-        (kaocha-runner--is-test? it))
-   (funcall significant-other-find-fn)))
+  (car (significant-other-find-tests)))
 
 (defun kaocha-runner-run-relevant-tests ()
   (interactive)
