@@ -92,6 +92,9 @@
 
 (add-to-list 'find-file-not-found-functions 'my-create-non-existent-directory)
 
+;; Try first to go to file under point
+(ffap-bindings)
+
 ;; Don't zoom individual buffers
 (global-unset-key (kbd "C-x C-+"))
 (global-unset-key (kbd "s-t"))
