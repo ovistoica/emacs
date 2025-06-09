@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         mc/mark-next-lines
+        paredit-backward-kill-word
         paredit-forward-delete
         paredit-forward-kill-word
         ))

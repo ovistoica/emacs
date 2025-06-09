@@ -6,9 +6,19 @@
   :bind (("C-c <enter>" . gptel-send)
          ("C-c RET" . gptel-send)
          ("C-c C-<enter>" . gptel-menu))
+  :init
+  (setq gptel-default-mode 'org-mode)   ; Use org-mode as the default
   :config
   (require 'ai-project-agent)
   (require 'private)
+
+  (add-hook 'gptel-mode-hook
+            (lambda ()
+              (when (and (derived-mode-p 'org-mode)
+                         (bound-and-true-p org-indent-mode))
+                (org-indent-mode -1))))
+
+
   (setq gptel-api-key my/secret-openai-key)
   (gptel-make-gemini "Gemini" :key my/secret-google-gemini-api-key :stream t)
   (gptel-make-openai "DeepSeek"
@@ -28,6 +38,7 @@
         gptel-window-select t           ; Select the window after creation
         gptel-window-side 'right        ; Display on the right side
         gptel-window-width 80           ; Set window width
+
         )
   (setq gptel-directives (my/gptel-load-all-markdown-directives (expand-file-name "ai-prompts" user-emacs-directory))))
 
