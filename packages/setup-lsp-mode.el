@@ -20,14 +20,22 @@
 
   (setq lsp-apply-edits-after-file-operations nil) ;; Disable broken lsp feature: https://github.com/clojure-lsp/clojure-lsp/issues/1813
 
+  (setq lsp-signature-doc-lines 1)      ; Don't raise the echo area. It's distracting
+  (setq lsp-ui-doc-use-childframe t)    ; Show docs for symbol at point
+
   ;; To consider
   ;;
   ;; (setq lsp-enable-completion-at-point nil) ;; CIDER vs LSP?
   ;; (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
 
   :config
+  (define-key lsp-command-map (kbd "d") #'lsp-ui-doc-glance)
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
   (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback))
+
+(use-package lsp-ui
+  :after lsp-mode
+  :defer t)
 
 (defun my/use-lsp-completion-only-as-fallback ()
   (when (-contains? completion-at-point-functions #'lsp-completion-at-point)

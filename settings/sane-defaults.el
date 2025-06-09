@@ -39,6 +39,7 @@
 
 ;; Always display column numbers
 (setq column-number-mode t)
+(setq line-number-mode t)
 
 ;; Save a list of recent files visited. (open recent file with C-x f)
 (use-package recentf
@@ -62,9 +63,6 @@
   :defer 1
   :config (global-subword-mode 1)
   :diminish subword-mode)
-
-;; Don't visually break lines for me, please
-(setq-default truncate-lines t)
 
 ;; Sentences do not need double spaces to end. Period.
 (set-default 'sentence-end-double-space nil)

@@ -20,10 +20,6 @@
 ;; Completion at point
 (global-set-key (kbd "C-,") 'completion-at-point)
 
-;; Use shell-like backspace C-h, rebind help to F1
-(define-key key-translation-map [?\C-h] [?\C-?])
-(global-set-key (kbd "<f1>") 'help-command)
-
 ;; Revert entire buffer without any fuss
 (global-set-key (kbd "M-<escape>") (λ (revert-buffer t t)))
 
