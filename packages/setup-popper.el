@@ -102,7 +102,7 @@
   (add-to-list 'display-buffer-alist '("\\*cider-repl.*\\*$"
                                        (display-buffer-in-side-window)
                                        (side . right)
-                                       (window-width . 0.33)))
+                                       (window-width . 0.4)))
   (popper-mode +1)
   (popper-echo-mode +1))
 
