@@ -34,7 +34,7 @@
   (setf (alist-get 'css-mode apheleia-mode-alist) 'prettier-css)
   (setf (alist-get 'css-ts-mode apheleia-mode-alist) 'prettier-css)
 
-  (apheleia-global-mode +1))
+  )
 
 (provide 'setup-apheleia)
 ;;; setup-formatting.el ends here

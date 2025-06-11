@@ -7,9 +7,14 @@
         dabbrev-expand
         kill-sexp
         mc/mark-next-lines
+        paredit-backward
         paredit-backward-kill-word
+        paredit-backward-up
+        paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-open-square
+        paredit-raise-sexp
         paredit-wrap-round
         ))
 
