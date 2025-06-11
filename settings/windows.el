@@ -1,5 +1,8 @@
 ;; Manipulating windows, ie. the squares with buffers in them
 
+;; Enable repeat-mode for window resizing (C-x } then }}}... to keep enlarging)
+(repeat-mode 1)
+
 (global-set-key (kbd "C-x -") 'toggle-window-split)
 (global-set-key (kbd "C-c -") 'rotate-windows)
 
