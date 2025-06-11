@@ -143,9 +143,7 @@
                        (s-repeat (length lets) ")"))))
     (cider-interactive-eval code
                             (when output-to-current-buffer
-                              (cider-eval-print-handler))
-                            nil
-                            (cider--nrepl-pr-request-map))))
+                              (cider-eval-print-handler)))))
 
 (defun clj-hippie-expand-no-case-fold ()
   "Consider / as whitespace when doing hippie-expand i clojure-mode"

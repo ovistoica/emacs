@@ -3,13 +3,18 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        cljr-slash
+        dabbrev-expand
+        kill-sexp
         mc/mark-next-lines
         paredit-backward-kill-word
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-wrap-round
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        lsp-ui-doc--handle-mouse-movement
         persp-switch-to-buffer*
         ))
