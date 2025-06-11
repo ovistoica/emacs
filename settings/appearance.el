@@ -33,7 +33,7 @@
 (global-display-line-numbers-mode 1)
 
 ;; Customize line number appearance
-(setq display-line-numbers-type 'relative) ; Use 'absolute for absolute line numbers
+(setq display-line-numbers-type 'absolute) ; Use 'relative for relative line numbers
 (setq display-line-numbers-width-start t)  ; Auto-adjust width based on buffer size
 
 (provide 'appearance)
