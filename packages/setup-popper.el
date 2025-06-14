@@ -23,7 +23,6 @@
                              eshell-mode
                              geiser-repl-mode
                              shell-mode
-                             eat-mode
                              inferior-python-mode
                              cider-repl-mode
                              fennel-repl-mode
@@ -103,6 +102,11 @@
                                        (display-buffer-in-side-window)
                                        (side . right)
                                        (window-width . 0.4)))
+  (add-to-list 'display-buffer-alist '("\\*claude:.*\\*"
+                                       (display-buffer-in-side-window)
+                                       (side . right)
+                                       (window-width . 0.4)))
+
   (popper-mode +1)
   (popper-echo-mode +1))
 

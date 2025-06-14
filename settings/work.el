@@ -29,3 +29,5 @@
   :cwd "~/workspace/shipclojure-datom"
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
+
+(provide 'work)

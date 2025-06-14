@@ -5,21 +5,29 @@
       '(
         cljr-slash
         dabbrev-expand
+        forward-sexp
         kill-sexp
         mc/mark-next-lines
         paredit-backward
         paredit-backward-kill-word
         paredit-backward-up
+        paredit-doublequote
         paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-open-round
         paredit-open-square
         paredit-raise-sexp
+        paredit-splice-sexp
         paredit-wrap-round
+        wgrep-finish-edit
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        handle-switch-frame
+        ignore-preserving-kill-region
         lsp-ui-doc--handle-mouse-movement
+        mouse-set-region
         persp-switch-to-buffer*
         ))
