@@ -33,7 +33,7 @@
          (position (yas--field-end (yas--snippet-active-field snippet))))
     (if (= (point) position)
         (move-end-of-line 1)
-      (goto char position))))
+      (goto-char position))))
 
 (defun yas/goto-start-of-active-field ()
   (interactive)

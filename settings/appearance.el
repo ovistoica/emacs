@@ -29,8 +29,8 @@
                            (invert-face 'mode-line)
                            (run-with-timer 0.05 nil 'invert-face 'mode-line)))
 
-;; Enable line numbers globally
-(global-display-line-numbers-mode 1)
+;; Enable line numbers only in programming modes
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 ;; Customize line number appearance
 (setq display-line-numbers-type 'absolute) ; Use 'relative for relative line numbers
