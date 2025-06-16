@@ -4,9 +4,11 @@
 (setq mc/cmds-to-run-for-all
       '(
         cljr-slash
+        clojure-backward-logical-sexp
         dabbrev-expand
         forward-sexp
         kill-sexp
+        mark-sexp
         mc/mark-next-lines
         paredit-backward
         paredit-backward-kill-word
@@ -15,6 +17,7 @@
         paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-kill
         paredit-open-round
         paredit-open-square
         paredit-raise-sexp

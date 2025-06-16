@@ -27,3 +27,5 @@
         (eat-term-send-string eat-terminal "\e[Z")
         (display-buffer claude-code-buffer))
     (claude-code--show-not-running-message)))
+
+(provide 'setup-claude-code)
