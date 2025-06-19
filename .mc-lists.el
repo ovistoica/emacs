@@ -7,6 +7,7 @@
         clojure-backward-logical-sexp
         dabbrev-expand
         forward-sexp
+        indent-for-tab-command
         kill-sexp
         mark-sexp
         mc/mark-next-lines
