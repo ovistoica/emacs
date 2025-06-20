@@ -45,7 +45,7 @@
 (use-package recentf
   :defer 1 ;; Loads after 1 second of idle time.
   :config (recentf-mode 1)
-  :custom (recentf-max-saved-items 100))  ;; just 20 is too recent
+  :custom (recentf-max-saved-items 1000))  ;; just 20 is too recent
 
 ;; Undo/redo window configuration with C-c <left>/<right>
 (use-package winner
