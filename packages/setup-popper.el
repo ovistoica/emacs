@@ -21,6 +21,7 @@
 ;; useful afterwards
 (defvar my/repl-modes-list '(matlab-shell-mode
                              eshell-mode
+                             vterm-mode
                              geiser-repl-mode
                              shell-mode
                              inferior-python-mode
