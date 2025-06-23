@@ -3,8 +3,11 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        backward-sexp
         cljr-slash
         clojure-backward-logical-sexp
+        clojure-forward-logical-sexp
+        copy-region-or-current-line
         dabbrev-expand
         forward-sexp
         indent-for-tab-command
@@ -25,13 +28,18 @@
         paredit-splice-sexp
         paredit-wrap-round
         wgrep-finish-edit
+        yaml-electric-backspace
+        yaml-electric-dash-and-dot
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        consult-recent-file
         handle-switch-frame
         ignore-preserving-kill-region
         lsp-ui-doc--handle-mouse-movement
         mouse-set-region
+        my/split-window-right
         persp-switch-to-buffer*
+        query-replace-regexp
         ))
