@@ -55,7 +55,8 @@
                    (with-current-buffer task-buffer-name
                      babashka--previous-window-configuration)
                  (list (current-window-configuration) (point-marker))))
-         (task (or (and repeat? (with-current-buffer task-buffer-name))
+         (task (or (and repeat? (with-current-buffer task-buffer-name
+                                  babashka--previous-task))
                    (completing-read (format "bb in %s" short-dir)
                                     (--map
                                      (concat "bb " it)
