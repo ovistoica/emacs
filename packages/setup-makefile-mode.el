@@ -108,6 +108,4 @@
                                         (when conf (register-val-jump-to conf nil))))))
       (message "No Makefile found in %s" short-dir))))
 
-(global-set-key (kbd "s-m") 'makefile-invoke-target)
-
 (provide 'setup-makefile-mode)

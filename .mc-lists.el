@@ -35,6 +35,7 @@
 (setq mc/cmds-to-run-once
       '(
         consult-recent-file
+        dired-jump
         handle-switch-frame
         ignore-preserving-kill-region
         lsp-ui-doc--handle-mouse-movement
@@ -42,4 +43,5 @@
         my/split-window-right
         persp-switch-to-buffer*
         query-replace-regexp
+        wgrep-change-to-wgrep-mode
         ))
