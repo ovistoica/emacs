@@ -18,20 +18,29 @@
 (defun kaocha-runner--significant-other-find-existing-test ()
   (car (significant-other-find-tests)))
 
+(defun kaocha-runner--should-run-tests? ()
+  "Check if tests should run based on buffer comment."
+  (save-excursion
+    (goto-char (point-min))
+    (not (re-search-forward ";; {:kaocha-runner-run-tests-on-file-loaded\\? false}" nil t))))
+
 (defun kaocha-runner-run-relevant-tests ()
   (interactive)
   (when (cljr--project-depends-on-p "kaocha")
     (if (kaocha-runner--is-test? (buffer-file-name))
-        (kaocha-runner--run-tests
-         (kaocha-runner--testable-sym (cider-current-ns) nil nil)
-         nil t)
+        (when (kaocha-runner--should-run-tests?)
+          (kaocha-runner--run-tests
+           (kaocha-runner--testable-sym (cider-current-ns) nil nil)
+           nil t))
       (let ((original-buffer (current-buffer)))
-        (save-window-excursion
-          (when-let ((file (kaocha-runner--significant-other-find-existing-test)))
-            (find-file file)
-            (kaocha-runner--run-tests
-             (kaocha-runner--testable-sym (cider-current-ns) nil nil)
-             nil t original-buffer)))))))
+        (when (kaocha-runner--should-run-tests?)
+          (save-window-excursion
+            (when-let ((file (kaocha-runner--significant-other-find-existing-test)))
+              (find-file file)
+              (when (kaocha-runner--should-run-tests?)
+                (kaocha-runner--run-tests
+                 (kaocha-runner--testable-sym (cider-current-ns) nil nil)
+                 nil t original-buffer)))))))))
 
 (add-hook 'cider-file-loaded-hook #'kaocha-runner-run-relevant-tests)
 
