@@ -20,6 +20,7 @@
         paredit-doublequote
         paredit-forward
         paredit-forward-delete
+        paredit-forward-down
         paredit-forward-kill-word
         paredit-kill
         paredit-open-round
@@ -27,6 +28,7 @@
         paredit-raise-sexp
         paredit-splice-sexp
         paredit-wrap-round
+        paredit-wrap-square
         wgrep-finish-edit
         yaml-electric-backspace
         yaml-electric-dash-and-dot
