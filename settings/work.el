@@ -12,14 +12,14 @@
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
 
-(prodigy-define-service
-  :name "ShipClojure Datom Shadow-CLJS Watch"
-  :tags '(shipclojure-datom frontend)
-  :command "bb"
-  :args '("watch:frontend")
-  :cwd "~/workspace/shipclojure-datom"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
+;; (prodigy-define-service
+;;   :name "ShipClojure Datom Shadow-CLJS Watch"
+;;   :tags '(shipclojure-datom frontend)
+;;   :command "bb"
+;;   :args '("watch:frontend")
+;;   :cwd "~/workspace/shipclojure-datom"
+;;   :stop-signal 'sigkill
+;;   :kill-process-buffer-on-stop t)
 
 (prodigy-define-service
   :name "ShipCLojure Datom CSS Watch"
@@ -39,14 +39,14 @@
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
 
-(prodigy-define-service
-  :name "Wavekit Shadow-CLJS Watch"
-  :tags '(wavekit-ai frontend)
-  :command "bb"
-  :args '("watch:frontend")
-  :cwd "~/workspace/wavekit-ai"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
+;; (prodigy-define-service
+;;   :name "Wavekit Shadow-CLJS Watch"
+;;   :tags '(wavekit-ai frontend)
+;;   :command "bb"
+;;   :args '("watch:frontend")
+;;   :cwd "~/workspace/wavekit-ai"
+;;   :stop-signal 'sigkill
+;;   :kill-process-buffer-on-stop t)
 
 (prodigy-define-service
   :name "replicant-daisyui CSS Watch"
