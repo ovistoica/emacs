@@ -4,9 +4,11 @@
 (setq mc/cmds-to-run-for-all
       '(
         backward-sexp
+        clj-hippie-expand-no-case-fold
         cljr-slash
         clojure-backward-logical-sexp
         clojure-forward-logical-sexp
+        completion-at-point
         copy-region-or-current-line
         dabbrev-expand
         forward-sexp
@@ -23,6 +25,7 @@
         paredit-forward-down
         paredit-forward-kill-word
         paredit-kill
+        paredit-open-curly
         paredit-open-round
         paredit-open-square
         paredit-raise-sexp
@@ -36,6 +39,7 @@
 
 (setq mc/cmds-to-run-once
       '(
+        cider-load-buffer
         consult-recent-file
         dired-jump
         handle-switch-frame

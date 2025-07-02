@@ -60,8 +60,11 @@
 (use-package popper
   :straight '(:type git :host github :repo "karthink/popper")
   :bind (("C-`"   . popper-toggle)
+         ("C-\\"  . popper-toggle)
          ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
+         ("M-\\"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type)
+         ("C-M-\\" . popper-toggle-type))
   :init
   (setq popper-reference-buffers
         (append my/help-modes-list
