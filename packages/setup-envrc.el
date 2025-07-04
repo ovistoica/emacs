@@ -20,3 +20,5 @@
     (when (my/project-file-exists-p "requirements.txt")
       (projectile-run-shell-command-in-root "pip install -r requirements.txt"))
     (message "Python venv initialization finished!")))
+
+(provide 'setup-envrc)
