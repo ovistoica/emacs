@@ -127,4 +127,13 @@
   :defer 1
   :config (auto-sudoedit-mode 1))
 
+;; Make calendars start on Monday
+(setq calendar-week-start-day 1)
+
+;; Bucharest
+(setq calendar-latitude 44.4)
+(setq calendar-longitude 26.1)
+(setq calendar-location-name "Bucharest, Romania")
+(setq calendar-time-zone-style 'numeric)
+
 (provide 'sane-defaults)
