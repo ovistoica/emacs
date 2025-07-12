@@ -48,4 +48,9 @@
   :config
   (setq dired-subtree-use-backgrounds nil))
 
+(use-package dired-quick-sort
+  :after dired
+  :init
+  (dired-quick-sort-setup))
+
 (provide 'setup-dired)
