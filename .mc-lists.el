@@ -16,6 +16,7 @@
         kill-sexp
         mark-sexp
         mc/mark-next-lines
+        my/insert-lambda-symbol
         paredit-backward
         paredit-backward-kill-word
         paredit-backward-up

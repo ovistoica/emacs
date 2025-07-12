@@ -23,7 +23,7 @@
 
 ;; Configure Emacs for OSX
 (when (string= "darwin" system-type)
-  (require 'setup-mac))
+  (require 'romanian-mac))
 
 ;; Lets start with a smattering of sanity
 (require 'sane-defaults)

@@ -1,3 +1,5 @@
+(require 'romanian-mac)
+
 (use-package org
   :ensure nil
   :defer t
@@ -14,6 +16,8 @@
               ("M-+" . org-shiftright)
               ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
+
+  :hook ((org-mode . my/setup-romanian-diacritics))
 
   :config
   (unbind-key "S-<up>" org-mode-map)
