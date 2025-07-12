@@ -17,6 +17,13 @@
 ;; A convenient alternative to C-u as universal argument
 (global-set-key (kbd "s-u") 'universal-argument)
 
+(global-set-key (kbd "s-r") 'revert-buffer)
+
+;; Org organisation keybinds
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c a") 'org-agenda)
+
+
 (provide 'extra-keybindings)
 
 

@@ -5,7 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
- '(org-agenda-files '("~/Dropbox/working-memory.org"))
+ '(org-agenda-files '("~/Dropbox/org/working-memory.org"))
  '(package-selected-packages nil)
  '(safe-local-variable-values
    '((eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
