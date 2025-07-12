@@ -3,12 +3,16 @@
   :defer t
 
   :custom
+  (org-todo-keywords
+   '((sequence "TODO" "WAITING" "|" "DONE")))
   (org-todo-keyword-faces
-   '(("DONE" . (:foreground "green" :weight bold))))
+   '(("DONE" . (:foreground "green" :weight bold))
+     ("WAITING" . (:foreground "orange" :weight bold))))
+  (org-log-done 'time)
 
   :bind (:map org-mode-map
               ("M-+" . org-shiftright)
-              ("C-S-<down>" . org-metardown)
+              ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
 
   :config
