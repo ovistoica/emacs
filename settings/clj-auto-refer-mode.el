@@ -35,7 +35,7 @@
   (when (cljr--search-forward-within-sexp (concat "(" type))
     (skip-syntax-forward " >")
     (while (not (looking-at ")"))
-      (if (looking-at (regexp-quote (concat "[" s)))
+      (if (looking-at (concat "\\[" (regexp-quote s) "\\(\\s-\\|\\]\\)"))
           (cljr--delete-sexp)
         (paredit-forward))
       (skip-syntax-forward " >"))))
