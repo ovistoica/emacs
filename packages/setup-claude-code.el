@@ -7,7 +7,7 @@
   :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
                    :files ("*.el" (:exclude "demo.gif")))
   :bind-keymap
-  ("C-c c" . claude-code-command-map)
+  ("C-c C" . claude-code-command-map)
   :bind (:map claude-code-command-map
               ("Y" . claude-code-send-shift-tab))
   :config
