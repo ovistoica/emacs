@@ -40,6 +40,11 @@
           ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a")))
 
+  (setq org-feed-alist
+        '(("Slashdot"
+           "https://rss.slashdot.org/Slashdot/slashdot"
+           "~/Dropbox/org/feeds.org" "Slashdot Entries")))
+
   ;; Update [/] cookies after a selection of commands
 
   (--each '(org-yank
