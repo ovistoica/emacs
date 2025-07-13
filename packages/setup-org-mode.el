@@ -6,10 +6,16 @@
 
   :custom
   (org-todo-keywords
-   '((sequence "TODO" "WAITING" "|" "DONE")))
+        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)")))
+
   (org-todo-keyword-faces
    '(("DONE" . (:foreground "green" :weight bold))
-     ("WAITING" . (:foreground "orange" :weight bold))))
+     ("WAITING" . (:foreground "orange" :weight bold))
+     ("NEXT" . (:foreground "green" :weight bold))
+     ("PROJECT" . (:foreground "blue" :weight bold))))
+
+  (org-use-fast-todo-selection t)
+
   (org-log-done 'time)
 
   :bind (:map org-mode-map
@@ -20,10 +26,19 @@
   :hook ((org-mode . my/setup-romanian-diacritics))
 
   :config
+
   (unbind-key "S-<up>" org-mode-map)
   (unbind-key "S-<down>" org-mode-map)
   (unbind-key "S-<left>" org-mode-map)
   (unbind-key "S-<right>" org-mode-map)
+
+  (setq org-directory "~/Dropbox/org")
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
+           "* TODO %?\n  %i\n  %a")
+          ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+           "* %?\nEntered on %U\n  %i\n  %a")))
 
   ;; Update [/] cookies after a selection of commands
 
