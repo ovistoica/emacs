@@ -200,11 +200,22 @@ Including indent-buffer, which should not be called automatically on save."
                              (and (looking-back ">" 1) (looking-at "<"))
                              (and (looking-back "(" 1) (looking-at ")"))
                              (and (looking-back "\\[" 1) (looking-at "\\]")))))
-    (newline)
-    (when break-open-pair
+    (cond
+     ;; In org-mode and on a list item
+     ((and (eq major-mode 'org-mode)
+           (org-in-item-p))
+      (org-insert-item))
+     ;; Handle bracket pairs
+     (break-open-pair
+      (newline)
       (save-excursion
         (newline)
-        (indent-for-tab-command)))
-    (indent-for-tab-command)))
+        (indent-for-tab-command))
+      (indent-for-tab-command))
+     ;; Default case
+     (t
+      (newline)
+      (indent-for-tab-command)))))
+
 
 (provide 'editing)
