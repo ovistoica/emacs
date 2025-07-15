@@ -6,7 +6,7 @@
 
   :custom
   (org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)")))
+   '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)")))
 
   (org-todo-keyword-faces
    '(("DONE" . (:foreground "green" :weight bold))
@@ -65,5 +65,16 @@
         (forward-char -1)
         (org-back-to-heading)
         (org-update-parent-todo-statistics)))))
+
+
+(defun my/markdown-to-org-region (start end)
+  "Convert Markdown formatted text in region (START, END) to Org.
+
+This command requires that pandoc (man page `pandoc(1)') be
+installed."
+  (interactive "r")
+  (shell-command-on-region
+   start end
+   "pandoc -f markdown -t org --wrap=preserve" t t))
 
 (provide 'setup-org-mode)

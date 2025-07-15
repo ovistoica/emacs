@@ -5,6 +5,7 @@
       '(
         backward-sexp
         clj-hippie-expand-no-case-fold
+        cljr-raise-sexp
         cljr-slash
         clojure-backward-logical-sexp
         clojure-forward-logical-sexp
@@ -17,6 +18,9 @@
         mark-sexp
         mc/mark-next-lines
         my/insert-lambda-symbol
+        org-delete-char
+        org-kill-line
+        org-self-insert-command
         paredit-backward
         paredit-backward-kill-word
         paredit-backward-up
