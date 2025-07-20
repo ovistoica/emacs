@@ -10,6 +10,7 @@
   :straight '(nerd-icons :type git :host github :repo "rainstormstudio/nerd-icons.el"))
 
 (use-package nerd-icons-dired
+  :diminish " "
   :straight '(nerd-icons-dired :type git :host github :repo "rainstormstudio/nerd-icons-dired")
   :hook
   (dired-mode . nerd-icons-dired-mode))

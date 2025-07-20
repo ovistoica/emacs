@@ -8,8 +8,8 @@
   (setq dired-dwim-target t)
 
   ;; Sort directories first
-  (setq dired-use-ls-dired t)
-  (setq dired-listing-switches "-lAXGh --group-directories-first --sort=name")
+  ;; (setq dired-use-ls-dired t)
+  ;; (setq dired-listing-switches "-lAXGh --group-directories-first --sort=name")
 
   ;; Don't ask me for recursive copies
   (setq dired-recursive-copies 'always)
@@ -52,5 +52,10 @@
   :after dired
   :init
   (dired-quick-sort-setup))
+
+;; Diminish dired in modeline
+(with-eval-after-load 'dired
+  (when (fboundp 'diminish)
+    (diminish 'dired-mode)))
 
 (provide 'setup-dired)
