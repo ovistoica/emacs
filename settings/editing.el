@@ -27,7 +27,7 @@
 (global-set-key (kbd "M-j") (λ (join-line -1)))
 
 ;; Query replace regex key binding
-(global-set-key (kbd "M-&") 'query-replace-regexp)
+(global-set-key (kbd "M-&") 'async-shell-command)
 
 ;; Delete blank lines
 (global-set-key (kbd "C-c C-<return>") 'delete-blank-lines)

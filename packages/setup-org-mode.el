@@ -6,13 +6,12 @@
 
   :custom
   (org-todo-keywords
-   '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)")))
+   '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)")))
 
   (org-todo-keyword-faces
    '(("DONE" . (:foreground "green" :weight bold))
      ("WAITING" . (:foreground "orange" :weight bold))
-     ("NEXT" . (:foreground "green" :weight bold))
-     ("PROJECT" . (:foreground "blue" :weight bold))))
+     ("NEXT" . (:foreground "green" :weight bold))))
 
   (org-use-fast-todo-selection t)
 
@@ -27,10 +26,17 @@
 
   :config
 
+  ;; Disable to support integration of window-mode with org schedule
   (unbind-key "S-<up>" org-mode-map)
   (unbind-key "S-<down>" org-mode-map)
   (unbind-key "S-<left>" org-mode-map)
   (unbind-key "S-<right>" org-mode-map)
+
+  ;; Don't do literal modifications to the file
+  (setq org-adapt-indentation nil)
+
+  ;;Use indent mode but keep the stars visible
+  (setq org-indent-mode-turns-on-hiding-stars nil)
 
   (setq org-directory "~/Dropbox/org")
 
