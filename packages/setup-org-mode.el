@@ -43,7 +43,10 @@
   (setq org-feed-alist
         '(("Slashdot"
            "https://rss.slashdot.org/Slashdot/slashdot"
-           "~/Dropbox/org/feeds.org" "Slashdot Entries")))
+           "~/Dropbox/org/feeds.org" "Slashdot Entries")
+          ("Clojure deref"
+           "https://clojure.org/feed.xml"
+           "~/Dropbox/org/feeds.org" "Clojure Deref Entries")))
 
   ;; Update [/] cookies after a selection of commands
 
