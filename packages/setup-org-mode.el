@@ -77,4 +77,98 @@ installed."
    start end
    "pandoc -f markdown -t org --wrap=preserve" t t))
 
+(defun my/org-de-autofill (&optional start end)
+  "Remove autofill formatting from region or entire buffer.
+If a region is active, process only the region (START, END).
+Otherwise, process the entire buffer."
+  (interactive (when (use-region-p)
+                 (list (region-beginning) (region-end))))
+  (let* ((use-region (and start end))
+         (beg (or start (point-min)))
+         (end-pos (or end (point-max)))
+         (text (buffer-substring beg end-pos))
+         (processed-text
+          (with-temp-buffer
+            (insert text)
+            (goto-char (point-min))
+            ;; Join lines that were broken by autofill
+            ;; Look for lines that don't end with sentence endings or intentional breaks
+            (while (not (eobp))
+              (let ((line-end (line-end-position)))
+                (when (and (not (eobp))
+                           (< line-end (point-max))
+                           (not (looking-at ".*[.!?:]\\s-*$"))  ; Not ending with punctuation
+                           (not (looking-at ".*\\s-\\s-$"))      ; Not ending with double space
+                           (not (looking-at "^\\s-*$"))         ; Not empty line
+                           (not (looking-at "^\\*+\\s-"))       ; Not org heading
+                           (not (looking-at "^#\\+"))           ; Not org option line
+                           (save-excursion
+                             (forward-line 1)
+                             (and (not (looking-at "^\\s-*$"))  ; Next line not empty
+                                  (not (looking-at "^\\*+\\s-")) ; Next line not heading
+                                  (not (looking-at "^#\\+")))))  ; Next line not option
+                  (end-of-line)
+                  (delete-char 1)  ; Remove newline
+                  (when (looking-at "\\s-+")
+                    (delete-region (point) (match-end 0)))  ; Remove extra spaces
+                  (insert " "))  ; Add single space
+                (forward-line 1)))
+            (buffer-string))))
+    ;; Replace the content
+    (save-excursion
+      (delete-region beg end-pos)
+      (goto-char beg)
+      (insert processed-text))))
+
+(defun my/org-auto-fillify (&optional start end)
+  "Apply autofill formatting to region or entire buffer.
+If a region is active, process only the region (START, END).
+Otherwise, process the entire buffer."
+  (interactive (when (use-region-p)
+                 (list (region-beginning) (region-end))))
+  (let* ((use-region (and start end))
+         (beg (or start (point-min)))
+         (end-pos (or end (point-max)))
+         (text (buffer-substring beg end-pos))
+         (processed-text
+          (with-temp-buffer
+            (org-mode)  ; Use org-mode for proper syntax handling
+            (insert text)
+            (auto-fill-mode 1)
+            (setq fill-column (or (and (boundp 'org-fill-column) org-fill-column) 
+                                  fill-column 
+                                  70))
+            (goto-char (point-min))
+            ;; Process line by line, being careful with org syntax
+            (while (not (eobp))
+              (cond
+               ;; Skip org option lines (#+title:, #+description:, etc.)
+               ((looking-at "^#\\+")
+                (forward-line 1))
+               ;; Skip org headings
+               ((looking-at "^\\*+\\s-")
+                (forward-line 1))
+               ;; Skip empty lines
+               ((looking-at "^\\s-*$")
+                (forward-line 1))
+               ;; Process regular content paragraphs
+               (t
+                (let ((para-start (point)))
+                  ;; Find end of current paragraph (stop at empty line, heading, or option)
+                  (while (and (not (eobp))
+                              (not (looking-at "^\\s-*$"))     ; Not empty line
+                              (not (looking-at "^\\*+\\s-"))   ; Not heading
+                              (not (looking-at "^#\\+")))      ; Not option line
+                    (forward-line 1))
+                  (let ((para-end (point)))
+                    (when (> para-end para-start)
+                      ;; Fill this paragraph
+                      (fill-region para-start para-end)))))))
+            (buffer-string))))
+    ;; Replace the content
+    (save-excursion
+      (delete-region beg end-pos)
+      (goto-char beg)
+      (insert processed-text))))
+
 (provide 'setup-org-mode)
