@@ -1,6 +1,9 @@
 ;; setup-notmuch.el
 ;; notmuch is a mail indexer and Mail User Agent (MUA). I use it to read and organize emails
 
+(require 'prot-common)
+(require 'prot-notmuch)
+
 ;; I install notmuch from the distro's repos because the CLI program is
 ;; not dependent on Emacs. Though the package also includes notmuch.el
 ;; which is what we use here (they are maintained by the same people).
