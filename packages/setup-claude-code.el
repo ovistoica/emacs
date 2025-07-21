@@ -4,6 +4,7 @@
 
 (use-package claude-code
   :after (eat transient)
+  :diminish ""
   :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
                    :files ("*.el" (:exclude "demo.gif")))
   :bind-keymap
