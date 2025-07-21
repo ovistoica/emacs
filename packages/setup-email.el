@@ -64,13 +64,4 @@
   (setq smtpmail-smtp-service 587)
   (setq smtpmail-stream-type 'starttls))
 
-;; I install notmuch from the distro's repos because the CLI program is
-;; not dependent on Emacs. Though the package also includes notmuch.el
-;; which is what we use here (they are maintained by the same people).
-(use-package notmuch
-  :load-path "/opt/homebrew/Cellar/notmuch/0.39/share/emacs/site-lisp/notmuch/"
-  :defer t
-  :commands (notmuch notmuch-mua-new-mail))
-
-
 (provide 'setup-email)

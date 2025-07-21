@@ -235,3 +235,6 @@ that and instead tries to complete against dictionary entries."
   (add-to-list 'notmuch-tag-formats '("attachment" (concat tag "📎")))
   (add-to-list 'notmuch-tag-formats '("coach" (concat tag "🏆")))
   (add-to-list 'notmuch-tag-formats '("package" (concat tag "🗂️"))))
+
+
+(provide 'setup-notmuch)
