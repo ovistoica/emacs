@@ -85,7 +85,7 @@
   (setq notmuch-show-empty-saved-searches t)
   (setq notmuch-saved-searches
         `(( :name "📥 inbox"
-            :query "tag:inbox"
+            :query "tag:inbox not tag:sent"
             :sort-order newest-first
             :key ,(kbd "i"))
           ( :name "💬 all unread (inbox)"
@@ -95,7 +95,11 @@
           ( :name "🛠️ unread packages"
             :query "tag:unread and tag:package"
             :sort-order newest-first
-            :key ,(kbd "p")))))
+            :key ,(kbd "p"))
+          ( :name "📤 Sent mail"
+            :query "tag:sent"
+            :sort-order newest-first
+            :key , (kbd "s")))))
 
 (use-package notmuch
   :defer t
