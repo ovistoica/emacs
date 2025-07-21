@@ -88,7 +88,11 @@
           ( :name "💬 all unread (inbox)"
             :query "tag:unread and tag:inbox"
             :sort-order newest-first
-            :key ,(kbd "u")))))
+            :key ,(kbd "u"))
+          ( :name "🛠️ unread packages"
+            :query "tag:unread and tag:package"
+            :sort-order newest-first
+            :key ,(kbd "p")))))
 
 (use-package notmuch
   :defer t
@@ -236,5 +240,29 @@ that and instead tries to complete against dictionary entries."
   (add-to-list 'notmuch-tag-formats '("coach" (concat tag "🏆")))
   (add-to-list 'notmuch-tag-formats '("package" (concat tag "🗂️"))))
 
+(use-package ol-notmuch
+  :ensure t
+  :after notmuch)
+
+(use-package notmuch-indicator
+  :ensure t
+  :after notmuch
+  :config
+  (setq notmuch-indicator-args
+        '(( :terms "tag:unread and tag:inbox"
+            ;; :label "[U] "
+            :label "💬 "
+            :label-face prot-modeline-indicator-cyan
+            :counter-face prot-modeline-indicator-cyan))
+
+        notmuch-indicator-refresh-count (* 60 3)
+        notmuch-indicator-hide-empty-counters t
+        notmuch-indicator-force-refresh-commands '(notmuch-refresh-this-buffer))
+
+  ;; I control its placement myself.  See prot-emacs-modeline.el where
+  ;; I set the `mode-line-format'.
+  (setq notmuch-indicator-add-to-mode-line-misc-info nil)
+
+  (notmuch-indicator-mode 1))
 
 (provide 'setup-notmuch)
