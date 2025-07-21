@@ -94,4 +94,10 @@
   (windmove-right)
   (balance-windows))
 
+
+(defun zshrc ()
+  (interactive)
+  (find-file "~/.zshrc"))
+
+
 (provide 'navigation)
