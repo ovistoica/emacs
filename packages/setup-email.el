@@ -54,6 +54,16 @@
   :hook
   (dired-mode . turn-on-gnus-dired-mode))
 
+;; SMTP settings for Gmail
+(use-package smtpmail
+  :ensure nil
+  :after message
+  :config
+  (setq send-mail-function #'smtpmail-send-it)
+  (setq smtpmail-smtp-server "smtp.gmail.com")
+  (setq smtpmail-smtp-service 587)
+  (setq smtpmail-stream-type 'starttls))
+
 ;; I install notmuch from the distro's repos because the CLI program is
 ;; not dependent on Emacs. Though the package also includes notmuch.el
 ;; which is what we use here (they are maintained by the same people).
