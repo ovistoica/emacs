@@ -97,9 +97,14 @@
             :sort-order newest-first
             :key ,(kbd "p"))
           ( :name "📤 Sent mail"
-            :query "tag:sent"
+            :query "tag:sent not tag:dellocal not tag:archivesent"
             :sort-order newest-first
-            :key , (kbd "s")))))
+            :key , (kbd "s"))
+
+          ( :name "🗄️ Archive"
+            :query "tag:archiveinbox"
+            :sort-order newest-first
+            :key , (kbd "a")))))
 
 (use-package notmuch
   :defer t
