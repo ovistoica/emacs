@@ -42,10 +42,16 @@
   (setq org-directory "~/Dropbox/org")
 
   (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
+        '(("a" "Affirmation" entry (file+datetree "~/Dropbox/org/affirmations.org")
+           "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
+          ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
+           "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
+          ("d" "Deadline" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
+           "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1)
+          ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %?\n  %i\n  %a")
           ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
-           "* %?\nEntered on %U\n  %i\n  %a")))
+           "* %?\nEntered on %U\n  %i\n ")))
 
   (setq org-feed-alist
         '(("Slashdot"
