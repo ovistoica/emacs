@@ -22,7 +22,8 @@
               ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
 
-  :hook ((org-mode . my/setup-romanian-diacritics))
+  :hook ((org-mode . my/setup-romanian-diacritics)
+         (org-mode . auto-fill-mode))
 
   :config
 
