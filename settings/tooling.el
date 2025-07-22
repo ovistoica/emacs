@@ -33,10 +33,6 @@
 
 (defvar my/previous-window-configuration nil)
 
-(defun my/insert-lambda-symbol ()
-  (interactive)
-  (insert "\u03bb"))
-
 (defun my/copy-buffer-as-prompt ()
   "Copy the current buffer content with file information for AI prompts."
   (interactive)

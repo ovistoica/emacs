@@ -89,4 +89,17 @@
   (interactive)
   (async-shell-command "/Users/ovistoica/.local/bin/sync-mail"))
 
+
+(defun show-email-sync-logs ()
+  "Show the logs for email"
+  (interactive)
+  (let ((prev-config (current-window-configuration)))
+    (find-file "~/.local/logs/mbsync.log")
+    (setq-local my/previous-window-configuration prev-config)
+    (local-set-key (kbd "q")
+      (lambda ()
+        (interactive)
+        (kill-buffer (current-buffer))
+        (set-window-configuration my/previous-window-configuration)))))
+
 (provide 'setup-email)
