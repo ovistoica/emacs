@@ -9,9 +9,9 @@
   :bind (("C-x C-b" . persp-ibuffer)
          ("C-x b" . persp-switch-to-buffer*)
          ("C-x k" . persp-kill-buffer*))
-  :custom
-  (persp-mode-prefix-key (kbd "C-x x"))
-  :init
+  :config
+  (setq persp-mode-prefix-key (kbd "C-x x"))
+  (setq persp-modestring-short t)
   (persp-mode))
 
 ;; Avoid popping ediff up in separate window, it breaks perspective
