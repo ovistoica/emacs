@@ -99,7 +99,12 @@
           ( :name "📤 Sent mail"
             :query "tag:sent not tag:dellocal not tag:archivesent"
             :sort-order newest-first
-            :key , (kbd "s"))
+            :key ,(kbd "s"))
+
+          ( :name "📬 Mail lists"
+            :query "tag:mailing_list not tag:dellocal not tag:archiveinbov"
+            :sort-order newest-first
+            :key ,(kbd "m"))
 
           ( :name "🗄️ Archive"
             :query "tag:archiveinbox"
@@ -243,14 +248,16 @@ that and instead tries to complete against dictionary entries."
           (,(kbd "f") prot-notmuch-mark-flag-tags "🚩 Flag as important")
           (,(kbd "s") prot-notmuch-mark-spam-tags "🔥 Mark as spam")
           (,(kbd "r") ("-unread") "👁️‍🗨️ Mark as read")
-          (,(kbd "u") ("+unread") "🗨️ Mark as unread")))
+          (,(kbd "u") ("+unread") "🗨️ Mark as unread")
+          (,(kbd "m") ("-unread" "+mailing_list" "-inbox") "📬 Mark as mailing list")))
 
   ;; These emoji are purely cosmetic.  The tag remains the same: I
   ;; would not like to input emoji for searching.
   (add-to-list 'notmuch-tag-formats '("encrypted" (concat tag "🔒")))
   (add-to-list 'notmuch-tag-formats '("attachment" (concat tag "📎")))
   (add-to-list 'notmuch-tag-formats '("coach" (concat tag "🏆")))
-  (add-to-list 'notmuch-tag-formats '("package" (concat tag "🗂️"))))
+  (add-to-list 'notmuch-tag-formats '("package" (concat tag "🗂️")))
+  (add-to-list 'notmuch-tag-formats '("mailing_list" (concat tag "📬"))))
 
 (use-package ol-notmuch
   :ensure t
