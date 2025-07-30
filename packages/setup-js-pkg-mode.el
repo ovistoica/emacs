@@ -3,4 +3,4 @@
 (use-package js-pkg-mode
   :diminish js-pkg-mode
   :straight (:type git :local-repo "~/workspace/js-pkg-mode")
-  :init (js-pkg-global-mode 1))
+  :config (js-pkg-global-mode 1))

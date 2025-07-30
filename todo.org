@@ -1,0 +1,10 @@
+#+title: TODOs for my emacs config
+#+description: Things I'd like to have but don't have time to do yet / not a big enough issue
+
+* TODO Fix =auto-refer-mode= removing =use-fixture= from clojure namespace imports
+
+* TODO Add some more themes.
+
+* TODO Add denote for articles/blogs/wiki - doing book reviews
+
+* TODO Add config for typescript with treesitter

@@ -9,7 +9,7 @@
   :bind (("C-x C-b" . persp-ibuffer)
          ("C-x b" . persp-switch-to-buffer*)
          ("C-x k" . persp-kill-buffer*))
-  :config
+  :init
   (setq persp-mode-prefix-key (kbd "C-x x"))
   (setq persp-modestring-short t)
   (persp-mode))

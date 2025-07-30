@@ -69,7 +69,9 @@
             org-kill-line
             kill-whole-line
             duplicate-current-line-or-region)
-    (advice-add it :after 'my/org-update-parent-cookie)))
+    (advice-add it :after 'my/org-update-parent-cookie))
+
+  (require 'ox-gfm nil t))
 
 (defun my/org-update-parent-cookie (&rest _)
   (when (equal major-mode 'org-mode)
