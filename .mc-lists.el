@@ -12,6 +12,7 @@
         completion-at-point
         copy-region-or-current-line
         dabbrev-expand
+        end-of-buffer
         forward-sexp
         indent-for-tab-command
         kill-sexp
