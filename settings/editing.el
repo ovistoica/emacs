@@ -11,9 +11,6 @@
 (global-set-key (kbd "C-+") 'inc-number-at-point)
 (global-set-key (kbd "C-?") 'dec-number-at-point)
 
-;; Clean up whitespace
-(global-set-key (kbd "C-c n") 'cleanup-buffer)
-
 ;; Copy to end of current line if no region
 (global-set-key (kbd "M-w") 'copy-region-or-current-line)
 
@@ -138,14 +135,6 @@ If there's no region, the current line will be duplicated."
 (defun dec-number-at-point (arg)
   (interactive "p")
   (inc-number-at-point (- arg)))
-
-(defun cleanup-buffer ()
-  "Perform a bunch of operations on the whitespace content of a buffer.
-Including indent-buffer, which should not be called automatically on save."
-  (interactive)
-  (untabify (point-min) (point-max))
-  (delete-trailing-whitespace)
-  (indent-region (point-min) (point-max)))
 
 (defun kill-region-or-backward-word ()
   (interactive)

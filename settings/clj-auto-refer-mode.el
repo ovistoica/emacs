@@ -5,7 +5,6 @@
 (require 'dash)
 (require 'cider)
 (require 'clj-refactor)
-(require 'clj-clean-namespace)
 
 (defvar auto-refer-packages nil)
 ;; see setup-clj-refactor.el for usage (for now)
@@ -53,8 +52,7 @@
             (apply 'insert (->> usages
                                 (-sort 'string<)
                                 (-interpose " ")))
-            (insert "]]"))))
-      (clj-cn-sort-ns))))
+            (insert "]]")))))))
 
 (defun auto-refer--update-cljs-namespace (package)
   (let* ((ns (or (plist-get package :cljs-ns)
@@ -86,8 +84,7 @@
             (apply 'insert (->> used-macros
                                 (-sort 'string<)
                                 (-interpose " ")))
-            (insert "]]"))
-          (clj-cn-sort-ns))))))
+            (insert "]]")))))))
 
 (defun auto-refer-update-namespace ()
   (interactive)

@@ -1,7 +1,8 @@
+(require 'standard-clojure)
+
 (use-package clojure-mode
-  :hook ((clojure-mode . setup-clojure-mode-so)
-         (clojurescript-mode-hook . setup-clojure-mode-so)
-         (clojurec-mode-hook . setup-clojure-mode-so))
+  :hook (((clojure-mode clojurescript-mode clojurec-mode) . standard-clojure-hook)
+         ((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))
 
   :custom
   (clojure-toplevel-inside-comment-form t)
@@ -29,6 +30,7 @@
               ("<f6>" . cider-pprint-eval-last-sexp)
               ("<f5>" . delete-other-windows)
               ("s-<return>" . clerk-show)))
+
 
 (use-package zprint-mode
   :defer 2)
