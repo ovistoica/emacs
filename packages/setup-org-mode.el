@@ -6,12 +6,12 @@
 
   :custom
   (org-todo-keywords
-   '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)")))
+   '((sequence "TODO(t)" "WAIT(w)" "EVENT(e)" "|" "DONE(d)")))
 
   (org-todo-keyword-faces
    '(("DONE" . (:foreground "green" :weight bold))
-     ("WAITING" . (:foreground "orange" :weight bold))
-     ("NEXT" . (:foreground "green" :weight bold))))
+     ("WAIT" . (:foreground "orange" :weight bold))
+     ("EVENT" . (:foreground "blue" :weight bold))))
 
   (org-use-fast-todo-selection t)
 
@@ -45,7 +45,7 @@
         '(("a" "Affirmation" entry (file+datetree "~/Dropbox/org/affirmations.org")
            "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
-           "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
+           "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
           ("d" "Deadline" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1)
           ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")

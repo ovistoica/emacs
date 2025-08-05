@@ -13,6 +13,7 @@
         copy-region-or-current-line
         dabbrev-expand
         end-of-buffer
+        fixup-whitespace
         forward-sexp
         indent-for-tab-command
         kill-sexp
