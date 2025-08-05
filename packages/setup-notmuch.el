@@ -26,18 +26,14 @@
   :defer t
   :config
   (let ((prim (prot-common-auth-get-field "gmail-primary-smtp" :user))
-
-        ;;(sec (prot-common-auth-get-field "gmail-secondary-smtp" :user))
-        )
+        (sec (prot-common-auth-get-field "gmail-secondary-smtp" :user)))
     (setq notmuch-identities
           (mapcar (lambda (str)
                     (format "%s <%s>" user-full-name str))
-                  (list prim))
+                  (list prim sec))
           notmuch-fcc-dirs
           `((,prim . "gmail/Sent")
-
-
-            ;;(,sec . "gmail/Sent")
+            (,sec . "gmail/Sent")
             ))))
 
 (use-package notmuch
