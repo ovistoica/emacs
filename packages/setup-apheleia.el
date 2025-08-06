@@ -12,7 +12,10 @@
   :ensure t
   :diminish ""                          ; Don't show in modeline
   :bind ((:map global-map
-               ("C-c n" . my/format-buffer)))
+               ("C-c p" . my/format-buffer)))
+
+  :init
+  (apheleia-global-mode)
 
   :config
   (setf (alist-get 'shfmt apheleia-formatters)
