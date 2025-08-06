@@ -6,8 +6,8 @@
 
 (use-package perspective
   :straight '(perspective :type git :host github :repo "nex3/perspective-el")
+  :hook ((persp-mode . my/perspective-setup-universal-buffers))
   :bind (("C-x C-b" . persp-ibuffer)
-         ("C-x b" . persp-switch-to-buffer*)
          ("C-x k" . persp-kill-buffer*))
   :init
   (setq persp-mode-prefix-key (kbd "C-x x"))
@@ -24,5 +24,13 @@
      (persp-switch ,name)
      (when initialize ,@body)
      (set-frame-parameter nil 'persp--last current-perspective)))
+
+(defun my/perspective-setup-universal-buffers ()
+  "Add common universal buffers to frame-global
+  perspective."
+  (when (get-buffer "*Messages*")
+    (persp-add-buffer-to-frame-global "*Messages*"))
+  (when (get-buffer "*Warnings*")
+    (persp-add-buffer-to-frame-global "*Warnings*")))
 
 (provide 'setup-perspective)
