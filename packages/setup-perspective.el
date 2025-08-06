@@ -10,10 +10,12 @@
          ("C-x k" . persp-kill-buffer*))
   :init
   (setq persp-mode-prefix-key (kbd "C-x x"))
+  (persp-mode)
+  :config
   (setq persp-modestring-short t)
   (persp-add-buffer-to-frame-global "*Messages*")
   (persp-add-buffer-to-frame-global "*Warnings*")
-  (persp-mode))
+  (persp-add-buffer-to-frame-global "*lsp-log*"))
 
 ;; Avoid popping ediff up in separate window, it breaks perspective
 (setq ediff-window-setup-function #'ediff-setup-windows-plain)
