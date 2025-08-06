@@ -11,7 +11,8 @@
   (unbind-key "C-M-b" vterm-mode-map)
   (unbind-key "C-M-f" vterm-mode-map)
   (unbind-key "M-w" vterm-mode-map)
-  (unbind-key "C-M-@" vterm-mode-map))
+  (unbind-key "C-M-@" vterm-mode-map)
+  (unbind-key "M-&" vterm-mode-map))
 
 
 (provide 'setup-vterm)
