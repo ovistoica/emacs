@@ -36,6 +36,17 @@
 ;; Setup environment variables from the user's shell.
 (use-package exec-path-from-shell
   :init
+  (setq exec-path-from-shell-shell-name "/bin/zsh") ; Explicitly set shell
+  (setq exec-path-from-shell-variables
+        '(
+          "ANTHROPIC_API_KEY"
+          "OPENAI_API_KEY"
+          "MANPATH"
+          "NVM_DIR"
+          "PATH"
+          "SSH_AGENT_PID"
+          "SSH_AUTH_SOCK"
+          ))
   (exec-path-from-shell-initialize))
 
 (provide 'romanian-mac)
