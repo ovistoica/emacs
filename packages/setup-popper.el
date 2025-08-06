@@ -111,6 +111,8 @@
                                        (side . right)
                                        (window-width . 0.4)))
 
+  (setq popper-group-function #'popper-group-by-perspective) ; group by perspective
+
   (popper-mode +1)
   (popper-echo-mode +1))
 
