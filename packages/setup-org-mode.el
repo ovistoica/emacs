@@ -42,7 +42,7 @@
   (setq org-directory "~/Dropbox/org")
 
   (setq org-capture-templates
-        '(("a" "Affirmation" entry (file+datetree "~/Dropbox/org/affirmations.org")
+        '(("a" "Affirmation" entry (file+olp+datetree "~/Dropbox/org/affirmations.org")
            "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
@@ -50,7 +50,7 @@
            "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1)
           ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %?\n  %i\n  %a")
-          ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+          ("j" "Journal" entry  (file+olp+datetree "~/Dropbox/org/journal.org")
            "* %?\nEntered on %U\n  %i\n ")
           ("p" "Social Post" entry (file+headline "~/Dropbox/org/social-posts.org" "Posts")
            "* %?\n  %U" :empty-lines 1)))

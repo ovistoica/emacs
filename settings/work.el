@@ -6,7 +6,7 @@
 (prodigy-define-service
   :name "Datomic Transactor"
   :tags '(wavekit-ai shipclojure-datom datomic)
-  :command "transactor"
+  :command "/Users/ovistoica/datomic-pro-1.0.7364/bin/transactor"
   :args '("config/samples/dev-transactor-template.properties")
   :cwd "~/"
   :stop-signal 'sigkill

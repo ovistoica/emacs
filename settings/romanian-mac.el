@@ -6,6 +6,7 @@
 
 (defun my/setup-romanian-diacritics ()
   "Set up Romanian diacritics input"
+  (interactive)
   (local-set-key (kbd "s-a") (λ (insert "ă")))
   (local-set-key (kbd "s-q") (λ (insert "â")))
   (local-set-key (kbd "s-t") (λ (insert "ț")))
