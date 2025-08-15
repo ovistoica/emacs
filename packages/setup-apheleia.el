@@ -14,9 +14,6 @@
   :bind ((:map global-map
                ("C-c p" . my/format-buffer)))
 
-  :init
-  (apheleia-global-mode)
-
   :config
   (setf (alist-get 'shfmt apheleia-formatters)
         '("shfmt" "-i=4" "-sr" "-kp"))
@@ -38,6 +35,7 @@
 (defun apheleia-mode-formatter (&optional mode)
   "Return the formatter for the current major mode, or nil. Special case
 for elisp where we don't want it handled by apheleia."
+  (require 'apheleia-formatters)
   (let ((mode (or mode major-mode)))
     (when (not (eq mode 'emacs-lisp-mode))
       (alist-get mode apheleia-mode-alist))))
