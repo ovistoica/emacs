@@ -1,8 +1,5 @@
-(require 'standard-clojure)
-
 (use-package clojure-mode
-  :hook (((clojure-mode clojurescript-mode clojurec-mode) . standard-clojure-hook)
-         ((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))
+  :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))
 
   :custom
   (clojure-toplevel-inside-comment-form t)
