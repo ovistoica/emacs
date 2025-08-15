@@ -1,7 +1,30 @@
 (use-package lsp-mode
+  :preface
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+
+       (let ((bytecode (read (current-buffer))))
+         (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?) ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection)) ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+        orig-result)))
   :hook ((clojure-mode . lsp)
          (clojurescript-mode . lsp)
          (clojurec-mode . lsp)
+         (python-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :diminish " lsp"
 
@@ -31,11 +54,33 @@
   :config
   (define-key lsp-command-map (kbd "d") #'lsp-ui-doc-glance)
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
-  (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback))
+  (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback)
+  ;; (setq lsp-use-plists t)
+
+
+  )
 
 (use-package lsp-ui
   :after lsp-mode
   :defer t)
+
+(use-package lsp-pyright
+  :preface
+  (defun lsp-pyright-hook ()
+    (require 'lsp-pyright)
+    (lsp))
+  (defun os/locate-python-virtualenv ()
+    "Find the Python executable based on the VIRTUAL_ENV environment variable."
+    (when-let ((venv (getenv "VIRTUAL_ENV")))
+      (let ((python-path (expand-file-name "bin/python" venv)))
+        (when (file-executable-p python-path)
+          python-path))))
+  :straight '(lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
+  :config (add-to-list 'lsp-pyright-python-search-functions #'os/locate-python-virtualenv)
+  :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+  :hook ((python-mode . lsp-pyright-hook)
+         (python-ts-mode . lsp-pyright-hook)))
+
 
 (defun my/use-lsp-completion-only-as-fallback ()
   (when (-contains? completion-at-point-functions #'lsp-completion-at-point)
