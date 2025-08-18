@@ -1,6 +1,6 @@
 (use-package magit
   :defer t
-  :custom 
+  :custom
   (magit-section-initial-visibility-alist '((untracked . show)
                                             (unstaged . show)
                                             (unpushed . show)
@@ -11,17 +11,16 @@
   (magit-no-confirm '(stage-all-changes
                       unstage-all-changes))
 
-  :bind (("C-x m" . magit-status)
-         (:map magit-status-mode-map
+  :bind ((:map magit-status-mode-map
                ("q" . magit-quit)))
-  :config 
+  :config
   (wrap-fullscreen magit-status)
   (wrap-fullscreen magit-init)
 
   ;; move cursor into position when entering commit message
   (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix))
 
-(use-package git-timemachine 
+(use-package git-timemachine
   :defer t
   :bind (("C-x v t" . git-timemachine)))
 
