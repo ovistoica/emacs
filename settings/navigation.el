@@ -40,6 +40,13 @@
 
 (use-package windmove)
 
+(use-package view-mode
+  :ensure nil
+  :bind (("<f12>" . view-mode )
+         :map view-mode-map
+         ("n" . forward-line)
+         ("p" . previous-line)))
+
 (defun isearch-forward-use-region ()
   (interactive)
   (when (region-active-p)
