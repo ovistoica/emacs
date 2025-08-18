@@ -32,6 +32,7 @@
         paredit-forward-down
         paredit-forward-kill-word
         paredit-kill
+        paredit-kill-region-or-backward-word
         paredit-open-curly
         paredit-open-round
         paredit-open-square
