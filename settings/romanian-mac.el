@@ -4,6 +4,10 @@
 (setq ns-function-modifier 'hyper)
 (setq mac-right-option-modifier nil)
 
+;; Fix for emacs password prompt for gpg:
+;; https://bpanthi977.com/braindump/configuring_gpg_for_emacs_in_macos.html
+(setq epa-pinentry-mode 'loopback)
+
 (defun my/setup-romanian-diacritics ()
   "Set up Romanian diacritics input"
   (interactive)
