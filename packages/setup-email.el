@@ -64,6 +64,9 @@
   (setq smtpmail-smtp-service 587)
   (setq smtpmail-stream-type 'starttls))
 
+(use-package smtpmail-multi
+  :straight '(:type git :repo "vapniks/smtpmail-multi" :host github))
+
 (use-package notmuch-indicator
   :ensure t
   :after notmuch

@@ -136,4 +136,6 @@
 (setq calendar-location-name "Bucharest, Romania")
 (setq calendar-time-zone-style 'numeric)
 
+(setq native-comp-async-report-warnings-errors 'silent)
+
 (provide 'sane-defaults)
