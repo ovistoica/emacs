@@ -59,23 +59,27 @@
         xref-show-definitions-function #'consult-xref)
 
   (when (featurep 'perspective)
-    (setf (car consult-buffer-sources)
-          `(:name "Perspective"
-                  :narrow ?s
-                  :category buffer
-                  :state ,#'consult--buffer-state
-                  :history buffer-name-history
-                  :default t
-                  :items ,(lambda ()
-                            ;; Get buffers in MRU order from perspective
-                            (let ((buffers (persp-current-buffer-names t)))
-                              ;; Sort by buffer-list order (most recent first)
-                              (sort buffers
-                                    (lambda (a b)
-                                      (< (or (cl-position (get-buffer a) (buffer-list))
-                                             999)
-                                         (or (cl-position (get-buffer b) (buffer-list))
-                                             999))))))))))
+      ;; Remove any existing perspective sources
+      (setq consult-buffer-sources
+            (cl-remove-if (lambda (source)
+                            (string= (plist-get source :name) "Perspective"))
+                          consult-buffer-sources))
+      ;; Add single fast perspective source
+      (push `(:name "Perspective"
+              :narrow ?s
+              :category buffer
+              :state ,#'consult--buffer-state
+              :history buffer-name-history
+              :default t
+              :items ,(lambda ()
+                        (let ((buffers (persp-current-buffer-names t)))
+                          (sort buffers
+                                (lambda (a b)
+                                  (< (or (cl-position (get-buffer a) (buffer-list))
+  999)
+                                     (or (cl-position (get-buffer b) (buffer-list))
+  999)))))))
+            consult-buffer-sources)))
 
 (use-package consult-flycheck
   :bind (("M-g f" . consult-flycheck)))
