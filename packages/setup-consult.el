@@ -30,7 +30,7 @@
          ("M-s k" . consult-keep-lines)
          ;; C-x bindings in `ctl-x-map'
          ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ;;("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
          ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
          ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
          ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
@@ -51,35 +51,34 @@
 
   :config 
   ;; Show only perspective-buffers with consult-buffer
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  (add-to-list 'consult-buffer-sources persp-consult-source)
-
+  
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
 
-  (when (featurep 'perspective)
-      ;; Remove any existing perspective sources
-      (setq consult-buffer-sources
-            (cl-remove-if (lambda (source)
-                            (string= (plist-get source :name) "Perspective"))
-                          consult-buffer-sources))
-      ;; Add single fast perspective source
-      (push `(:name "Perspective"
-              :narrow ?s
-              :category buffer
-              :state ,#'consult--buffer-state
-              :history buffer-name-history
-              :default t
-              :items ,(lambda ()
-                        (let ((buffers (persp-current-buffer-names t)))
-                          (sort buffers
-                                (lambda (a b)
-                                  (< (or (cl-position (get-buffer a) (buffer-list))
-  999)
-                                     (or (cl-position (get-buffer b) (buffer-list))
-  999)))))))
-            consult-buffer-sources)))
+  ;; (when (featurep 'perspective)
+  ;;     ;; Remove any existing perspective sources
+  ;;     (setq consult-buffer-sources
+  ;;           (cl-remove-if (lambda (source)
+  ;;                           (string= (plist-get source :name) "Perspective"))
+  ;;                         consult-buffer-sources))
+  ;;     ;; Add single fast perspective source
+  ;;     (push `(:name "Perspective"
+  ;;             :narrow ?s
+  ;;             :category buffer
+  ;;             :state ,#'consult--buffer-state
+  ;;             :history buffer-name-history
+  ;;             :default t
+  ;;             :items ,(lambda ()
+  ;;                       (let ((buffers (persp-current-buffer-names t)))
+  ;;                         (sort buffers
+  ;;                               (lambda (a b)
+  ;;                                 (< (or (cl-position (get-buffer a) (buffer-list))
+  ;; 999)
+  ;;                                    (or (cl-position (get-buffer b) (buffer-list))
+  ;; 999)))))))
+  ;;           consult-buffer-sources))
+  )
 
 (use-package consult-flycheck
   :bind (("M-g f" . consult-flycheck)))
