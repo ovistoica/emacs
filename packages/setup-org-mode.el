@@ -46,6 +46,8 @@
            "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
+          ("e" "Event" entry (file+headline "~/Dropbox/org/working-memory.org" "Events")
+           "* %? \n%^t\n  %U" :empty-lines 1)
           ("d" "Deadline" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1)
           ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
