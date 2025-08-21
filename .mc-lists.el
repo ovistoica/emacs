@@ -9,6 +9,7 @@
         cljr-slash
         clojure-backward-logical-sexp
         clojure-forward-logical-sexp
+        clojure-toggle-keyword-string
         completion-at-point
         copy-region-or-current-line
         dabbrev-expand
