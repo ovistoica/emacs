@@ -1,13 +1,18 @@
 ;; Setup email
 ;; Tools and utils to read email from emacs
 
+(require 'prot-common)
+
 (use-package auth-source
   :ensure nil
   :defer t
   :config
   (setq auth-sources '("~/.authinfo.gpg")
         user-full-name "Ovidiu Stoica"
-        user-mail-address "ovidiu.stoica1094@gmail.com"))
+        user-mail-address "ovidiu.stoica1094@gmail.com")
+
+  ;; This is needed so Emacs doesn't keep old cached data
+  (auth-source-forget-all-cached))
 
 (use-package mm-encode
   :ensure nil
@@ -67,7 +72,6 @@
 (use-package smtpmail-multi
   :straight '(:type git :repo "vapniks/smtpmail-multi" :host github)
   :config
-
   (setq smtpmail-multi-accounts
         `((gmail-primary . (,(prot-common-auth-get-field "gmail-primary-smtp" :user)
                             "smtp.gmail.com"
