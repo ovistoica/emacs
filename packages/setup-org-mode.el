@@ -57,6 +57,8 @@
           ("p" "Social Post" entry (file+headline "~/Dropbox/org/social-posts.org" "Posts")
            "* %?\n  %U" :empty-lines 1)))
 
+  (setq org-agenda-files '("working-memory.org" "journal.org"))
+
   (setq org-feed-alist
         '(("Slashdot"
            "https://rss.slashdot.org/Slashdot/slashdot"
