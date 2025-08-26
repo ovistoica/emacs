@@ -1,6 +1,5 @@
 ;; Auto refresh buffers
 (use-package autorevert
-  :defer 2
   :config (global-auto-revert-mode 1))
 
 ;; Also auto refresh dired, but be quiet about it
