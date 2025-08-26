@@ -71,7 +71,7 @@
     ("C-c C-d C-f" . denote-dired-rename-marked-files-using-front-matter))
   :config
   ;; Remember to check the doc strings of those variables.
-  (setq denote-directory (expand-file-name "~/Documents/notes/"))
+  (setq denote-directory (expand-file-name "~/Dropbox/org/notes"))
   (setq denote-file-type 'org)   ; Org is the default, set others here like I do
   ;; If you want to have a "controlled vocabulary" of keywords,
   ;; meaning that you only use a predefined set of them, then you want
