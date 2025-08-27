@@ -25,6 +25,7 @@
 (use-package notmuch
   :defer t
   :config
+  (auth-source-forget-all-cached)
   (let ((prim (prot-common-auth-get-field "gmail-primary-smtp" :user))
         (sec (prot-common-auth-get-field "gmail-secondary-smtp" :user))
         (reps (prot-common-auth-get-field "gmail-repsmate-smtp" :user)))

@@ -72,6 +72,7 @@
 (use-package smtpmail-multi
   :straight '(:type git :repo "vapniks/smtpmail-multi" :host github)
   :config
+  (auth-source-forget-all-cached)
   (setq smtpmail-multi-accounts
         `((gmail-primary . (,(prot-common-auth-get-field "gmail-primary-smtp" :user)
                             "smtp.gmail.com"
