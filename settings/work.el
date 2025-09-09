@@ -5,7 +5,7 @@
 
 (prodigy-define-service
   :name "Datomic Transactor"
-  :tags '(wavekit-ai shipclojure-datom datomic)
+  :tags '(wavekit-ai shipclojure-datom shipclojure-website datomic)
   :command "/Users/ovistoica/datomic-pro-1.0.7364/bin/transactor"
   :args '("config/samples/dev-transactor-template.properties")
   :cwd "~/"
@@ -39,6 +39,15 @@
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
 
+(prodigy-define-service
+  :name "Shipclojure Website CSS Watch"
+  :tags '(shipclojure-website css)
+  :command "bb"
+  :args '("watch:css")
+  :cwd "~/workspace/shipclojure-website"
+  :stop-signal 'sigkill
+  :kill-process-buffer-on-stop t)
+
 ;; (prodigy-define-service
 ;;   :name "Wavekit Shadow-CLJS Watch"
 ;;   :tags '(wavekit-ai frontend)
@@ -65,5 +74,18 @@
   :cwd "~/workspace/replicant-daisyui"
   :stop-signal 'sigkill
   :kill-process-buffer-on-stop t)
+
+
+(setq world-clock-list
+      '(("America/Chicago" "Houston/Texas")
+        ("Europe/Bucharest" "Bucharest")
+        ("Europe/Brussels" "Belgium")
+        ("Europe/London" "UK")
+        ("Europe/Madrid" "Spain")
+        ("Asia/Jerusalem" "Israel")
+        ("Europe/Athens" "Greece")
+        ("Etc/UTC" "UTC")))
+
+(setq world-clock-time-format "%a, %d %b %I:%M %p %Z")
 
 (provide 'work)

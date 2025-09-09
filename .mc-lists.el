@@ -13,6 +13,7 @@
         completion-at-point
         copy-region-or-current-line
         dabbrev-expand
+        down-list
         end-of-buffer
         fixup-whitespace
         forward-sexp
@@ -20,6 +21,7 @@
         kill-sexp
         mark-sexp
         mc/mark-next-lines
+        my/cider-unload-current-namespace-aliases
         my/insert-lambda-symbol
         org-delete-char
         org-kill-line
@@ -55,8 +57,11 @@
         ignore-preserving-kill-region
         lsp-ui-doc--handle-mouse-movement
         mouse-set-region
+        my/format-buffer
         my/split-window-right
+        paredit-mode
         persp-switch-to-buffer*
         query-replace-regexp
+        revert-buffer
         wgrep-change-to-wgrep-mode
         ))

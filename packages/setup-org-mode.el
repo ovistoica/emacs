@@ -47,7 +47,7 @@
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
           ("e" "Event" entry (file+headline "~/Dropbox/org/working-memory.org" "Events")
-           "* %? \n%^t\n  %U" :empty-lines 1)
+           "* %? \n%^t\n %U\n  %a" :empty-lines 1)
           ("d" "Deadline" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1)
           ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
@@ -57,7 +57,7 @@
           ("p" "Social Post" entry (file+headline "~/Dropbox/org/social-posts.org" "Posts")
            "* %?\n  %U" :empty-lines 1)))
 
-  (setq org-agenda-files '("working-memory.org" "journal.org"))
+  (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org"))
 
   (setq org-feed-alist
         '(("Slashdot"
