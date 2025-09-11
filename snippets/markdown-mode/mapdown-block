@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Mapdown block
+# key: block
+# --
+--------------------------------------------------------------------------------
+:block/title $1
+:block/level $2
+:block/id ${1:$(downcase (replace-regexp-in-string " " "-" yas-text))}
+:block/markdown
+$0

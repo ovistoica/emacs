@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
-# name: clojure-code
+# name: ClojureCode block
 # key: clj
 # --
-``` clojure
+\`\`\`clojure
 $0
-```
+\`\`\`
