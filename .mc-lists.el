@@ -22,6 +22,7 @@
         mark-sexp
         mc/mark-next-lines
         my/cider-unload-current-namespace-aliases
+        my/convert-classes-to-vector
         my/insert-lambda-symbol
         org-delete-char
         org-kill-line
