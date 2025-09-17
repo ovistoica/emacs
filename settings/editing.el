@@ -2,7 +2,6 @@
 
 ;; Killing words backwards
 (global-set-key (kbd "C-w") 'kill-region-or-backward-word)
-(global-set-key (kbd "M-h") 'kill-region-or-backward-word) ;; matches C-h
 
 ;; Duplicate region
 (global-set-key (kbd "C-c d") 'duplicate-current-line-or-region)

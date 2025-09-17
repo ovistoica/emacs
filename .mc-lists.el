@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         backward-sexp
+        beancount-tab-dwim
         clj-hippie-expand-no-case-fold
         cljr-raise-sexp
         cljr-slash
@@ -18,6 +19,7 @@
         fixup-whitespace
         forward-sexp
         indent-for-tab-command
+        kill-region-or-backward-word
         kill-sexp
         mark-sexp
         mc/mark-next-lines
