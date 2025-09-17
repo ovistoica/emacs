@@ -7,4 +7,4 @@
 # --
 `(format-time-string "%Y-%m-%d")` * "${1:Description}"
   ${2:Account$$(yas-choose-value beancount-accounts)} ${3:AMT}
-  ${4:Account$$(yas-choose-value beancount-accounts)} -$3
+  ${4:Account$$(yas-choose-value beancount-accounts)}
