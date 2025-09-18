@@ -1,0 +1,7 @@
+# -*- mode: snippet;-*-
+# name: beancount-with-date
+# key: bcd
+# --
+${1:`(format-time-string "%Y-%m-%d")`} * "${2:Description}"
+  ${3:Account$$(yas-choose-value beancount-accounts)} ${4:AMT}
+  ${5:Account$$(yas-choose-value beancount-accounts)}
