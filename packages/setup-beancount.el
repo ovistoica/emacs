@@ -5,6 +5,9 @@
 
 (use-package beancount
   :straight '(:type git :host github :repo "beancount/beancount-mode")
-  :mode ("\\.beancount\\'" . beancount-mode))
+  :mode ("\\.beancount\\'" . beancount-mode)
+  :bind ((:map beancount-mode-map
+               ("C-c C-n" . beancount-goto-next-transaction)
+               ("C-c C-p" . beancount-goto-previous-transaction))))
 
 (provide 'setup-beancount)
