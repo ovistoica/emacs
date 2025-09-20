@@ -1,5 +1,6 @@
 ;; Eca - Editor Code Assistant
 
+;;; Code:
 (use-package eca
   :straight  '(:type git :local-repo "~/workspace/eca-emacs"
                      ;;:repo "editor-code-assistant/eca-emacs" :branch "master"

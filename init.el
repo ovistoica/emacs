@@ -38,6 +38,7 @@
 (require 'windows)
 (require 'extra-keybindings)
 (require 'indented-yank)
+(require 'significant-other)
 
 ;; Set up Straight (for packages on github)
 (require 'setup-straight)
