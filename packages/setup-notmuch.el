@@ -169,7 +169,8 @@
     "Override for `message-tab' to enforce header line check.
 More specifically, perform address completion when on a relevant header
 line, because `message-tab' sometimes (not sure when/how) fails to do
-that and instead tries to complete against dictionary entries."
+that and instead tries to complete against dictionary entries.
+Also supports yasnippet expansion in the message body."
     (interactive nil message-mode)
     (cond
      ((save-excursion
@@ -178,6 +179,9 @@ that and instead tries to complete against dictionary entries."
       (notmuch-address-expand-name)
       ;; Completion was performed; nothing else to do.
       nil)
+     ;; Try yasnippet expansion first in the message body
+     ((and (bound-and-true-p yas-minor-mode)
+           (yas-expand)))
      (message-tab-body-function (funcall message-tab-body-function))
      (t (funcall (or (lookup-key text-mode-map "\t")
                      (lookup-key global-map "\t")

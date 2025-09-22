@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "Emacs-MCP-Server": {
+      "command": "/Users/ovistoica/.local/bin/uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "--with",
+        "smartfunc",
+        "mcp",
+        "run",
+        "/Users/ovistoica/workspace/emacs-mcp-server/emacs_mcp_server.py"
+      ]
+    }
+  }
+}
