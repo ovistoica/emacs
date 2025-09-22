@@ -2,8 +2,6 @@
   :ensure nil
   :defer t
   :custom
-  (markdown-fontify-code-blocks-natively t)
-  :init
-  (add-hook 'markdown-mode-hook 'auto-fill-mode))
+  (markdown-fontify-code-blocks-natively t))
 
 (provide 'setup-markdown-mode)
