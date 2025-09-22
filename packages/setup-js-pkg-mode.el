@@ -5,3 +5,5 @@
   :straight (:type git :local-repo "~/workspace/js-pkg-mode")
   :config
   (js-pkg-global-mode 1))
+
+(provide 'setup-js-pkg-mode)

@@ -120,13 +120,13 @@
   (notmuch-indicator-mode 1))
 
 (defun sync-email ()
-  "Runs a script for syncing email"
+  "Runs a script for syncing email."
   (interactive)
   (async-shell-command "/Users/ovistoica/.local/bin/sync-mail"))
 
 
 (defun show-email-sync-logs ()
-  "Show the logs for email"
+  "Show the logs for email."
   (interactive)
   (let ((prev-config (current-window-configuration)))
     (find-file "~/.local/logs/mbsync.log")
