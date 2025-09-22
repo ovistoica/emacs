@@ -38,11 +38,11 @@
 (require 'windows)
 (require 'extra-keybindings)
 (require 'indented-yank)
-(require 'significant-other)
 
 ;; Set up Straight (for packages on github)
 (require 'setup-straight)
 
+(require 'significant-other)
 
 ;; Load all packages
 (dolist (file (directory-files packages-dir t "^[^#].*el$"))
