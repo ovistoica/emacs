@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: ShipClojure Doc Page
+# key: scdp
+# --
+--------------------------------------------------------------------------------
+:page/title $1
+:shipclojure/stack :shipclojure.stack/$2
+:page/uri /docs/$2/${1:$(downcase (replace-regexp-in-string " " "-" yas-text))}/
+:page/category :page.category/$3
+$0
