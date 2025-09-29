@@ -88,7 +88,6 @@
                   "^\\*TeX errors\\*"
                   "^\\*ielm\\*"
                   "^\\*TeX Help\\*"
-                  "^\\*ChatGPT\\*"
                   "^\\*Input History\\*"
                   "^\\*gptel-ask\\*"
                   "^\\*clojure-compilation\\*"
@@ -98,20 +97,18 @@
                   "\\*Completions\\*"
                   ;; "\\*scratch.*\\*$"
                   "[Oo]utput\\*")))
+  (setq popper-display-control nil)
   (add-to-list 'display-buffer-alist '("\\*ielm\\*"
                                        (display-buffer-in-side-window)
                                        (side . left)
                                        (window-width . 50)))
   (add-to-list 'display-buffer-alist '("\\*cider-repl.*\\*$"
                                        (display-buffer-in-side-window)
-                                       (side . right)
-                                       (window-width . 0.4)))
-  (add-to-list 'display-buffer-alist '("\\*claude:.*\\*"
-                                       (display-buffer-in-side-window)
-                                       (side . right)
-                                       (window-width . 0.4)))
+                                       (side . left)
+                                       (window-width . 100)))
 
   (setq popper-group-function #'popper-group-by-perspective) ; group by perspective
+
 
   (popper-mode +1)
   (popper-echo-mode +1))
