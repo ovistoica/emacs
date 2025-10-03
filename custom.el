@@ -4,7 +4,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("df39cc8ecf022613fc2515bccde55df40cb604d7568cb96cd7fe1eff806b863b"
+   '("d6b369a3f09f34cdbaed93eeefcc6a0e05e135d187252e01b0031559b1671e97"
+     "ffa78fc746f85d1c88a2d1691b1e37d21832e9a44a0eeee114a00816eabcdaf9"
+     "ea4dd126d72d30805c083421a50544e235176d9698c8c541b824b60912275ba1"
+     "df39cc8ecf022613fc2515bccde55df40cb604d7568cb96cd7fe1eff806b863b"
      "aff0396925324838889f011fd3f5a0b91652b88f5fd0611f7b10021cc76f9e09"
      "b41d0a9413fb0034cea34eb8c9f89f6e243bdd76bccecf8292eb1fefa42eaf0a"
      "00d7122017db83578ef6fba39c131efdcb59910f0fac0defbe726da8072a0729"
@@ -23,5 +26,4 @@
      (cider-preferred-build-tool . clojure-cli)
      (cider-default-cljs-repl . figwheel-main)
      (cider-clojure-cli-aliases . "-A:ui")
-     (flycheck-disabled-checkers emacs-lisp-checkdoc)))
- )
+     (flycheck-disabled-checkers emacs-lisp-checkdoc))))
