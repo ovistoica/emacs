@@ -53,7 +53,7 @@
                (php "https://github.com/tree-sitter/tree-sitter-php" "v0.22.8" "php/src" )
                (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src"))
                (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src"))
-               (yaml . ("https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0"))
+               (yaml . ("https://github.com/tree-sitter-grammars/tree-sitter-yaml" "v0.7.1"))
                (prisma "https://github.com/victorhqc/tree-sitter-prisma")
                (rust . ("https://github.com/tree-sitter/tree-sitter-rust" "v0.24.0"))))
       (add-to-list 'treesit-language-source-alist grammar)
