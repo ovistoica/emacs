@@ -78,12 +78,15 @@
 
 (setq world-clock-list
       '(("America/Chicago" "Houston/Texas")
+        ("America/New_York" "New York")
         ("Europe/Bucharest" "Bucharest")
         ("Europe/Brussels" "Belgium")
         ("Europe/London" "UK")
         ("Europe/Madrid" "Spain")
+        ("Europe/Stockholm" "Stockholm")
         ("Asia/Jerusalem" "Israel")
         ("Europe/Athens" "Greece")
+        ("Asia/Kolkata" "India/Bangalore")
         ("Etc/UTC" "UTC")))
 
 (setq world-clock-time-format "%a, %d %b %I:%M %p %Z")
