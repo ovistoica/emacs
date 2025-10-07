@@ -79,6 +79,7 @@
 (setq world-clock-list
       '(("America/Chicago" "Houston/Texas")
         ("America/New_York" "New York")
+        ("America/Los_Angeles" "Los Angeles")
         ("Europe/Bucharest" "Bucharest")
         ("Europe/Brussels" "Belgium")
         ("Europe/London" "UK")

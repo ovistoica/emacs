@@ -20,7 +20,7 @@
 (tooltip-mode -1)
 
 ;; Set theme
-(load-theme 'ef-duo-light)
+(load-theme 'default-black)
 
 (set-face-attribute 'default nil :font "-apple-Monaco-medium-normal-normal-*-15-*-*-*-m-0-iso10646-1")
 
