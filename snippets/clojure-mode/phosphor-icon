@@ -2,5 +2,5 @@
 # name: phosphor icon
 # key: phos
 # --
-(icons/render (icons/icon :phosphor.${1:type$$(yas-choose-value "regular" "light" "bold" "fill" "duotone")}/${2:icon}
+(icons/render (icons/icon :phosphor.${1:type$$(yas-choose-value "regular" "light" "bold" "fill" "duotone")}/${2:icon})
   {:class [${3::size-5}]})
