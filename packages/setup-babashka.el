@@ -95,11 +95,10 @@
      ((file-exists-p makefile)
       (makefile-invoke-target))
      ((file-exists-p pkg-json)
-      (js-pkg-run))
+      (call-interactively #'js-pkg-run))
      (t (message "No task file found. Add %s %s or %s" (shorten-path bb-edn) (shorten-path makefile) (shorten-path pkg-json))))))
-
-
 
 (global-set-key (kbd "s-m") 'my/task-runner)
 
 (provide 'setup-babashka)
+;; setup-babashka.el ends here
