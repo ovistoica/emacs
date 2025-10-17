@@ -84,17 +84,11 @@
                               ,(string-to-number (prot-common-auth-get-field "gmail-secondary-smtp" :port))
                               ,(prot-common-auth-get-field "gmail-secondary-smtp" :user)
                               starttls nil nil nil)
-                           )
-          (gmail-repsmate . (,(prot-common-auth-get-field "gmail-repsmate-smtp" :user)
-                             "smtp.gmail.com"
-                             ,(string-to-number (prot-common-auth-get-field "gmail-repsmate-smtp" :port))
-                             ,(prot-common-auth-get-field "gmail-repsmate-smtp" :user)
-                             starttls nil nil nil))))
+                           )))
 
   (setq smtpmail-multi-associations
         `((,(prot-common-auth-get-field "gmail-primary-smtp" :user) gmail-primary)
-          (,(prot-common-auth-get-field "gmail-secondary-smtp" :user) gmail-secondary)
-          (,(prot-common-auth-get-field "gmail-repsmate-smtp" :user) gmail-repsmate)))
+          (,(prot-common-auth-get-field "gmail-secondary-smtp" :user) gmail-secondary)))
 
   (setq smtpmail-servers-requiring-authorization "\\.com")
   (setq send-mail-function #'smtpmail-multi-send-it))
