@@ -1,4 +1,6 @@
-(require 'romanian-mac)
+;; Load macOS-specific configuration if on macOS
+(when (eq system-type 'darwin)
+  (require 'romanian-mac))
 
 (use-package org
   :ensure nil
@@ -22,8 +24,7 @@
               ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
 
-  :hook ((org-mode . my/setup-romanian-diacritics)
-         (org-mode . auto-fill-mode))
+  :hook (org-mode . auto-fill-mode)
 
   :config
 
@@ -194,5 +195,9 @@ Otherwise, process the entire buffer."
       (delete-region beg end-pos)
       (goto-char beg)
       (insert processed-text))))
+
+;; Add Romanian diacritics hook on macOS
+(when (eq system-type 'darwin)
+  (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
 
 (provide 'setup-org-mode)

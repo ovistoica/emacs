@@ -22,8 +22,12 @@
 (require 'packages)
 
 ;; Configure Emacs for OSX
-(when (string= "darwin" system-type)
+(when (eq system-type 'darwin)
   (require 'romanian-mac))
+
+;; Configure Emacs for Linux
+(when (eq system-type 'gnu/linux)
+  (require 'linux-setup))
 
 ;; Lets start with a smattering of sanity
 (require 'sane-defaults)

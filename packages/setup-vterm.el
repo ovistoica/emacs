@@ -4,7 +4,7 @@
 (use-package vterm
   :ensure vterm
   :config
-  (setq shell-file-name "/bin/zsh"
+  (setq shell-file-name (or (getenv "SHELL") "/bin/bash")
         vterm-max-scrollback 500000)
   (unbind-key "M-`" vterm-mode-map)
   (unbind-key "M-s" vterm-mode-map)

@@ -9,6 +9,8 @@
 (setq use-package-always-ensure t)
 (setq package-native-compile t)
 
-(setenv "CC" "/opt/homebrew/bin/gcc-15")
+;; Set CC compiler path only on macOS
+(when (eq system-type 'darwin)
+  (setenv "CC" "/opt/homebrew/bin/gcc-15"))
 
 (provide 'packages)

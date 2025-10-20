@@ -54,7 +54,11 @@
 
 (defun my/projectile-switch-project-to-emacs ()
   (interactive)
-  (projectile-switch-project-by-name "~/.emacs.d/"))
+  (let ((emacs-dir (if (file-directory-p "~/.config/emacs")
+                       "~/.config/emacs/"
+                     "~/.emacs.d/")))
+    (projectile-switch-project-by-name emacs-dir)))
+
 
 ;; Interactive commands for manual control
 (defun my/projectile-start-prodigy-process ()

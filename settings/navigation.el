@@ -106,5 +106,9 @@
   (interactive)
   (find-file "~/.zshrc"))
 
+(defun bashrc ()
+  (interactive)
+  (find-file "~/.bashrc"))
+
 
 (provide 'navigation)

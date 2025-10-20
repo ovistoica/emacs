@@ -22,7 +22,9 @@
 ;; Set theme
 (load-theme 'default-black)
 
-(set-face-attribute 'default nil :font "-apple-Monaco-medium-normal-normal-*-15-*-*-*-m-0-iso10646-1")
+;; Set default font (Caskaydia Mono Nerd Font from Omarchy)
+(when (member "CaskaydiaCove Nerd Font" (font-family-list))
+  (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 140))
 
 ;; Don't beep. Just blink the modeline on errors.
 (setq ring-bell-function (lambda ()

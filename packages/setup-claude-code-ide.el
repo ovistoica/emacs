@@ -1,4 +1,4 @@
-;; claude-code-id.el
+;; claude-code-ide.el
 
 
 (use-package claude-code-ide
