@@ -39,6 +39,8 @@
            :bold-weight extrabold)
           (presentation
            :default-height 180)
+          (framework-laptop
+           :default-height 200)
           (t
            ;; I keep all properties for didactic purposes, but most can be
            ;; omitted.  See the fontaine manual for the technicalities:
