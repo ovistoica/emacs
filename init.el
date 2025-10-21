@@ -46,7 +46,7 @@
 ;; Set up Straight (for packages on github)
 (require 'setup-straight)
 
-(require 'significant-other)
+(require 'setup-significant-other)
 
 ;; Load all packages
 (dolist (file (directory-files packages-dir t "^[^#].*el$"))

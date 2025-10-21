@@ -4,5 +4,5 @@
   :straight '(significant-other :type git :host github :repo "ovistoica/significant-other.el")
   :bind ("s-j" . significant-other-jump))
 
-(provide 'significant-other)
+(provide 'setup-significant-other)
 

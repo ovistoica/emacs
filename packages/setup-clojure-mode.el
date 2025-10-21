@@ -1,4 +1,5 @@
 (use-package clojure-mode
+  :after (significant-other)
   :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))
 
   :custom
