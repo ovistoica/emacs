@@ -10,7 +10,9 @@
 (use-package notmuch
   :load-path (cond ((eq system-type 'darwin)
                     "/opt/homebrew/Cellar/notmuch/0.39/share/emacs/site-lisp/notmuch/")
-                   (t nil)) ; Let Emacs find notmuch in the standard load-path on other systems
+                   ((eq system-type 'gnu/linux)
+                    "/usr/share/emacs/site-lisp/")
+                   (t nil))
   :defer t
   :commands (notmuch notmuch-mua-new-mail))
 
