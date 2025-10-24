@@ -21,3 +21,4 @@
 /type-break
 /.DS_Store
 /tree-sitter/
+/.cache/
