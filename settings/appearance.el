@@ -45,24 +45,42 @@ HEIGHT is optional and defaults to the current font height."
 (my/set-font my/current-font)
 
 ;;; Theme management
+
+(defun my/raw-set-theme (theme)
+  "Disables previously enabled themes, before enabling THEME to not have overlaps"
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme theme :no-confirm))
+
 (defvar my/theme-mapping
   '(("Catppuccin" . (lambda ()
                       (setq catppuccin-flavor 'mocha)
-                      (load-theme 'catppuccin :no-confirm)))
+                      (my/raw-set-theme 'catppuccin)))
+    ("catppuccin" . (lambda ()
+                      (setq catppuccin-flavor 'mocha)
+                      (my/raw-set-theme 'catppuccin)))
     ("Catppuccin Latte" . (lambda ()
                             (setq catppuccin-flavor 'latte)
-                            (load-theme 'catppuccin :no-confirm)))
+                            (my/raw-set-theme 'catppuccin)))
+    ("catppuccin-latte" . (lambda ()
+                            (setq catppuccin-flavor 'latte)
+                            (my/raw-set-theme 'catppuccin)))
     ("everforest" . everforest)
     ("flexoki-light" . flexoki-light)
-    ("gruvbox" . gruvbox)
+    ("gruvbox" . doom-gruvbox)
+    ("Gruvbox" . doom-gruvbox)
     ("kanagawa" . kanagawa)
     ("matte-black" . matte-black)
-    ("nord" . nord)
+    ("nord" . doom-nord)
+    ("Nord" . doom-nord)
     ("osaka-jade" . osaka-jade)
-    ("ristretto" . ristretto)
+    ("ristretto" . doom-monokai-ristretto)
+    ("Ristretto" . doom-monokai-ristretto)
     ("rose-pine" . rose-pine)
-    ("tokyo-night" . tokyo-night))
+    ("tokyo-night" . doom-tokyo-night)
+    ("Tokyo Night" . doom-tokyo-night))
   "Mapping of omarchy theme names to either theme symbols or configuration functions.")
+
+
 
 (defvar my/default-theme 'catppuccin
   "Default theme to use if omarchy theme cannot be determined.")
@@ -74,7 +92,7 @@ THEME-SPEC can be:
 - A symbol: loads that theme directly
 - A function: calls the function to configure and load the theme"
   (interactive)
-  (message "Changing theme to %s" theme-spec)
+  (message "Got theme %s" theme-spec)
   (let ((orig-theme theme-spec)
         (handler (if (stringp theme-spec)
                      (or (cdr (assoc theme-spec my/theme-mapping))
@@ -87,7 +105,7 @@ THEME-SPEC can be:
                 (funcall handler)
                 (message "Theme set to %s" theme-spec))
             (progn
-              (load-theme handler :no-confirm)
+              (my/raw-set-theme handler)
               (message "Theme set to %s" handler))))
       (error
        (message "Failed to load theme: %s" (error-message-string err))))))
