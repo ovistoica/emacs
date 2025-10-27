@@ -70,6 +70,7 @@ HEIGHT is optional and defaults to the current font height."
                             (my/raw-set-theme 'catppuccin)))
     ("everforest" . everforest)
     ("flexoki-light" . flexoki-light)
+    ("Flexoki Light" . flexoki-light)
     ("gruvbox" . doom-gruvbox)
     ("Gruvbox" . doom-gruvbox)
     ("kanagawa" . kanagawa)
