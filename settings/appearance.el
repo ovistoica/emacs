@@ -46,6 +46,10 @@ HEIGHT is optional and defaults to the current font height."
 
 ;;; Theme management
 
+;; Add custom themes directory to load path
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "themes" user-emacs-directory))
+
 (defun my/raw-set-theme (theme)
   "Disables previously enabled themes, before enabling THEME to not have overlaps"
   (mapc #'disable-theme custom-enabled-themes)
