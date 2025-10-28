@@ -2,10 +2,7 @@
   :demand t
   :custom
   ;; Set the title
-  (dashboard-banner-logo-title "Welcome to Emacs Dashboard")
-
-  ;; Set the banner
-  (dashboard-startup-banner 'logo)
+  (dashboard-banner-logo-title "Don't wish it was easier! Wish you were better! - Jim Rohn")
 
   ;; Content is not centered by default. To center, set
   (dashboard-center-content t)
@@ -17,20 +14,17 @@
   (dashboard-show-shortcuts nil)
 
   ;; Set the items to show on the dashboard
-  (dashboard-items '((recents   . 5)
-                     (projects  . 5)
-                     (agenda    . 5)
-                     (bookmarks . 5)))
+  (dashboard-items '((agenda           . 20)
+                     (recents          . 5)
+                     (projects         . 3)
+                     (bookmarks        . 5)))
 
   ;; Show agenda for the next 7 days
   (dashboard-week-agenda t)
 
-  ;; Filter out done tasks from agenda
-  (dashboard-filter-agenda-entry 'dashboard-no-filter-agenda)
-
   ;; Show item counts
   (dashboard-item-names '(("Recent Files:" . "Recently opened files:")
-                          ("Agenda for the coming week:" . "Org Agenda:")
+                          ("Agenda for the coming week:" . "Agenda:")
                           ("Projects:" . "Recent projects:")
                           ("Bookmarks:" . "Bookmarks:")))
 
