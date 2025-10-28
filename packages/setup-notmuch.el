@@ -8,11 +8,11 @@
 ;; not dependent on Emacs. Though the package also includes notmuch.el
 ;; which is what we use here (they are maintained by the same people).
 (use-package notmuch
-  :load-path (cond ((eq system-type 'darwin)
-                    "/opt/homebrew/Cellar/notmuch/0.39/share/emacs/site-lisp/notmuch/")
-                   ((eq system-type 'gnu/linux)
-                    "/usr/share/emacs/site-lisp/")
-                   (t nil))
+  :load-path (lambda ()
+               (cond ((eq system-type 'darwin)
+                      "/opt/homebrew/Cellar/notmuch/0.39/share/emacs/site-lisp/notmuch/")
+                     ((eq system-type 'gnu/linux)
+                      "/usr/share/emacs/site-lisp/")))
   :defer t
   :commands (notmuch notmuch-mua-new-mail))
 
@@ -116,7 +116,7 @@
           ( :name "🗄️ Archive"
             :query "tag:archiveinbox"
             :sort-order newest-first
-            :key , (kbd "a")))))
+            :key ,(kbd "a")))))
 
 (use-package notmuch
   :defer t
