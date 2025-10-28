@@ -87,7 +87,7 @@
    `(font-lock-function-name-face ((,class (:foreground ,yellow :weight bold))))
    `(font-lock-keyword-face ((,class (:foreground ,green-br :weight bold))))
    `(font-lock-preprocessor-face ((,class (:foreground ,teal))))
-   `(font-lock-string-face ((,class (:foreground ,cyan))))
+   `(font-lock-string-face ((,class (:foreground ,cyan-dim))))
    `(font-lock-type-face ((,class (:foreground ,blue))))
    `(font-lock-variable-name-face ((,class (:foreground ,blue-br))))
    `(font-lock-warning-face ((,class (:foreground ,red :weight bold))))
@@ -299,7 +299,7 @@
    `(rainbow-delimiters-unmatched-face ((,class (:foreground ,red :weight bold))))
 
    ;; Clojure specific
-   `(clojure-keyword-face ((,class (:foreground ,cyan))))
+   `(clojure-keyword-face ((,class (:foreground ,magenta))))
 
    ;; CIDER
    `(cider-result-overlay-face ((,class (:background ,bg-hl :foreground ,fg))))

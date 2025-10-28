@@ -78,6 +78,7 @@ HEIGHT is optional and defaults to the current font height."
     ("nord" . doom-nord)
     ("Nord" . doom-nord)
     ("osaka-jade" . osaka-jade)
+    ("Osaka Jade" . osaka-jade)
     ("ristretto" . doom-monokai-ristretto)
     ("Ristretto" . doom-monokai-ristretto)
     ("rose-pine" . rose-pine)
