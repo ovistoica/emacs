@@ -19,7 +19,8 @@
   :straight '(nerd-icons-completion :type git :host github :repo "rainstormstudio/nerd-icons-completion")
   :after marginalia
   :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+  (nerd-icons-completion-marginalia-setup))
 
 (provide 'setup-icons)
 ;;; setup-icons.el ends here

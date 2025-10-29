@@ -18,6 +18,9 @@
 ;; Set up appearance early
 (require 'appearance)
 
+;; Set up Straight (for packages on github) - MUST come before packages.el
+(require 'setup-straight)
+
 ;; Configure the package manager
 (require 'packages)
 
@@ -42,9 +45,6 @@
 (require 'windows)
 (require 'extra-keybindings)
 (require 'indented-yank)
-
-;; Set up Straight (for packages on github)
-(require 'setup-straight)
 
 (require 'setup-significant-other)
 

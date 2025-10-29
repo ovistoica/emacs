@@ -52,6 +52,10 @@ HEIGHT is optional and defaults to the current font height."
 
 (defun my/raw-set-theme (theme)
   "Disables previously enabled themes, before enabling THEME to not have overlaps"
+  (interactive
+   (list (intern (completing-read "Choose theme: "
+                                   (mapcar #'symbol-name (custom-available-themes))
+                                   nil t))))
   (mapc #'disable-theme custom-enabled-themes)
   (load-theme theme :no-confirm))
 
