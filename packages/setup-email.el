@@ -69,29 +69,31 @@
   (setq smtpmail-smtp-service 587)
   (setq smtpmail-stream-type 'starttls))
 
-(use-package smtpmail-multi
-  :straight '(:type git :repo "vapniks/smtpmail-multi" :host github)
-  :config
-  (auth-source-forget-all-cached)
-  (setq smtpmail-multi-accounts
-        `((gmail-primary . (,(prot-common-auth-get-field "gmail-primary-smtp" :user)
-                            "smtp.gmail.com"
-                            ,(string-to-number (prot-common-auth-get-field "gmail-primary-smtp" :port))
-                            ,(prot-common-auth-get-field "gmail-primary-smtp" :user)
-                            starttls nil nil nil))
-          (gmail-secondary . (,(prot-common-auth-get-field "gmail-secondary-smtp" :user)
+;; Only use smtpmail-multi on macOS
+(when (eq system-type 'darwin)
+  (use-package smtpmail-multi
+    :straight '(:type git :repo "vapniks/smtpmail-multi" :host github)
+    :config
+    (auth-source-forget-all-cached)
+    (setq smtpmail-multi-accounts
+          `((gmail-primary . (,(prot-common-auth-get-field "gmail-primary-smtp" :user)
                               "smtp.gmail.com"
-                              ,(string-to-number (prot-common-auth-get-field "gmail-secondary-smtp" :port))
-                              ,(prot-common-auth-get-field "gmail-secondary-smtp" :user)
-                              starttls nil nil nil)
-                           )))
+                              ,(string-to-number (prot-common-auth-get-field "gmail-primary-smtp" :port))
+                              ,(prot-common-auth-get-field "gmail-primary-smtp" :user)
+                              starttls nil nil nil))
+            (gmail-secondary . (,(prot-common-auth-get-field "gmail-secondary-smtp" :user)
+                                "smtp.gmail.com"
+                                ,(string-to-number (prot-common-auth-get-field "gmail-secondary-smtp" :port))
+                                ,(prot-common-auth-get-field "gmail-secondary-smtp" :user)
+                                starttls nil nil nil)
+                             )))
 
-  (setq smtpmail-multi-associations
-        `((,(prot-common-auth-get-field "gmail-primary-smtp" :user) gmail-primary)
-          (,(prot-common-auth-get-field "gmail-secondary-smtp" :user) gmail-secondary)))
+    (setq smtpmail-multi-associations
+          `((,(prot-common-auth-get-field "gmail-primary-smtp" :user) gmail-primary)
+            (,(prot-common-auth-get-field "gmail-secondary-smtp" :user) gmail-secondary)))
 
-  (setq smtpmail-servers-requiring-authorization "\\.com")
-  (setq send-mail-function #'smtpmail-multi-send-it))
+    (setq smtpmail-servers-requiring-authorization "\\.com")
+    (setq send-mail-function #'smtpmail-multi-send-it)))
 
 (use-package notmuch-indicator
   :ensure t
