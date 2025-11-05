@@ -20,7 +20,9 @@
   (setq fontaine-latest-state-file (locate-user-emacs-file "fontaine-latest-state.eld"))
 
   (setq fontaine-presets
-        '((smaller
+        '((smallest
+           :default-height 100)
+          (smaller
            :default-height 120)
           (small
            :default-height 130)

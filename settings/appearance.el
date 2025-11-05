@@ -92,7 +92,7 @@ HEIGHT is optional and defaults to the current font height."
 
 
 
-(defvar my/default-theme 'catppuccin
+(defvar my/default-theme 'default-black
   "Default theme to use if omarchy theme cannot be determined.")
 
 (defun my/set-theme (theme-spec)

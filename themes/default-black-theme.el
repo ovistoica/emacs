@@ -2,7 +2,7 @@
 
 (custom-theme-set-faces
  'default-black
- '(default ((t (:inherit nil :stipple nil :background "Black" :foreground "White" :inverse-video nil :box nil :strike-t*hrough nil :overline nil :underline nil :slant normal :weight normal :width normal :height 105))))
+ '(default ((t (:inherit nil :stipple nil :background "Black" :foreground "White" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :width normal))))
  '(highlight ((((class color) (min-colors 88) (background dark)) (:background "#222222"))))
  '(region ((nil (:background "#464740"))))
  '(hl-line ((nil (:background "#222222"))))
