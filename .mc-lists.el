@@ -21,6 +21,7 @@
         indent-for-tab-command
         kill-region-or-backward-word
         kill-sexp
+        kill-visual-line
         mark-sexp
         mc/mark-next-lines
         my/cider-unload-current-namespace-aliases
