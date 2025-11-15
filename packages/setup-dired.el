@@ -58,4 +58,15 @@
   (when (fboundp 'diminish)
     (diminish 'dired-mode)))
 
+(use-package dired-toggle-sudo
+  :ensure t
+  :after dired
+  :bind (:map dired-mode-map
+              ("C-c C-s" . dired-toggle-sudo))
+  :config
+  ;; Allow to use: /sudo:user@host:/path/to/file
+  (with-eval-after-load 'tramp
+    (add-to-list 'tramp-default-proxies-alist
+                 '(".*" "\\`.+\\'" "/ssh:%h:"))))
+
 (provide 'setup-dired)
