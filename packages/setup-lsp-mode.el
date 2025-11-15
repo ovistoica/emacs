@@ -75,7 +75,7 @@
       (let ((python-path (expand-file-name "bin/python" venv)))
         (when (file-executable-p python-path)
           python-path))))
-  :straight '(lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
+  :vc (:url "https://github.com/emacs-lsp/lsp-pyright")
   :config (add-to-list 'lsp-pyright-python-search-functions #'os/locate-python-virtualenv)
   :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
   :hook ((python-mode . lsp-pyright-hook)

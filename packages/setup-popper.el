@@ -58,7 +58,7 @@
   "List of major-modes used in message buffers.")
 
 (use-package popper
-  :straight '(:type git :host github :repo "karthink/popper")
+  :vc (:url "https://github.com/karthink/popper")
   :bind (("C-`"   . popper-toggle)
          ("C-\\"  . popper-toggle)
          ("M-`"   . popper-cycle)

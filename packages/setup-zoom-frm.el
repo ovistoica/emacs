@@ -2,11 +2,19 @@
 ;;
 ;; Change text size for entire frame, not just a single buffer, lol
 
-(straight-use-package
- '(zoom-frm :type git :host github :repo "emacsmirror/zoom-frm"))
+;; Dependencies for zoom-frm
+(use-package frame-fns
+  :vc (:url "https://github.com/emacsmirror/frame-fns"))
 
-(global-set-key (kbd "C-x C-+") 'zoom-frm-in)
-(global-set-key (kbd "C-x C--") 'zoom-frm-out)
-(global-set-key (kbd "C-x C-0") 'zoom-frm-unzoom)
+(use-package frame-cmds
+  :vc (:url "https://github.com/emacsmirror/frame-cmds")
+  :after frame-fns)
+
+(use-package zoom-frm
+  :vc (:url "https://github.com/emacsmirror/zoom-frm")
+  :after frame-cmds
+  :bind (("C-x C-+" . zoom-frm-in)
+         ("C-x C--" . zoom-frm-out)
+         ("C-x C-0" . zoom-frm-unzoom)))
 
 (provide 'setup-zoom-frm)

@@ -2,7 +2,7 @@
 
 ;;; Code:
 (use-package eca
-  :straight  '(:type git :host github :repo "editor-code-assistant/eca-emacs" :files ("*.el"))
+  :vc (:url "https://github.com/editor-code-assistant/eca-emacs")
 
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
   ;;:config

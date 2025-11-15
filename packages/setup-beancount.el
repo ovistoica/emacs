@@ -4,7 +4,7 @@
 ;; Beancount is a text based accounting system that works with double entry bookkeeping
 
 (use-package beancount
-  :straight '(:type git :host github :repo "beancount/beancount-mode")
+  :vc (:url "https://github.com/beancount/beancount-mode")
   :mode ("\\.beancount\\'" . beancount-mode)
   :bind ((:map beancount-mode-map
                ("C-c C-n" . beancount-goto-next-transaction)

@@ -71,7 +71,7 @@
 
 ;; Only use smtpmail-multi on macOS
 (use-package smtpmail-multi
-  :straight '(:type git :repo "vapniks/smtpmail-multi" :host github)
+  :vc (:url "https://github.com/vapniks/smtpmail-multi")
   :config
   (auth-source-forget-all-cached)
   (setq smtpmail-multi-accounts

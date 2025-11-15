@@ -9,7 +9,7 @@ This is a comprehensive Emacs configuration designed for Clojure development wit
 ### Starting/Restarting Emacs
 - Configuration loads automatically from `init.el`
 - Restart Emacs to reload configuration changes: `M-x restart-emacs` or restart from terminal
-- Package management uses both MELPA and straight.el for GitHub packages
+- Package management uses MELPA with use-package's `:vc` feature for GitHub packages
 
 ### Development Commands
 
@@ -115,6 +115,6 @@ The `ai-prompts/` directory contains specialized AI expert personas:
 ### Package Management
 
 - **Primary**: MELPA via use-package with automatic installation
-- **GitHub packages**: straight.el for development versions
+- **GitHub packages**: use-package `:vc` keyword for development versions
 - **Native compilation**: Enabled for performance
-- **GCC path**: Uses Homebrew GCC for native compilation
+- **GCC path**: Uses Homebrew GCC for native compilation (macOS only)

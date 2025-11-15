@@ -15,10 +15,6 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
-
-;; Set up Straight (for packages on github) - MUST come before packages.el
-(require 'setup-straight)
-
 ;; Configure the package manager
 (require 'packages)
 

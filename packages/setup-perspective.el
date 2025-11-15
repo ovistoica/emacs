@@ -5,7 +5,7 @@
 ;; the Mac.
 
 (use-package perspective
-  :straight '(perspective :type git :host github :repo "nex3/perspective-el")
+  :vc (:url "https://github.com/nex3/perspective-el")
   :bind (("C-x k" . persp-kill-buffer*)
          ("C-x b" . persp-switch-to-buffer*))
   :init

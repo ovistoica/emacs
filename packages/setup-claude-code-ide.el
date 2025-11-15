@@ -2,7 +2,7 @@
 
 
 (use-package claude-code-ide
-  :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el")
   :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
   :custom
   ;; Window configuration

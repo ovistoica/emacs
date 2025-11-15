@@ -1,6 +1,6 @@
 (use-package envrc
   :diminish nil
-  :straight '(envrc :type git :host github :repo "purcell/envrc")
+  :vc (:url "https://github.com/purcell/envrc")
   :init (envrc-global-mode))
 
 (defun my/project-file-exists-p (filename)
