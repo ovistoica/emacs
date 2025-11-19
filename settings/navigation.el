@@ -4,6 +4,8 @@
 (global-set-key (kbd "C-s") 'isearch-forward-use-region)
 (global-set-key (kbd "C-r") 'isearch-backward-use-region)
 
+(global-set-key (kbd "C-x e") 'my/eshell-current-directory)
+
 ;; Navigate between windows using shift + arrow key
 (global-set-key (kbd "S-<right>") 'windmove-right)
 (global-set-key (kbd "S-<left>") 'windmove-left)
@@ -101,6 +103,23 @@
   (windmove-right)
   (balance-windows))
 
+(defun my/eshell-current-directory (&optional directory)
+  "Open eshell current `default-directory' or DIRECTORY."
+  (interactive)
+  (let ((current-dir (or directory default-directory))
+        (eshell-buffer (or (get-buffer "*eshell*")
+                           (eshell))))
+    (switch-to-buffer eshell-buffer)
+    (eshell/cd current-dir)
+    (eshell-next-prompt)
+    ;; Regenerate prompt to show current directory.
+    ;; Avoid sending any half written input commands
+    (if (eobp)
+        (eshell-send-input nil nil nil)
+      (move-end-of-line nil)
+      (eshell-kill-input)
+      (eshell-send-input nil nil nil)
+      (yank))))
 
 (defun zshrc ()
   (interactive)
