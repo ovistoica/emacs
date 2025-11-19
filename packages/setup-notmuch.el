@@ -13,7 +13,7 @@
                       "/opt/homebrew/Cellar/notmuch/0.39/share/emacs/site-lisp/notmuch/")
                      ((eq system-type 'gnu/linux)
                       "/usr/share/emacs/site-lisp/")))
-  :defer t
+  :defer
   :commands (notmuch notmuch-mua-new-mail))
 
 (autoload 'auth-source-search "auth-source")
@@ -280,22 +280,19 @@ Also supports yasnippet expansion in the message body."
 
 (use-package notmuch-indicator
   :ensure t
-  :after notmuch
+  :init
+  (notmuch-indicator-mode 1)
   :config
   (setq notmuch-indicator-args
         '(( :terms "tag:unread and tag:inbox"
-            ;; :label "[U] "
-            :label "💬 "
-            :label-face prot-modeline-indicator-cyan
-            :counter-face prot-modeline-indicator-cyan))
-
-        notmuch-indicator-refresh-count (* 60 3)
+            :label "@"
+            :label-face success)
+          ( :terms "from:bank and tag:bills and tag:unpaid"
+            :label "😱"
+            :counter-face warning)))
+  (setq notmuch-indicator-refresh-count (* 60 3)
         notmuch-indicator-hide-empty-counters t
         notmuch-indicator-force-refresh-commands '(notmuch-refresh-this-buffer))
-
-  ;; I control its placement myself.  See prot-emacs-modeline.el where
-  ;; I set the `mode-line-format'.
-  (setq notmuch-indicator-add-to-mode-line-misc-info nil)
 
   (notmuch-indicator-mode 1))
 

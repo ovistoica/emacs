@@ -94,25 +94,7 @@
   (setq smtpmail-servers-requiring-authorization "\\.com")
   (setq send-mail-function #'smtpmail-multi-send-it))
 
-(use-package notmuch-indicator
-  :ensure t
-  :after notmuch
-  :config
-  (setq notmuch-indicator-args
-        '(( :terms "tag:unread and tag:inbox"
-            :label "[U] ")
-          ( :terms "tag:unread and tag:package"
-            :label "[P] "))
 
-        notmuch-indicator-refresh-count (* 60 3)
-        notmuch-indicator-hide-empty-counters t
-        notmuch-indicator-force-refresh-commands '(notmuch-refresh-this-buffer))
-
-  ;; I control its placement myself.  See prot-emacs-modeline.el where
-  ;; I set the `mode-line-format'.
-  (setq notmuch-indicator-add-to-mode-line-misc-info nil)
-
-  (notmuch-indicator-mode 1))
 
 (defun sync-email ()
   "Runs a script for syncing email."
