@@ -1,6 +1,6 @@
 ;; Moving the cursor around
 
-;; Like isearch, but adds region (if any) to history and deactivates mark 
+;; Like isearch, but adds region (if any) to history and deactivates mark
 (global-set-key (kbd "C-s") 'isearch-forward-use-region)
 (global-set-key (kbd "C-r") 'isearch-backward-use-region)
 
@@ -129,5 +129,15 @@
   (interactive)
   (find-file "~/.bashrc"))
 
+(defvar freedom-websites-helpful-but-distracting
+  '("https?://\\(?:\\w+\\.\\)?reddit\\.com/.*"
+    "https?://\\(?:www\\.\\|m\\.\\)?youtube\\.com/\\(?:watch\\?v=\\|embed/\\|v/\\|channel/\\|playlist\\?list=\\)[^\\s&]+"))
+
+(defun my/freedom-blocked-url-p (url)
+  "Url blocked by freedom so only open from emacs when it's read in an article"
+  (not (null (seq-some (lambda (regex) (string-match-p regex url))
+                       freedom-websites-helpful-but-distracting))))
+
+(setq browse-url-handlers '((my/freedom-blocked-url-p . browse-url-firefox)))
 
 (provide 'navigation)
