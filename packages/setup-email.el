@@ -34,7 +34,9 @@
   :ensure nil
   :defer t
   :hook
-  (message-setup . message-sort-headers)
+  ((message-setup . message-sort-headers)
+   (message-mode . visual-line-mode)
+   (message-mode . visual-fill-column-mode))
   :config
   (setq mail-user-agent 'message-user-agent
         message-mail-user-agent t) ; use `mail-user-agent'
@@ -49,6 +51,7 @@
                                              ">")
         message-ignored-cited-headers "") ; default is "." for all headers
   (setq message-confirm-send nil)
+  (setq message-fill-column nil)
   (setq message-kill-buffer-on-exit t)
   ;; (add-to-list 'mm-body-charset-encoding-alist '(utf-8 . base64))
   (setq message-wide-reply-confirm-recipients nil))
