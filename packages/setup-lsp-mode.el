@@ -81,6 +81,9 @@
   :hook ((python-mode . lsp-pyright-hook)
          (python-ts-mode . lsp-pyright-hook)))
 
+(use-package lsp-java
+  :ensure t)
+
 
 (defun my/use-lsp-completion-only-as-fallback ()
   (when (-contains? completion-at-point-functions #'lsp-completion-at-point)
