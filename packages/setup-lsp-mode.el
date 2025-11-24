@@ -25,6 +25,7 @@
          (clojurescript-mode . lsp)
          (clojurec-mode . lsp)
          (python-mode . lsp)
+         (java-ts-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :diminish " lsp"
 
