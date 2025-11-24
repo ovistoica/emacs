@@ -79,24 +79,38 @@
         (babashka-run-task task task-buffer-name)
         (message "No bb.edn found in %s" short-dir))))
 
-(defun my/task-runner ()
+(defun display-prefix (arg)
+  "Display the value of the raw prefix arg."
+  (interactive "P")
+  (message "%s" arg))
+
+(defvar available-task-file-lists
+  '(("Babashka (bb.edn)" . babashka-invoke-task)
+    ("Makefile (Makefile)" . makefile-invoke-target)
+    ("JS Task (package.json)" . (lambda () (call-interactively #'js-pkg-run)))))
+
+(defun my/task-runner (arg)
   "Run task runner based on the project in the list of priorities:
 1. bb.edn - babashka-invoke-task
 2. Makefile - makefile-invoke-target
 3. package.json - js-pkg-run"
-  (interactive)
+  (interactive "P")
   (let* ((root (projectile-project-root))
          (bb-edn (concat root "bb.edn"))
          (makefile (concat root "Makefile"))
          (pkg-json (concat root "package.json")))
-    (cond
-     ((file-exists-p bb-edn)
-      (babashka-invoke-task))
-     ((file-exists-p makefile)
-      (makefile-invoke-target))
-     ((file-exists-p pkg-json)
-      (call-interactively #'js-pkg-run))
-     (t (message "No task file found. Add %s %s or %s" (shorten-path bb-edn) (shorten-path makefile) (shorten-path pkg-json))))))
+    (if arg
+        (let* ((task-runner (completing-read "Choose task runner: " (mapcar #'car available-task-file-lists)))
+               (task-fn (cdr (assoc task-runner available-task-file-lists))))
+          (funcall task-fn))
+        (cond
+         ((file-exists-p bb-edn)
+          (babashka-invoke-task))
+         ((file-exists-p makefile)
+          (makefile-invoke-target))
+         ((file-exists-p pkg-json)
+          (call-interactively #'js-pkg-run))
+         (t (message "No task file found. Add %s %s or %s" (shorten-path bb-edn) (shorten-path makefile) (shorten-path pkg-json)))))))
 
 (global-set-key (kbd "s-m") 'my/task-runner)
 
