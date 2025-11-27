@@ -1,3 +1,5 @@
+(defvar snippets-dir (expand-file-name "snippets" user-emacs-directory))
+
 (use-package yasnippet
   :diminish yas-minor-mode
   :defer t
@@ -9,7 +11,8 @@
 
   :config
   ;; Use only own snippets, do not use bundled ones
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (setq yas-snippet-dirs (list snippets-dir))
+
 
   ;; No dropdowns please, yas
   (setq yas-prompt-functions '(yas-ido-prompt yas-completing-prompt))
