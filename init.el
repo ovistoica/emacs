@@ -1,3 +1,28 @@
+;;; init.el --- Emacs configuration -*- lexical-binding: t -*-
+
+;; Redirect .elc files to a separate directory
+(defun my/setup-byte-compile-destination ()
+  "Configure byte compilation to output .elc files to a separate directory."
+  (let ((elc-dir (expand-file-name "elc/" user-emacs-directory)))
+    ;; Create the elc directory if it doesn't exist
+    (unless (file-directory-p elc-dir)
+      (make-directory elc-dir t))
+
+    ;; Set the byte-compile destination function
+    (setq byte-compile-dest-file-function
+          (lambda (source)
+            (let* ((relative-path (file-relative-name source user-emacs-directory))
+                   (dest-path (expand-file-name relative-path elc-dir))
+                   (dest-dir (file-name-directory dest-path)))
+              ;; Ensure the destination directory exists
+              (unless (file-directory-p dest-dir)
+                (make-directory dest-dir t))
+              ;; Return the .elc file path
+              (concat (file-name-sans-extension dest-path) ".elc"))))))
+
+;; Call immediately
+(my/setup-byte-compile-destination)
+
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
   (setq mac-option-modifier 'super)
