@@ -118,7 +118,7 @@ If there's no region, the current line will be duplicated."
       ((and closest-behind (not closest-ahead)) closest-behind)
       ((> (- closest-ahead (point)) (- (point) closest-behind)) closest-behind)
       ((> (- (point) closest-behind) (- closest-ahead (point))) closest-ahead)
-      :else closest-ahead))))
+      (t closest-ahead)))))
 
 (defun inc-number-at-point (arg)
   (interactive "p")
