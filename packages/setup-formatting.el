@@ -1,9 +1,9 @@
-;;; setup-apheleia.el --- Config about formatting -*- lexical-binding: t -*-
+;;; Config about formatting -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;;; Code:
-
+(require 'tooling)
 
 ;;; APHELEIA
 ;; auto-format different source code files extremely intelligently
@@ -55,5 +55,9 @@ Including indent-buffer, which should not be called automatically on save."
       (apheleia-format-buffer formatter)
     (cleanup-buffer)))
 
-(provide 'setup-apheleia)
+(defun my/format-w-cljfmt ()
+  (interactive)
+  (quittable-async-shell-command (concat "cljfmt fix " (buffer-name)) t))
+
+(provide 'setup-formatting)
 ;;; setup-formatting.el ends here

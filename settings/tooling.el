@@ -51,9 +51,51 @@
 
 (global-set-key (kbd "C-s-w") 'my/copy-buffer-as-prompt)
 
+(defvar async-cmd--previous-window-configuration nil)
+
+(defun quittable-async-shell-command (command &optional quit-immediately-p)
+  "Like async-shell-command but with small improvements on the result
+buffer. Execute `COMMAND' in separate buffer, asynchronously. Kill the
+result buffer immediately if `QUIT-IMMEDIATELY-P' is t"
+  (interactive
+   (list
+    (read-shell-command (if shell-command-prompt-show-cwd
+                            (format-message "Async shell command in `%s': "
+                                            (abbreviate-file-name
+                                             default-directory))
+                          "Async shell command: ")
+                        nil nil
+                        (let ((filename
+                               (cond
+                                (buffer-file-name)
+                                ((eq major-mode 'dired-mode)
+                                 (dired-get-filename nil t)))))
+                          (and filename (file-relative-name filename))))
+    nil))
+  (let* ((cmd-buffer-name (concat "*Command: " command "*"))
+         (current-buffer (buffer-name))
+         (prev (if (get-buffer cmd-buffer-name)
+                   (with-current-buffer cmd-buffer-name
+                     async-cmd--previous-window-configuration)
+                 (list (current-window-configuration) (point-marker)))))
+    (progn
+      (async-shell-command command cmd-buffer-name)
+      (unless (s-equals? (buffer-name) cmd-buffer-name)
+        (switch-to-buffer-other-window cmd-buffer-name))
+      (setq async-cmd--previous-window-configuration prev)
+      (read-only-mode)
+      (local-set-key (kbd "g") (λ (async-shell-command command cmd-buffer-name)))
+      (local-set-key (kbd "q") (λ (let ((conf async-cmd--previous-window-configuration))
+                                    (kill-buffer)
+                                    (when conf (register-val-jump-to conf nil)))))
+      (when quit-immediately-p
+        (let ((conf async-cmd--previous-window-configuration))
+          (kill-buffer)
+          (when conf (register-val-jump-to conf nil)))))))
+
+(global-set-key (kbd "M-&") 'quittable-async-shell-command)
+
 ;; No need to remind me about eldoc-mode all the time
 (diminish 'eldoc-mode)
 
 (provide 'tooling)
-
-
