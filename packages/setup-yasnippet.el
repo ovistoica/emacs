@@ -27,8 +27,8 @@
   (yas-global-mode 1))
 
 (use-package datomic-snippets
-  :config
-  (datomic-snippets-initialize))
+  :after clojure-mode
+  :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so)))
 
 (defun yas/goto-end-of-active-field ()
   (interactive)

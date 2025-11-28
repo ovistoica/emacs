@@ -5,4 +5,5 @@
 ;; auto-filled ones however I don't like using it for writing.
 
 (use-package visual-fill-column
-  :ensure t)
+  :ensure t
+  :defer t)

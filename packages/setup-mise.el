@@ -3,7 +3,6 @@
 (use-package mise
   :ensure t
   :diminish ""
-  :config
-  (global-mise-mode))
+  :hook (after-init . global-mise-mode))
 
 (provide 'setup-mise)

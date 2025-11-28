@@ -83,7 +83,8 @@
          (python-ts-mode . lsp-pyright-hook)))
 
 (use-package lsp-java
-  :ensure t)
+  :ensure t
+  :defer t)
 
 
 (defun my/use-lsp-completion-only-as-fallback ()
