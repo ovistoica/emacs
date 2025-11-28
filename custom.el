@@ -48,8 +48,8 @@
               nerd-icons-completion nerd-icons-dired notmuch-indicator
               ol-notmuch orderless ox-clip ox-gfm ox-gist perspective popper
               prodigy projectile pulsar rainbow-mode significant-other
-              smartparens smtpmail-multi terraform-mode undo-fu vertico
-              visual-fill-column vterm vundo wakatime-mode web-server
+              smartparens smtpmail-multi terraform-mode time-zones undo-fu
+              vertico visual-fill-column vterm vundo wakatime-mode web-server
               wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
               zprint-mode))
  '(safe-local-variable-values
