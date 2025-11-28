@@ -35,6 +35,23 @@
      "1ad12cda71588cc82e74f1cabeed99705c6a60d23ee1bb355c293ba9c000d4ac"
      "b9c002dc827fb75b825da3311935c9f505d48d7ee48f470f0aa7ac5d2a595ab2"
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
+ '(package-selected-packages
+   '(apheleia auto-sudoedit beancount browse-at-remote catppuccin-theme
+              centered-window claude-code-ide clay clj-refactor compile-angel
+              consult-flycheck dashboard datomic-snippets deadgrep denote
+              diff-hl diminish dired-quick-sort dired-subtree dired-toggle-sudo
+              dockerfile-mode doom-themes eca ef-themes envrc
+              exec-path-from-shell expand-region fontaine frame-fns
+              git-timemachine helpful html-to-hiccup jira kaocha-runner lin
+              lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia
+              mermaid-mode mise modus-themes move-text neil
+              nerd-icons-completion nerd-icons-dired notmuch-indicator
+              ol-notmuch orderless ox-clip ox-gfm ox-gist perspective popper
+              prodigy projectile pulsar rainbow-mode significant-other
+              smartparens smtpmail-multi terraform-mode undo-fu vertico
+              visual-fill-column vterm vundo wakatime-mode web-server
+              wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
+              zprint-mode))
  '(safe-local-variable-values
    '((eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
            (add-to-list 'cider-jack-in-nrepl-middlewares
@@ -47,3 +64,9 @@
      (cider-default-cljs-repl . figwheel-main)
      (cider-clojure-cli-aliases . "-A:ui")
      (flycheck-disabled-checkers emacs-lisp-checkdoc))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
