@@ -12,4 +12,26 @@
   :config
   (setq beancount-use-ido nil))
 
+(defun beancount-rev-pockets ()
+  (beancount-collect-unique beancount-account-regexp 0)
+  (seq-filter (lambda (account)
+                (string-match-p "Assets:RO:Revolut:Pocket:.*" account))
+              my-list))
+
+(defconst my/beancount-rev-checking-accounts-regexp
+  (rx "Assets:"
+      (? (+ (not ":")) ":")  ; optional country
+      (? (+ (not ":")) ":")  ; optional owner
+      "Revolut:Checking"
+      (? "Joint")
+      (? ":" (or "RON" "EUR" "USD"))))
+
+(defconst my/beancount-rev-pocket-accounts-regexp
+  (rx "Assets:"
+      (? (+ (not ":")) ":")
+      "Revolut:Pocket:"
+      (one-or-more alpha)))
+
+
+
 (provide 'setup-beancount)
