@@ -29,9 +29,17 @@
 (defconst my/beancount-rev-pocket-accounts-regexp
   (rx "Assets:"
       (? (+ (not ":")) ":")
+      (? (+ (not ":")) ":")
       "Revolut:Pocket:"
-      (one-or-more alpha)))
+      (one-or-more alpha)
+      (? ":" (or "RON" "EUR" "USD"))))
 
+(defconst my/beancount-expenses-regexp
+  (rx "Expenses:"
+      (or "Home" "Business")
+      ":"
+      (one-or-more alpha)
+      (? ":" (one-or-more alpha))))
 
 
 (provide 'setup-beancount)

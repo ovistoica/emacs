@@ -3,5 +3,5 @@
 # key: bpw
 # --
 ${1:`(format-time-string "%Y-%m-%d")`} * "${2:Pocket Withdrawal}"
-${3:From$$(yas-choose-value (sort (beancount-collect-unique my/beancount-rev-pocket-accounts-regexp 0) #'string<))} -${4:AMT} RON
-${5:Assets:RO:Ovi:Revolut:Checking:RON$(yas-choose-value (sort (beancount-collect-unique my/beancount-rev-checking-accounts-regexp 0) #'string<))}
+${3:Assets:RO:Ovi:Revolut:Checking:RON$(yas-choose-value (sort (beancount-collect-unique my/beancount-rev-checking-accounts-regexp 0) #'string<))} ${4:AMT} RON
+${5:Pocket$$(yas-choose-value (sort (beancount-collect-unique my/beancount-rev-pocket-accounts-regexp 0) #'string<))}

@@ -47,7 +47,11 @@
   :bind (("<f12>" . view-mode )
          :map view-mode-map
          ("n" . forward-line)
-         ("p" . previous-line)))
+         ("j" . forward-line)
+         ("p" . previous-line)
+         ("k" . previous-line)
+         ("f" . forward-char)
+         ("b" . backward-char)))
 
 (defun isearch-forward-use-region ()
   (interactive)
