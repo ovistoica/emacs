@@ -38,7 +38,7 @@ for elisp where we don't want it handled by apheleia."
   (require 'apheleia-formatters)
   (let ((mode (or mode major-mode)))
     (when (not (eq mode 'emacs-lisp-mode))
-      (alist-get mode apheleia-mode-alist))))
+      (or apheleia-formatter (alist-get mode apheleia-mode-alist)))))
 
 (defun cleanup-buffer ()
   "Perform a bunch of operations on the whitespace content of a buffer.
@@ -57,7 +57,11 @@ Including indent-buffer, which should not be called automatically on save."
 
 (defun my/format-w-cljfmt ()
   (interactive)
-  (quittable-async-shell-command (concat "cljfmt fix " (buffer-name)) t))
+  (let* ((command (concat "cljfmt fix " (buffer-name)))
+         (cmd-buffer-name (concat "*Command: " command "*")))
+    (when (get-buffer cmd-buffer-name)
+      (kill-buffer))
+    (quittable-async-shell-command command t)))
 
 (provide 'setup-formatting)
 ;;; setup-formatting.el ends here
