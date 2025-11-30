@@ -47,13 +47,14 @@
               mermaid-mode mise modus-themes move-text neil
               nerd-icons-completion nerd-icons-dired notmuch-indicator
               ol-notmuch orderless ox-clip ox-gfm ox-gist perspective popper
-              prodigy projectile pulsar rainbow-mode significant-other
+              prodigy projectile pulsar rainbow-mode sicp significant-other
               smartparens smtpmail-multi terraform-mode time-zones undo-fu
               vertico visual-fill-column vterm vundo wakatime-mode web-server
               wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
               zprint-mode))
  '(safe-local-variable-values
-   '((eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
+   '((apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
+     (eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
            (add-to-list 'cider-jack-in-nrepl-middlewares
                         "shadow.cljs.devtools.server.nrepl/middleware"))
      (cider-clojure-cli-parameters . "--port 7888")
