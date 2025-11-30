@@ -41,7 +41,9 @@
 ;; Setup environment variables from the user's shell.
 (use-package exec-path-from-shell
   :init
-  (setq exec-path-from-shell-shell-name "/bin/zsh") ; Explicitly set shell
+  (when (eq system-type 'darwin)
+    (setq exec-path-from-shell-shell-name "/bin/zsh"))
+   ; Explicitly set shell
   (setq exec-path-from-shell-variables
         '(
           "ANTHROPIC_API_KEY"
