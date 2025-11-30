@@ -77,7 +77,7 @@
                                        (babashka-find-tasks)))))))
     (if (file-exists-p file)
         (babashka-run-task task task-buffer-name)
-        (message "No bb.edn found in %s" short-dir))))
+      (message "No bb.edn found in %s" short-dir))))
 
 (defun display-prefix (arg)
   "Display the value of the raw prefix arg."
@@ -88,6 +88,20 @@
   '(("Babashka (bb.edn)" . babashka-invoke-task)
     ("Makefile (Makefile)" . makefile-invoke-target)
     ("JS Task (package.json)" . (lambda () (call-interactively #'js-pkg-run)))))
+
+(defvar-local preferred-task-runner nil
+  "Buffer local variable to set in case of multiple task runner files
+detected. Example: (nil . ((preferred-task-runner . makefile)))")
+
+(defun handle-preferred-task-runner ()
+  (cond
+   ((eq preferred-task-runner 'bb)
+    (babashka-invoke-task))
+   ((eq preferred-task-runner 'makefile)
+    (makefile-invoke-target))
+   ((eq preferred-task-runner 'pkg-json)
+    (call-interactively #'js-pkg-run))
+   (t (message "Invalid preferred task runner. Valid options are 'bb, 'makefile or 'pkg-json. Got %s" preferred-task-runner))))
 
 (defun my/task-runner (arg)
   "Run task runner based on the project in the list of priorities:
@@ -103,6 +117,8 @@
         (let* ((task-runner (completing-read "Choose task runner: " (mapcar #'car available-task-file-lists)))
                (task-fn (cdr (assoc task-runner available-task-file-lists))))
           (funcall task-fn))
+      (if preferred-task-runner
+          (handle-preferred-task-runner)
         (cond
          ((file-exists-p bb-edn)
           (babashka-invoke-task))
@@ -110,7 +126,7 @@
           (makefile-invoke-target))
          ((file-exists-p pkg-json)
           (call-interactively #'js-pkg-run))
-         (t (message "No task file found. Add %s %s or %s" (shorten-path bb-edn) (shorten-path makefile) (shorten-path pkg-json)))))))
+         (t (message "No task file found. Add %s %s or %s" (shorten-path bb-edn) (shorten-path makefile) (shorten-path pkg-json))))))))
 
 (global-set-key (kbd "s-m") 'my/task-runner)
 
