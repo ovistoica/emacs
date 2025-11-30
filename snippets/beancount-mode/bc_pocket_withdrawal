@@ -1,5 +1,5 @@
 # -*- mode: snippet;-*-
-# name: beancount-with-date
+# name: beancount-pocket-withdrawal
 # key: bpw
 # --
 ${1:`(format-time-string "%Y-%m-%d")`} * "${2:Pocket Withdrawal}"

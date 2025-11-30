@@ -1,10 +1,7 @@
-# -*- mode: snippet; require-final-newline: nil -*-
-# name: beancount-expense
-# key: bc
-# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
-# type: snippet
-# binding: direct-keybinding
+# -*- mode: snippet -*-
+# name: Expense
+# key: exp
 # --
-`(format-time-string "%Y-%m-%d")` * "${1:Description}"
-  ${2:Account$$(yas-choose-value beancount-accounts)} ${3:AMT}
-  ${4:Account$$(yas-choose-value beancount-accounts)}
+${1:`(format-time-string "%Y-%m-%d")`} * "${2:Expense}"
+${3:From$$(yas-choose-value (sort (beancount-collect-unique my/beancount-rev-checking-accounts-regexp 0) #'string<))} -${4:AMT} RON
+${5:Expense$(yas-choose-value (sort (beancount-collect-unique "Expenses.*" 0) #'string<))}
