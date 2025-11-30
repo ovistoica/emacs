@@ -8,6 +8,8 @@
   :mode ("\\.beancount\\'" . beancount-mode)
   :bind ((:map beancount-mode-map
                ("C-c C-n" . beancount-goto-next-transaction)
-               ("C-c C-p" . beancount-goto-previous-transaction))))
+               ("C-c C-p" . beancount-goto-previous-transaction)))
+  :config
+  (setq beancount-use-ido nil))
 
 (provide 'setup-beancount)
