@@ -3,7 +3,6 @@
 
 (use-package vterm
   :ensure vterm
-  :defer t
   :config
   (setq shell-file-name (or (getenv "SHELL") "/bin/bash")
         vterm-max-scrollback 500000)
