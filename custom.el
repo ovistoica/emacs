@@ -42,8 +42,8 @@
               diff-hl diminish dired-quick-sort dired-subtree dired-toggle-sudo
               dockerfile-mode doom-themes eca ef-themes envrc
               exec-path-from-shell expand-region fontaine frame-fns
-              git-timemachine helpful html-to-hiccup jira kaocha-runner lin
-              lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia
+              git-timemachine helpful html-to-hiccup jira kaocha-runner keycast
+              lin lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia
               mermaid-mode mise modus-themes move-text neil
               nerd-icons-completion nerd-icons-dired notmuch-indicator
               ol-notmuch orderless ox-clip ox-gfm ox-gist perspective popper

@@ -45,6 +45,8 @@
   (setq org-capture-templates
         '(("a" "Affirmation" entry (file+olp+datetree "~/Dropbox/org/affirmations.org")
            "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
+          ("b" "Bookmark" entry (file+headline "~/Dropbox/org/bookmarks.org" "Bookmarks")
+	   "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
           ("e" "Event" entry (file+headline "~/Dropbox/org/working-memory.org" "Events")
