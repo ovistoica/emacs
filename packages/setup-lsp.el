@@ -36,7 +36,7 @@
   (setq lsp-eldoc-enable-hover nil) ;; use CIDER eldoc
   (setq lsp-modeline-code-actions-enable nil) ;; Don't clutter modeline
   (setq lsp-modeline-diagnostics-enable nil) ;; Don't clutter modeline, jeez
-  (setq lsp-enable-symbol-highlighting t)
+  (setq lsp-enable-symbol-highlighting nil) ;; Don't highlight symbol - s l a h for when needed
 
   (setq lsp-apply-edits-after-file-operations nil) ;; Disable broken lsp feature: https://github.com/clojure-lsp/clojure-lsp/issues/1813
 
@@ -64,6 +64,8 @@
 (use-package lsp-ui-doc
   :ensure nil
   :after lsp-mode
+  :custom
+  (lsp-ui-doc-position 'at-point)  ; Show doc childframe at point, not top-right
   :bind ((:map lsp-command-map
                ("d" . lsp-ui-doc-glance))))
 
