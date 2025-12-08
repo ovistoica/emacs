@@ -3,15 +3,6 @@
 (with-eval-after-load 'lsp-mode
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]docker/build"))
 
-(prodigy-define-service
-  :name "Datomic Transactor"
-  :tags '(wavekit-ai shipclojure-datom shipclojure-website datomic)
-  :command "/Users/ovistoica/datomic-pro-1.0.7364/bin/transactor"
-  :args '("config/samples/dev-transactor-template.properties")
-  :cwd "~/"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
-
 ;; (prodigy-define-service
 ;;   :name "ShipClojure Datom Shadow-CLJS Watch"
 ;;   :tags '(shipclojure-datom frontend)
@@ -21,14 +12,14 @@
 ;;   :stop-signal 'sigkill
 ;;   :kill-process-buffer-on-stop t)
 
-(prodigy-define-service
-  :name "ShipCLojure Datom CSS Watch"
-  :tags '(shipclojure-datom css)
-  :command "bb"
-  :args '("watch:css")
-  :cwd "~/workspace/shipclojure-datom"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
+;; (prodigy-define-service
+;;   :name "ShipCLojure Datom CSS Watch"
+;;   :tags '(shipclojure-datom css)
+;;   :command "bb"
+;;   :args '("watch:css")
+;;   :cwd "~/workspace/shipclojure-datom"
+;;   :stop-signal 'sigkill
+;;   :kill-process-buffer-on-stop t)
 
 (prodigy-define-service
   :name "Wavekit CSS Watch"
@@ -93,3 +84,4 @@
 (setq world-clock-time-format "%a, %d %b %I:%M %p %Z")
 
 (provide 'work)
+;;; work.el ends here
