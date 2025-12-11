@@ -1,3 +1,13 @@
+;;; appearance --- Settings for fonts, theme & what is shown in emacs -*- lexical-binding: t -*-
+;;;
+;;; Commentary:
+
+;;; Some of the logic here is based around Omarchy as an OS where you can change
+;;; themes & fonts directly from the system prompt. You'll find equivalent
+;;; themes here for a homogeneus experience.
+
+;;; Code:
+
 ;; Turn off mouse interface early in startup to avoid momentary display
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -22,7 +32,7 @@
 ;; Font management
 
 (defun my/set-font (font &optional height)
-  "Set the emacs font to FONT if it is available.
+  "Set the Emacs font to FONT if it is available.
 HEIGHT is optional and defaults to the current font height."
   (interactive)
   ;; Get current height if not provided
@@ -87,8 +97,10 @@ HEIGHT is optional and defaults to the current font height."
     ("Ristretto" . doom-monokai-ristretto)
     ("rose-pine" . rose-pine)
     ("tokyo-night" . doom-tokyo-night)
-    ("Tokyo Night" . doom-tokyo-night))
-  "Mapping of omarchy theme names to either theme symbols or configuration functions.")
+    ("Tokyo Night" . doom-tokyo-night)
+    ("Ethereal" . modus-vivendi-tinted)
+    ("ethereal" . modus-vivendi-tinted))
+  "Map Omarchy theme names to either symbols or configuration functions.")
 
 
 
@@ -103,8 +115,7 @@ THEME-SPEC can be:
 - A function: calls the function to configure and load the theme"
   (interactive)
   (message "Got theme %s" theme-spec)
-  (let ((orig-theme theme-spec)
-        (handler (if (stringp theme-spec)
+  (let ((handler (if (stringp theme-spec)
                      (or (cdr (assoc theme-spec my/theme-mapping))
                          (intern theme-spec))
                    theme-spec)))
@@ -144,3 +155,4 @@ THEME-SPEC can be:
 (setq display-line-numbers-width-start t)  ; Auto-adjust width based on buffer size
 
 (provide 'appearance)
+;;; appearance.el ends here
