@@ -1,3 +1,10 @@
+;;; setup-git --- Settings and packages related to git management -*- lexical-binding: t -*-
+
+;;; Commentary:
+;;; I mostly use magit for usual git but this file contains some other quality of life packages.
+
+;;; Code:
+
 (use-package magit
   :defer t
   :custom
@@ -30,6 +37,20 @@
   :custom
   (browse-at-remote-prefer-symbolic nil)
   :bind (("C-x v w" . browse-at-remote-kill)))
+
+(use-package blamer
+  :vc (:url "https://github.com/artawower/blamer.el")
+  :bind (("s-i" . blamer-show-posframe-commit-info))
+  :custom
+  (blamer-idle-time 0.5)
+  (blamer-min-offset 10)
+  (blamer-author-formatter "  ✎ %s ")
+  (blamer-datetime-formatter "[%s]")
+  (blamer-commit-formatter " ● %s")
+  (blamer-type 'visual)
+  (blamer-view 'overlay-right)
+  (blamer-max-commit-message-length 70)
+  :commands (blamer-mode))
 
 (defun kill-magit-buffers ()
   (let ((current (current-buffer)))
@@ -84,4 +105,5 @@ stored by magit-status fullscreen."
       (browse-url pr-url)))))
 
 
-(provide 'setup-magit)
+(provide 'setup-git)
+;;; setup-git.el ends here
