@@ -23,6 +23,7 @@
         kill-sexp
         kill-visual-line
         mark-sexp
+        markdown-outdent-or-delete
         mc/mark-next-lines
         my/cider-unload-current-namespace-aliases
         my/convert-classes-to-vector
@@ -60,6 +61,7 @@
         dired-jump
         handle-switch-frame
         ignore-preserving-kill-region
+        isearch-forward-use-region
         lsp-ui-doc--handle-mouse-movement
         mouse-set-region
         my/format-buffer
