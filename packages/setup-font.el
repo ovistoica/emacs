@@ -2,7 +2,7 @@
 ;; Read the manual: <https://protesilaos.com/emacs/fontaine>
 (use-package fontaine
   :ensure t
-  :if (display-graphic-p)
+  :if (or (display-graphic-p) (daemonp))
   :hook
   ;; Persist the latest font preset when closing/starting Emacs and
   ;; while switching between themes.
