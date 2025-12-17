@@ -95,6 +95,22 @@ result buffer immediately if `QUIT-IMMEDIATELY-P' is t"
 
 (global-set-key (kbd "M-&") 'quittable-async-shell-command)
 
+
+;; Load bash history into shell-command-history
+(defun my/load-bash-history ()
+  "Load bash history into `shell-command-history'."
+  (let ((bash-history-file "~/.bash_history"))
+    (when (file-exists-p bash-history-file)
+      (with-temp-buffer
+        (insert-file-contents bash-history-file)
+        (let ((lines (split-string (buffer-string) "\n" t)))
+          ;; Add unique entries, most recent first
+          (setq shell-command-history
+                (delete-dups (append (nreverse lines) shell-command-history))))))))
+
+;; Load on startup
+(my/load-bash-history)
+
 ;; No need to remind me about eldoc-mode all the time
 (diminish 'eldoc-mode)
 
