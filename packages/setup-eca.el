@@ -1,13 +1,18 @@
+;;; setup-eca --- A vendor neutral agent interface -*- lexical-binding: t -*-
+
+;;; Commentary:
 ;; Eca - Editor Code Assistant
 
 ;;; Code:
 (use-package eca
-  :vc (:url "https://github.com/editor-code-assistant/eca-emacs")
-
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
   ;;:config
   ;;(setq eca-extra-args '("--verbose"))
   ;;(setq eca-chat-auto-add-repomap nil)
+  :ensure t
+  :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
+            :lisp-dir "."
+            :main-file "eca.el")
 
   )
 
@@ -26,3 +31,4 @@
 
 
 (provide 'setup-eca)
+;;; setup-eca.el ends here
