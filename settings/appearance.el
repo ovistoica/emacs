@@ -42,7 +42,7 @@ HEIGHT is optional and defaults to the current font height."
       (set-face-attribute 'default nil :font font :height font-height)
       (message "Font was set to %s" font))))
 
-(defvar my/default-font "CaskaydiaCove Nerd Font")
+(defvar my/default-font "Iosevka Nerd Font Mono")
 
 (defvar my/current-font
   (cond ((eq system-type 'darwin)
@@ -51,6 +51,8 @@ HEIGHT is optional and defaults to the current font height."
          (or (string-trim (shell-command-to-string "omarchy-font-current"))
              my/default-font))
         (t my/default-font)))
+
+;; (my/set-font my/default-font)
 
 (my/set-font my/current-font)
 
