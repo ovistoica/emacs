@@ -23,3 +23,4 @@
     (makunbound 'file-name-handler-alist-original)))
 
 (provide 'fast-startup)
+;;; fast-startup.el ends here
