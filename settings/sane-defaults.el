@@ -74,16 +74,19 @@
 
 ;; Start Emacs server for emacsclient
 (use-package server
+  :commands server-running-p
   :defer 2
   :config (unless (server-running-p)
+            (message "Starting emacs server...")
             (server-start)))
 
 ;; Show more than 4 levels when evaling expressions
 (setq eval-expression-print-level 100)
 
-;; Offer to create parent directories if they do not exist
-;; http://iqbalansari.github.io/blog/2014/12/07/automatically-create-parent-directories-on-visiting-a-new-file-in-emacs/
 (defun my-create-non-existent-directory ()
+  "Offer to create parent directories if they don't exist.
+Credit:
+http://iqbalansari.github.io/blog/2014/12/07/automatically-create-parent-directories-on-visiting-a-new-file-in-emacs/"
   (let ((parent-directory (file-name-directory buffer-file-name)))
     (when (and (not (file-exists-p parent-directory))
                (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
@@ -138,3 +141,4 @@
 (setq native-comp-async-report-warnings-errors 'silent)
 
 (provide 'sane-defaults)
+;;; sane-defaults.el ends here
