@@ -44,17 +44,12 @@ HEIGHT is optional and defaults to the current font height."
 
 (defvar my/default-font "Iosevka Nerd Font Mono")
 
-(defvar my/current-font
-  (cond ((eq system-type 'darwin)
-         my/default-font)
-        ((eq system-type 'gnu/linux)
-         (or (string-trim (shell-command-to-string "omarchy-font-current"))
-             my/default-font))
-        (t my/default-font)))
-
-;; (my/set-font my/default-font)
-
-(my/set-font my/current-font)
+(defun my/get-omarchy-font ()
+  "Get the current font from omarchy, or return default."
+  (if (eq system-type 'gnu/linux)
+      (let ((font (string-trim (shell-command-to-string "omarchy-font-current"))))
+        (if (string-empty-p font) my/default-font font))
+    my/default-font))
 
 ;;; Theme management
 
@@ -63,11 +58,11 @@ HEIGHT is optional and defaults to the current font height."
              (expand-file-name "themes" user-emacs-directory))
 
 (defun my/raw-set-theme (theme)
-  "Disables previously enabled themes, before enabling THEME to not have overlaps"
+  "Disable previously enabled themes, before enabling THEME to not have overlaps."
   (interactive
    (list (intern (completing-read "Choose theme: "
-                                   (mapcar #'symbol-name (custom-available-themes))
-                                   nil t))))
+                                  (mapcar #'symbol-name (custom-available-themes))
+                                  nil t))))
   (mapc #'disable-theme custom-enabled-themes)
   (load-theme theme :no-confirm))
 
@@ -133,16 +128,12 @@ THEME-SPEC can be:
       (error
        (message "Failed to load theme: %s" (error-message-string err))))))
 
-(defvar my/current-theme
-  (cond ((eq system-type 'darwin)
-         my/default-theme)
-        ((eq system-type 'gnu/linux)
-         (or (string-trim (shell-command-to-string "omarchy-theme-current"))
-             my/default-theme))
-        (t my/default-theme))
-  "Current theme based on system and omarchy configuration.")
-
-(my/set-theme my/current-theme)
+(defun my/get-omarchy-theme ()
+  "Get the current theme from omarchy, or return default."
+  (if (eq system-type 'gnu/linux)
+      (let ((theme (string-trim (shell-command-to-string "omarchy-theme-current"))))
+        (if (string-empty-p theme) my/default-theme theme))
+    my/default-theme))
 
 ;; Don't beep. Just blink the modeline on errors.
 (setq ring-bell-function (lambda ()
@@ -155,6 +146,23 @@ THEME-SPEC can be:
 ;; Customize line number appearance
 (setq display-line-numbers-type 'absolute) ; Use 'relative for relative line numbers
 (setq display-line-numbers-width-start t)  ; Auto-adjust width based on buffer size
+
+;; Omarchy appearance initialization (deferred for daemon mode)
+(defun my/init-omarchy-appearance ()
+  "Initialize font and theme from omarchy settings."
+  (my/set-font (my/get-omarchy-font))
+  (my/set-theme (my/get-omarchy-theme))
+  (when (daemonp)
+    (start-process "emacs-notify" nil "notify-send"
+                   "--app-name=Emacs"
+                   "Emacs initialized!"
+                   "Emacs daemon is ready to use.")))
+
+;; For daemon mode, delay initialization to ensure system is ready
+;; For interactive mode, run immediately after init
+(if (daemonp)
+    (run-with-timer 2 nil #'my/init-omarchy-appearance)
+  (add-hook 'after-init-hook #'my/init-omarchy-appearance))
 
 (provide 'appearance)
 ;;; appearance.el ends here
