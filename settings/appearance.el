@@ -143,7 +143,16 @@ THEME-SPEC can be:
 ;; Enable line numbers only in programming modes
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
+;; Colorize ANSI escape sequences in compilation buffers
+(require 'ansi-color)
+(require 'compile)
+(defun my/colorize-compilation-buffer ()
+  "Apply ANSI colors to compilation buffer output."
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+(add-hook 'compilation-filter-hook #'my/colorize-compilation-buffer)
+
 ;; Customize line number appearance
+(require 'display-line-numbers)
 (setq display-line-numbers-type 'absolute) ; Use 'relative for relative line numbers
 (setq display-line-numbers-width-start t)  ; Auto-adjust width based on buffer size
 
