@@ -1,5 +1,21 @@
+;;; setup-babashka.el --- Babashka task runner integration -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Provides integration with Babashka task runner (bb.edn).
+;; Supports running tasks from bb.edn, Makefile, and package.json.
+
+;;; Code:
+
+(require 'dash)
+(require 's)
+(require 'projectile)
+
+(declare-function makefile-invoke-target "setup-makefile-mode")
+(declare-function js-pkg-run "setup-js")
+(declare-function λ "tooling")
+
 (defun babashka-find-tasks ()
-  "Extract the task names of all the tasks from the bb.edn buffer"
+  "Extract the task names of all the tasks from the bb.edn buffer."
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward ":tasks" nil t)
@@ -44,20 +60,9 @@
 (defvar babashka--previous-window-configuration nil)
 (defvar babashka--previous-task nil)
 
-(defun babashka-run-task (task task-buffer-name)
-  (async-shell-command task task-buffer-name)
-  (unless (s-equals? (buffer-name) task-buffer-name)
-    (switch-to-buffer-other-window task-buffer-name))
-  (setq-local babashka--previous-window-configuration prev)
-  (setq-local babashka--previous-task task)
-  (read-only-mode)
-  (local-set-key (kbd "m") 'babashka-invoke-task)
-  (local-set-key (kbd "g") (λ (babashka-invoke-task t)))
-  (local-set-key (kbd "q") (λ (let ((conf babashka--previous-window-configuration))
-                                (kill-buffer)
-                                (when conf (register-val-jump-to conf nil))))))
-
 (defun babashka-invoke-task (&optional repeat?)
+  "Invoke a babashka task from bb.edn.
+If REPEAT? is non-nil, repeat the previous task."
   (interactive)
   (let* ((file (concat (projectile-project-root) "bb.edn"))
          (short-dir (shorten-path (projectile-project-root)))
@@ -76,7 +81,18 @@
                                        (insert-file-contents file)
                                        (babashka-find-tasks)))))))
     (if (file-exists-p file)
-        (babashka-run-task task task-buffer-name)
+        (progn
+          (async-shell-command task task-buffer-name)
+          (unless (s-equals? (buffer-name) task-buffer-name)
+            (switch-to-buffer-other-window task-buffer-name))
+          (setq-local babashka--previous-window-configuration prev)
+          (setq-local babashka--previous-task task)
+          (read-only-mode)
+          (local-set-key (kbd "m") 'babashka-invoke-task)
+          (local-set-key (kbd "g") (λ (babashka-invoke-task t)))
+          (local-set-key (kbd "q") (λ (let ((conf babashka--previous-window-configuration))
+                                        (kill-buffer)
+                                        (when conf (register-val-jump-to conf nil))))))
       (message "No bb.edn found in %s" short-dir))))
 
 (defun display-prefix (arg)
@@ -85,15 +101,17 @@
   (message "%s" arg))
 
 (defvar available-task-file-lists
+  "Alist of task runner names to their invoke functions."
   '(("Babashka (bb.edn)" . babashka-invoke-task)
     ("Makefile (Makefile)" . makefile-invoke-target)
     ("JS Task (package.json)" . (lambda () (call-interactively #'js-pkg-run)))))
 
 (defvar-local preferred-task-runner nil
-  "Buffer local variable to set in case of multiple task runner files
-detected. Example: (nil . ((preferred-task-runner . makefile)))")
+  "Buffer local variable to set in case of multiple task runner files detected.
+Example: (nil . ((preferred-task-runner . makefile)))")
 
 (defun handle-preferred-task-runner ()
+  "Run the task runner specified by `preferred-task-runner'."
   (cond
    ((eq preferred-task-runner 'bb)
     (babashka-invoke-task))
@@ -104,10 +122,9 @@ detected. Example: (nil . ((preferred-task-runner . makefile)))")
    (t (message "Invalid preferred task runner. Valid options are 'bb, 'makefile or 'pkg-json. Got %s" preferred-task-runner))))
 
 (defun my/task-runner (arg)
-  "Run task runner based on the project in the list of priorities:
-1. bb.edn - babashka-invoke-task
-2. Makefile - makefile-invoke-target
-3. package.json - js-pkg-run"
+  "Run task runner based on project files.
+With prefix ARG, prompt to choose task runner.
+Priority order: bb.edn, Makefile, package.json."
   (interactive "P")
   (let* ((root (projectile-project-root))
          (bb-edn (concat root "bb.edn"))
@@ -131,4 +148,4 @@ detected. Example: (nil . ((preferred-task-runner . makefile)))")
 (global-set-key (kbd "s-m") 'my/task-runner)
 
 (provide 'setup-babashka)
-;; setup-babashka.el ends here
+;;; setup-babashka.el ends here
