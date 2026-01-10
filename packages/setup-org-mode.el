@@ -1,3 +1,22 @@
+;;; setup-org-mode.el --- Org mode configuration -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Configuration for Org mode including TODO keywords, capture templates,
+;; agenda files, and RSS feeds.
+
+;;; Code:
+
+(require 'dash)
+
+;; Silence byte-compiler warnings for org variables set in :config
+(defvar org-indent-mode-turns-on-hiding-stars)
+(defvar org-capture-templates)
+(defvar org-feed-alist)
+
+;; Declare org functions used outside of org-mode context
+(declare-function org-back-to-heading "org")
+(declare-function org-update-parent-todo-statistics "org")
+
 ;; Load macOS-specific configuration if on macOS
 (when (eq system-type 'darwin)
   (require 'romanian-mac))
@@ -46,7 +65,7 @@
         '(("a" "Affirmation" entry (file+olp+datetree "~/Dropbox/org/affirmations.org")
            "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
           ("b" "Bookmark" entry (file+headline "~/Dropbox/org/bookmarks.org" "Bookmarks")
-	   "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
+           "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
           ("s" "Scheduled TODO" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* EVENT %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1)
           ("e" "Event" entry (file+headline "~/Dropbox/org/working-memory.org" "Events")
@@ -81,6 +100,7 @@
   (require 'ox-gfm nil t))
 
 (defun my/org-update-parent-cookie (&rest _)
+  "Update parent TODO statistics cookie after certain operations."
   (when (equal major-mode 'org-mode)
     (save-excursion
       (ignore-errors
@@ -104,102 +124,10 @@ installed."
    start end
    "pandoc -f markdown -t org --wrap=preserve" t t))
 
-(defun my/org-de-autofill (&optional start end)
-  "Remove autofill formatting from region or entire buffer.
-If a region is active, process only the region (START, END).
-Otherwise, process the entire buffer."
-  (interactive (when (use-region-p)
-                 (list (region-beginning) (region-end))))
-  (let* ((use-region (and start end))
-         (beg (or start (point-min)))
-         (end-pos (or end (point-max)))
-         (text (buffer-substring beg end-pos))
-         (processed-text
-          (with-temp-buffer
-            (insert text)
-            (goto-char (point-min))
-            ;; Join lines that were broken by autofill
-            ;; Look for lines that don't end with sentence endings or intentional breaks
-            (while (not (eobp))
-              (let ((line-end (line-end-position)))
-                (when (and (not (eobp))
-                           (< line-end (point-max))
-                           (not (looking-at ".*[.!?:]\\s-*$"))  ; Not ending with punctuation
-                           (not (looking-at ".*\\s-\\s-$"))      ; Not ending with double space
-                           (not (looking-at "^\\s-*$"))         ; Not empty line
-                           (not (looking-at "^\\*+\\s-"))       ; Not org heading
-                           (not (looking-at "^#\\+"))           ; Not org option line
-                           (save-excursion
-                             (forward-line 1)
-                             (and (not (looking-at "^\\s-*$"))  ; Next line not empty
-                                  (not (looking-at "^\\*+\\s-")) ; Next line not heading
-                                  (not (looking-at "^#\\+")))))  ; Next line not option
-                  (end-of-line)
-                  (delete-char 1)  ; Remove newline
-                  (when (looking-at "\\s-+")
-                    (delete-region (point) (match-end 0)))  ; Remove extra spaces
-                  (insert " "))  ; Add single space
-                (forward-line 1)))
-            (buffer-string))))
-    ;; Replace the content
-    (save-excursion
-      (delete-region beg end-pos)
-      (goto-char beg)
-      (insert processed-text))))
-
-(defun my/org-auto-fillify (&optional start end)
-  "Apply autofill formatting to region or entire buffer.
-If a region is active, process only the region (START, END).
-Otherwise, process the entire buffer."
-  (interactive (when (use-region-p)
-                 (list (region-beginning) (region-end))))
-  (let* ((use-region (and start end))
-         (beg (or start (point-min)))
-         (end-pos (or end (point-max)))
-         (text (buffer-substring beg end-pos))
-         (processed-text
-          (with-temp-buffer
-            (org-mode)  ; Use org-mode for proper syntax handling
-            (insert text)
-            (auto-fill-mode 1)
-            (setq fill-column (or (and (boundp 'org-fill-column) org-fill-column) 
-                                  fill-column 
-                                  70))
-            (goto-char (point-min))
-            ;; Process line by line, being careful with org syntax
-            (while (not (eobp))
-              (cond
-               ;; Skip org option lines (#+title:, #+description:, etc.)
-               ((looking-at "^#\\+")
-                (forward-line 1))
-               ;; Skip org headings
-               ((looking-at "^\\*+\\s-")
-                (forward-line 1))
-               ;; Skip empty lines
-               ((looking-at "^\\s-*$")
-                (forward-line 1))
-               ;; Process regular content paragraphs
-               (t
-                (let ((para-start (point)))
-                  ;; Find end of current paragraph (stop at empty line, heading, or option)
-                  (while (and (not (eobp))
-                              (not (looking-at "^\\s-*$"))     ; Not empty line
-                              (not (looking-at "^\\*+\\s-"))   ; Not heading
-                              (not (looking-at "^#\\+")))      ; Not option line
-                    (forward-line 1))
-                  (let ((para-end (point)))
-                    (when (> para-end para-start)
-                      ;; Fill this paragraph
-                      (fill-region para-start para-end)))))))
-            (buffer-string))))
-    ;; Replace the content
-    (save-excursion
-      (delete-region beg end-pos)
-      (goto-char beg)
-      (insert processed-text))))
 
 ;; Add Romanian diacritics hook on macOS
 (when (eq system-type 'darwin)
   (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
 
 (provide 'setup-org-mode)
+;;; setup-org-mode.el ends here
