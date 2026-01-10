@@ -20,6 +20,15 @@
          (clojurescript-mode . lsp)
          (clojurec-mode . lsp)
          (python-mode . lsp)
+         ;; TypeScript modes
+         (typescript-mode . lsp)
+         (typescript-ts-mode . lsp)
+         (tsx-ts-mode . lsp)
+         ;; JavaScript modes
+         (js-mode . lsp)
+         (js2-mode . lsp)
+         (js-ts-mode . lsp)
+         ;; Java
          (java-ts-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :diminish " lsp"
