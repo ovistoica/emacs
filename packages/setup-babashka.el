@@ -12,7 +12,6 @@
 
 (declare-function makefile-invoke-target "setup-makefile-mode")
 (declare-function js-pkg-run "setup-js")
-(declare-function λ "tooling")
 
 (defun babashka-find-tasks ()
   "Extract the task names of all the tasks from the bb.edn buffer."
@@ -57,54 +56,40 @@
         (concat "~" (substring path (length home)))
       path)))
 
-(defvar babashka--previous-window-configuration nil)
-(defvar babashka--previous-task nil)
+(defun babashka--exec-task (cmd)
+  "Execute babashka CMD using compile with a task-specific buffer name."
+  (let* ((project-name (projectile-project-name))
+         (compilation-buffer-name-function
+          (lambda (_mode)
+            (format "*bb:%s - %s*" project-name cmd))))
+    (compile cmd)))
 
-(defun babashka-invoke-task (&optional repeat?)
-  "Invoke a babashka task from bb.edn.
-If REPEAT? is non-nil, repeat the previous task."
+(defun babashka-invoke-task ()
+  "Invoke a babashka task from bb.edn."
   (interactive)
   (let* ((file (concat (projectile-project-root) "bb.edn"))
          (short-dir (shorten-path (projectile-project-root)))
          (default-directory (projectile-project-root))
-         (task-buffer-name (concat "*BB Task " (shorten-path (projectile-project-root)) "*"))
-         (prev (if (get-buffer task-buffer-name)
-                   (with-current-buffer task-buffer-name
-                     babashka--previous-window-configuration)
-                 (list (current-window-configuration) (point-marker))))
-         (task (or (and repeat? (with-current-buffer task-buffer-name
-                                  babashka--previous-task))
-                   (completing-read (format "bb in %s" short-dir)
-                                    (--map
-                                     (concat "bb " it)
-                                     (with-temp-buffer
-                                       (insert-file-contents file)
-                                       (babashka-find-tasks)))))))
+         (task (completing-read (format "bb in %s: " short-dir)
+                                (--map
+                                 (concat "bb " it)
+                                 (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (babashka-find-tasks))))))
     (if (file-exists-p file)
-        (progn
-          (async-shell-command task task-buffer-name)
-          (unless (s-equals? (buffer-name) task-buffer-name)
-            (switch-to-buffer-other-window task-buffer-name))
-          (setq-local babashka--previous-window-configuration prev)
-          (setq-local babashka--previous-task task)
-          (read-only-mode)
-          (local-set-key (kbd "m") 'babashka-invoke-task)
-          (local-set-key (kbd "g") (λ (babashka-invoke-task t)))
-          (local-set-key (kbd "q") (λ (let ((conf babashka--previous-window-configuration))
-                                        (kill-buffer)
-                                        (when conf (register-val-jump-to conf nil))))))
+        (babashka--exec-task task)
       (message "No bb.edn found in %s" short-dir))))
 
 (defun display-prefix (arg)
-  "Display the value of the raw prefix arg."
+  "Display the value of the raw prefix ARG."
   (interactive "P")
   (message "%s" arg))
 
 (defvar available-task-file-lists
-  "Alist of task runner names to their invoke functions."
   '(("Babashka (bb.edn)" . babashka-invoke-task)
     ("Makefile (Makefile)" . makefile-invoke-target)
-    ("JS Task (package.json)" . (lambda () (call-interactively #'js-pkg-run)))))
+    ("JS Task (package.json)" . (lambda () (call-interactively #'js-pkg-run))))
+  "Alist of task runner names to their invoke functions.")
 
 (defvar-local preferred-task-runner nil
   "Buffer local variable to set in case of multiple task runner files detected.
