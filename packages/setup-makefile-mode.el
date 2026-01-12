@@ -1,16 +1,26 @@
-;;; Inject some Emacs into makefile-mode.
+;;; setup-makefile-mode.el --- Makefile mode customizations -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom indentation and target invocation for Makefile mode.
+
+;;; Code:
+
+(require 'dash)
+(require 's)
+(require 'projectile)
 
 (defun my/tab-indent (n)
+  "Indent current line with N tabs."
   (back-to-indentation)
   (delete-horizontal-space)
   (--dotimes n
     (insert "\t")))
 
 (defun my/in-process-of-adding-commands-to-rule? ()
-  "This will indicate indentation of the current line if we are
-   working on a rule, but only if there is a blank line below.
-   Otherwise we would add a TAB to all the blank lines between rules
-   when cleaning the buffer."
+  "Check if we are adding commands to a Makefile rule.
+This indicates indentation of the current line if we are working on a rule,
+but only if there is a blank line below.  Otherwise we would add a TAB to
+all the blank lines between rules when cleaning the buffer."
   (interactive)
   (save-excursion
     (let ((current-line (thing-at-point 'line t))
@@ -76,6 +86,8 @@
 (defvar makefile--previous-target nil)
 
 (defun makefile-invoke-target (&optional repeat?)
+  "Invoke a Makefile target with completion.
+If REPEAT? is non-nil, repeat the previous target."
   (interactive)
   (let* ((file (concat (projectile-project-root) "Makefile"))
          (short-dir (shorten-path (projectile-project-root)))
@@ -109,3 +121,4 @@
       (message "No Makefile found in %s" short-dir))))
 
 (provide 'setup-makefile-mode)
+;;; setup-makefile-mode.el ends here
