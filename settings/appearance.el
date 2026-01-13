@@ -92,6 +92,7 @@ HEIGHT is optional and defaults to the current font height."
     ("Osaka Jade" . osaka-jade)
     ("ristretto" . doom-monokai-ristretto)
     ("Ristretto" . doom-monokai-ristretto)
+    ("Rose Pine" . rose-pine)
     ("rose-pine" . rose-pine)
     ("tokyo-night" . doom-tokyo-night)
     ("Tokyo Night" . doom-tokyo-night)
