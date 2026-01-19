@@ -80,8 +80,8 @@ HEIGHT is optional and defaults to the current font height."
                             (setq catppuccin-flavor 'latte)
                             (my/raw-set-theme 'catppuccin)))
     ("everforest" . everforest)
-    ("flexoki-light" . flexoki-light)
-    ("Flexoki Light" . flexoki-light)
+    ("flexoki-light" . modus-operandi-tinte)d
+    ("Flexoki Light" . modus-operandi-tinted)
     ("gruvbox" . doom-gruvbox)
     ("Gruvbox" . doom-gruvbox)
     ("kanagawa" . kanagawa)
