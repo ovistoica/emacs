@@ -5,12 +5,26 @@
 
 ;;; Code:
 
+(defun my/agent-shell-toggle ()
+  "Toggle agent shell display, falling back to any shell if none for project."
+  (interactive)
+  (if-let ((shell-buffer (or (and (derived-mode-p 'agent-shell-mode)
+                                  (current-buffer))
+                             (seq-first (agent-shell-project-buffers))
+                             (seq-first (agent-shell-buffers)))))
+      (if-let ((window (get-buffer-window shell-buffer)))
+          (if (> (count-windows) 1)
+              (delete-window window)
+            (switch-to-prev-buffer))
+        (agent-shell--display-buffer shell-buffer))
+    (call-interactively #'agent-shell)))
+
 (use-package agent-shell
   :ensure t
   :init
   (require 'diff)
   :bind (("C-c C-;" . agent-shell)
-         ("C-c ;"   . agent-shell-toggle)
+         ("C-c ;"   . my/agent-shell-toggle)
          ("C-c '"   . agent-shell-menu))
   :custom
   ;; Window configuration
