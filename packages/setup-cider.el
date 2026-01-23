@@ -1,5 +1,5 @@
-;; CIDER
-;;
+;;; setup-cider.el --- CIDER configuration -*- lexical-binding: t; -*-
+
 ;; Extends Emacs with support for interactive programming in Clojure. The
 ;; features are centered around cider-mode, an Emacs minor-mode that complements
 ;; clojure-mode. While clojure-mode supports editing Clojure source files,
@@ -7,12 +7,33 @@
 ;; compilation, debugging, definition and documentation lookup, running tests
 ;; and so on.
 
+;;; Code:
+
+(require 'dash)
+(require 's)
+
+(declare-function cider--gather-session-params "cider")
+(declare-function cider--extract-connections "cider")
+(declare-function cider-find-and-clear-repl-output "cider")
+(declare-function cider-last-sexp "cider")
+(declare-function cider-defun-at-point "cider")
+(declare-function cider-current-ns "cider")
+(declare-function cider-nrepl-request:eval "cider")
+(declare-function nrepl-dict-get "nrepl-dict")
+(declare-function sesman-current-session "sesman")
+(declare-function sesman-current-sessions "sesman")
+
+(defvar clojure-mode-map)
+(defvar cider-mode-map)
+
 (defun nrepl-warn-when-not-connected ()
   (interactive)
   (message "Oops! You're not connected to an nREPL server. Please run M-x cider or M-x cider-jack-in to connect."))
 
 (defun my/shadow-cider-keys-with-warning ()
-  "Rebind all keys from `cider-mode-map` to `nrepl-warn-when-not-connected` in `clojure-mode-map`."
+  "Rebind CIDER keys to warn when not connected.
+Rebinds all keys from `cider-mode-map' to `nrepl-warn-when-not-connected'
+in `clojure-mode-map'."
   (interactive)
   (map-keymap
    (lambda (key def)
@@ -83,7 +104,8 @@
   ;; always scroll output from interactive evaluations into view
   (cider-repl-display-output-before-window-boundaries t))
 
-(defun my/cider-maybe-log-figwheel-main-port (buffer out)
+(defun my/cider-maybe-log-figwheel-main-port (_buffer out)
+  "Log figwheel port from OUT when it starts."
   (when (string-match-p "\\[Figwheel\\] Starting Server at" out)
     (message (propertize out 'face 'cider-repl-stderr-face))))
 
@@ -136,3 +158,5 @@
    (cider-current-ns)))
 
 (provide 'setup-cider)
+
+;;; setup-cider.el ends here
