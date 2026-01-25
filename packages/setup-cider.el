@@ -1,5 +1,6 @@
 ;;; setup-cider.el --- CIDER configuration -*- lexical-binding: t; -*-
 
+;;; Commentary:
 ;; Extends Emacs with support for interactive programming in Clojure. The
 ;; features are centered around cider-mode, an Emacs minor-mode that complements
 ;; clojure-mode. While clojure-mode supports editing Clojure source files,
