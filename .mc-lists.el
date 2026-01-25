@@ -27,6 +27,7 @@
         mc/mark-next-lines
         my/cider-unload-current-namespace-aliases
         my/convert-classes-to-vector
+        my/copy-buffer-as-prompt
         my/insert-lambda-symbol
         org-delete-char
         org-kill-line
@@ -47,6 +48,7 @@
         paredit-raise-sexp
         paredit-semicolon
         paredit-splice-sexp
+        paredit-wrap-curly
         paredit-wrap-round
         paredit-wrap-square
         wgrep-finish-edit
