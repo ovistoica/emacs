@@ -57,12 +57,12 @@
       path)))
 
 (defun babashka--exec-task (cmd)
-  "Execute babashka CMD using compile with a task-specific buffer name."
+  "Execute babashka CMD using compile with comint for interactive input."
   (let* ((project-name (projectile-project-name))
          (compilation-buffer-name-function
           (lambda (_mode)
             (format "*bb:%s - %s*" project-name cmd))))
-    (compile cmd)))
+    (compile cmd t)))
 
 (defun babashka-invoke-task ()
   "Invoke a babashka task from bb.edn."

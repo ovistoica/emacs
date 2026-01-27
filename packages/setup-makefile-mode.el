@@ -83,12 +83,12 @@ all the blank lines between rules when cleaning the buffer."
       path)))
 
 (defun makefile--exec-target (cmd)
-  "Execute makefile CMD using compile with a target-specific buffer name."
+  "Execute makefile CMD using compile with comint for interactive input."
   (let* ((project-name (projectile-project-name))
          (compilation-buffer-name-function
           (lambda (_mode)
             (format "*make:%s - %s*" project-name cmd))))
-    (compile cmd)))
+    (compile cmd t)))
 
 (defun makefile-invoke-target ()
   "Invoke a Makefile target with completion."
