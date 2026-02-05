@@ -4,31 +4,50 @@
 ;; Eca - Editor Code Assistant
 
 ;;; Code:
+(require 'transient)
+;; Declare functions that might not be available
+(declare-function js-pkg-mode "js-pkg" (&optional arg))
+(declare-function dap-ui-many-windows-mode "dap-ui" (&optional arg))
+
+(defun my/eca-chat-mode-hook ()
+  "Disable various minor modes in ECA chat buffers for cleaner experience."
+  (eldoc-mode -1)
+  (when (fboundp 'envrc-mode) (envrc-mode -1))
+  (flycheck-mode -1)
+  (when (fboundp 'js-pkg-mode) (js-pkg-mode -1))
+  (visual-line-mode -1)
+  (when (fboundp 'whitespace-cleanup-mode) (whitespace-cleanup-mode -1))
+  (when (fboundp 'dap-mode) (dap-mode -1))
+  (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1))
+  (when (fboundp 'dap-ui-controls-mode) (dap-ui-controls-mode -1))
+  (when (fboundp 'dap-ui-many-windows-mode) (dap-ui-many-windows-mode -1))
+  (when (fboundp 'dap-ui-mode) (dap-ui-mode -1)))
+
+(defun my/eca-send-prompt-from-minibuffer ()
+  "Prompt for a message in the minibuffer and send it to the current ECA chat."
+  (interactive)
+  (let ((prompt (read-string "ECA Prompt: ")))
+    (when (and prompt (not (string-empty-p prompt)))
+      (eca-chat-send-prompt prompt))))
+
+
+
 (use-package eca
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
-  ;;:config
+  :bind (("C-c ." . eca-transient-menu))
+  :config
+  ;; Customize transient menu keybindings
+  ;; Replace "p" (repeat prompt) with minibuffer prompt (more common use case)
+  (transient-suffix-put 'eca-transient-menu '(0 0 6) :key "P")
+  (transient-append-suffix 'eca-transient-menu '(0 0 6)
+    '("p" "Send prompt from minibuffer" my/eca-send-prompt-from-minibuffer))
+
   ;;(setq eca-extra-args '("--verbose"))
   ;;(setq eca-chat-auto-add-repomap nil)
   :ensure t
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
             :lisp-dir "."
-            :main-file "eca.el")
-
-  )
-
-(defun my/eca-chat-mode-hook ()
-  (eldoc-mode -1)
-  (envrc-mode -1)
-  (flycheck-mode -1)
-  (js-pkg-mode -1)
-  (visual-line-mode -1)
-  (whitespace-cleanup-mode -1)
-  (dap-mode -1)
-  (denote-rename-buffer-mode -1)
-  (dap-ui-controls-mode -1)
-  (dap-ui-many-windows-mode -1)
-  (dap-ui-mode -1))
-
+            :main-file "eca.el"))
 
 (provide 'setup-eca)
 ;;; setup-eca.el ends here
