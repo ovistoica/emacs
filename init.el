@@ -1,4 +1,10 @@
 ;;; init.el --- Emacs configuration -*- lexical-binding: t -*-
+
+;;; Commentary:
+;; Emacs configuration entry point
+
+;;; Code:
+
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
   (setq mac-option-modifier 'super)
