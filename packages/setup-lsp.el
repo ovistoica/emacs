@@ -40,7 +40,7 @@
   (lsp-completion-provider :none)  ;; Skip company-mode
   :init
   (setq lsp-headerline-breadcrumb-enable nil) ;; Don't need file path in my buffer
-  (setq lsp-lens-enable nil) ;; Hide clutter (reference and test counts)
+  (setq lsp-lens-enable t) ;; Show reference and test counts
   (setq lsp-enable-indentation nil) ;; use clojure-mode indentation
   (setq lsp-eldoc-enable-hover nil) ;; use CIDER eldoc
   (setq lsp-modeline-code-actions-enable nil) ;; Don't clutter modeline
