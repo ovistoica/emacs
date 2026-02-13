@@ -11,9 +11,7 @@
 
 (defun my/eca-chat-mode-hook ()
   "Disable various minor modes in ECA chat buffers for cleaner experience."
-  (eldoc-mode -1)
   (when (fboundp 'envrc-mode) (envrc-mode -1))
-  (flycheck-mode -1)
   (when (fboundp 'js-pkg-mode) (js-pkg-mode -1))
   (visual-line-mode -1)
   (when (fboundp 'whitespace-cleanup-mode) (whitespace-cleanup-mode -1))

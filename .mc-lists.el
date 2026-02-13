@@ -40,6 +40,7 @@
         paredit-forward-delete
         paredit-forward-down
         paredit-forward-kill-word
+        paredit-forward-slurp-sexp
         paredit-kill
         paredit-kill-region-or-backward-word
         paredit-open-curly
