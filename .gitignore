@@ -24,3 +24,6 @@
 /eclipse.jdt.ls/
 /elc/
 /.time-zones.el
+/eca/
+/.dap-breakpoints
+/ielm-history.eld
