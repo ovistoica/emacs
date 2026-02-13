@@ -44,6 +44,7 @@
   ;;(setq eca-chat-auto-add-repomap nil)
   :ensure t
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
+            :branch "master"
             :lisp-dir "."
             :main-file "eca.el"))
 
