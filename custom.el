@@ -35,7 +35,21 @@
      "1ad12cda71588cc82e74f1cabeed99705c6a60d23ee1bb355c293ba9c000d4ac"
      "b9c002dc827fb75b825da3311935c9f505d48d7ee48f470f0aa7ac5d2a595ab2"
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(apheleia auto-sudoedit beancount blamer browse-at-remote catppuccin-theme
+              claude-code-ide clj-refactor consult-flycheck dashboard
+              datomic-snippets deadgrep denote diff-hl diminish dired-quick-sort
+              dired-subtree dired-toggle-sudo dockerfile-mode doom-themes
+              dts-mode eca edit-indirect envrc exec-path-from-shell
+              expand-region fontaine frame-fns git-timemachine helpful
+              html-to-hiccup kaocha-runner keycast lin lsp-java lsp-pyright
+              lsp-tailwindcss lsp-ui magit marginalia mise modus-themes
+              move-text neil nerd-icons-completion nerd-icons-dired
+              notmuch-indicator ol-notmuch orderless ox-gfm perspective popper
+              prodigy projectile pulsar significant-other smartparens
+              smtpmail-multi time-zones undo-fu vertico visual-fill-column vterm
+              vundo wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
+              zprint-mode))
  '(package-vc-selected-packages
    '((zoom-frm :url "https://github.com/emacsmirror/zoom-frm")
      (frame-cmds :url "https://github.com/emacsmirror/frame-cmds")

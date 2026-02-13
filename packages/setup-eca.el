@@ -13,7 +13,6 @@
   "Disable various minor modes in ECA chat buffers for cleaner experience."
   (when (fboundp 'envrc-mode) (envrc-mode -1))
   (when (fboundp 'js-pkg-mode) (js-pkg-mode -1))
-  (visual-line-mode -1)
   (when (fboundp 'whitespace-cleanup-mode) (whitespace-cleanup-mode -1))
   (when (fboundp 'dap-mode) (dap-mode -1))
   (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1))
@@ -31,8 +30,13 @@
 
 
 (use-package eca
+  :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
+            :branch "master"
+            :lisp-dir "."
+            :main-file "eca.el")
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
   :bind (("C-c ." . eca-transient-menu))
+  :ensure t
   :config
   ;; Customize transient menu keybindings
   ;; Replace "p" (repeat prompt) with minibuffer prompt (more common use case)
@@ -40,13 +44,11 @@
   (transient-append-suffix 'eca-transient-menu '(0 0 6)
     '("p" "Send prompt from minibuffer" my/eca-send-prompt-from-minibuffer))
 
+  :custom
   ;;(setq eca-extra-args '("--verbose"))
-  ;;(setq eca-chat-auto-add-repomap nil)
-  :ensure t
-  :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
-            :branch "master"
-            :lisp-dir "."
-            :main-file "eca.el"))
+  (setq eca-chat-auto-add-repomap t)
+
+  )
 
 (provide 'setup-eca)
 ;;; setup-eca.el ends here

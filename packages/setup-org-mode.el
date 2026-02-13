@@ -101,6 +101,10 @@
 
   (require 'ox-gfm nil t))
 
+
+(use-package ox-gfm
+  :ensure t)
+
 (defun my/org-update-parent-cookie (&rest _)
   "Update parent TODO statistics cookie after certain operations."
   (when (equal major-mode 'org-mode)
