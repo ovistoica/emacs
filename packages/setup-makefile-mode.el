@@ -7,7 +7,9 @@
 
 (require 'dash)
 (require 's)
-(require 'projectile)
+
+(declare-function projectile-project-root "projectile")
+(declare-function projectile-project-name "projectile")
 
 (defun my/tab-indent (n)
   "Indent current line with N tabs."

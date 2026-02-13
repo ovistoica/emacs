@@ -8,7 +8,9 @@
 
 (require 'dash)
 (require 's)
-(require 'projectile)
+
+(declare-function projectile-project-root "projectile")
+(declare-function projectile-project-name "projectile")
 
 (declare-function makefile-invoke-target "setup-makefile-mode")
 (declare-function js-pkg-run "setup-js")
