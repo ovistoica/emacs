@@ -55,13 +55,5 @@ Including indent-buffer, which should not be called automatically on save."
       (apheleia-format-buffer formatter)
     (cleanup-buffer)))
 
-(defun my/format-w-cljfmt ()
-  (interactive)
-  (let* ((command (concat "cljfmt fix " (buffer-name)))
-         (cmd-buffer-name (concat "*Command: " command "*")))
-    (when (get-buffer cmd-buffer-name)
-      (kill-buffer))
-    (quittable-async-shell-command command t)))
-
 (provide 'setup-formatting)
 ;;; setup-formatting.el ends here
