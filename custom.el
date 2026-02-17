@@ -66,6 +66,8 @@
                 "https://github.com/editor-code-assistant/eca-emacs")
      (vc-use-package :vc-backend Git :url
                      "https://github.com/slotThe/vc-use-package")))
+ '(safe-local-variable-directories
+   '("/home/ovistoica/Work/tries/2025-12-14-lambdaisland-launchpad/"))
  '(safe-local-variable-values
    '((apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
      (eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)

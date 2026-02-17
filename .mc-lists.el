@@ -63,6 +63,7 @@
         consult-recent-file
         dired-jump
         handle-switch-frame
+        ignore
         ignore-preserving-kill-region
         isearch-forward-use-region
         lsp-ui-doc--handle-mouse-movement
