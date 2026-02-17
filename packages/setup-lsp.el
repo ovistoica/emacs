@@ -58,6 +58,8 @@
   ;; (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
 
   :config
+  ;; Map edn-mode to clojure language server
+  (add-to-list 'lsp-language-id-configuration '(edn-mode . "clojure"))
 
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
   (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback)
