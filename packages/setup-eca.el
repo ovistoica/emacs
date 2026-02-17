@@ -5,20 +5,12 @@
 
 ;;; Code:
 (require 'transient)
-;; Declare functions that might not be available
-(declare-function js-pkg-mode "js-pkg" (&optional arg))
-(declare-function dap-ui-many-windows-mode "dap-ui" (&optional arg))
+
 
 (defun my/eca-chat-mode-hook ()
   "Disable various minor modes in ECA chat buffers for cleaner experience."
-  (when (fboundp 'envrc-mode) (envrc-mode -1))
-  (when (fboundp 'js-pkg-mode) (js-pkg-mode -1))
-  (when (fboundp 'whitespace-cleanup-mode) (whitespace-cleanup-mode -1))
-  (when (fboundp 'dap-mode) (dap-mode -1))
   (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1))
-  (when (fboundp 'dap-ui-controls-mode) (dap-ui-controls-mode -1))
-  (when (fboundp 'dap-ui-many-windows-mode) (dap-ui-many-windows-mode -1))
-  (when (fboundp 'dap-ui-mode) (dap-ui-mode -1)))
+  )
 
 (defun my/eca-send-prompt-from-minibuffer ()
   "Prompt for a message in the minibuffer and send it to the current ECA chat."
@@ -28,14 +20,15 @@
       (eca-chat-send-prompt prompt))))
 
 
-
 (use-package eca
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs"
             :branch "master"
             :lisp-dir "."
             :main-file "eca.el")
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
-  :bind (("C-c ." . eca-transient-menu))
+  :bind (("C-c ." . eca-transient-menu)
+         ("C-c e" . eca-chat-toggle-window)
+         ("C-c i" . eca-chat-add-context-to-user-prompt))
   :ensure t
   :config
   ;; Customize transient menu keybindings
