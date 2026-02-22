@@ -96,14 +96,26 @@ in `clojure-mode-map'."
   ;; don't pop up repl when connecting
   (cider-repl-pop-to-buffer-on-connect nil)
 
-  ;; re-use dead buffers without asking me about it when there is only one choice
-  (cider-reuse-dead-repls 'auto)
+  ;; never reuse dead REPLs — always start fresh
+  (cider-reuse-dead-repls nil)
 
   ;; show stacktraces for everything, until https://github.com/clojure-emacs/cider/issues/3495 is solved
   (cider-clojure-compilation-error-phases nil)
 
   ;; always scroll output from interactive evaluations into view
   (cider-repl-display-output-before-window-boundaries t))
+
+(defun my/cider-kill-dead-repls (&rest _)
+  "Kill all dead CIDER REPL buffers silently, without prompting."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (and (derived-mode-p 'cider-repl-mode)
+                 (not (process-live-p (get-buffer-process buf))))
+        (kill-buffer buf))))
+  nil)
+
+;; Run before CIDER checks for dead REPLs so none are found to prompt about
+(advice-add 'cider--choose-reusable-repl-buffer :before #'my/cider-kill-dead-repls)
 
 (defun my/cider-maybe-log-figwheel-main-port (_buffer out)
   "Log figwheel port from OUT when it starts."
