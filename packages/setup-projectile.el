@@ -22,7 +22,7 @@
 
   (require 'setup-perspective)
   (require 'project-processes)
-  (setq projectile-switch-project-action 'switch-perspective+find-file))
+  (setq projectile-switch-project-action 'my/projectile-switch-project-action))
 
 (use-package project-processes
   :ensure nil
@@ -48,6 +48,38 @@
 (defun switch-perspective+find-file ()
   (with-perspective (current-project-name)
                     (projectile-find-file)))
+
+;; Project switch action: switch perspective first, then offer commander menu
+(defun my/projectile-switch-project-action ()
+  "Switch to the project's perspective, then offer a commander menu.
+On first visit the perspective is initialized and the menu is shown.
+On subsequent visits the perspective is simply restored and the menu shown."
+  (with-perspective (current-project-name)
+                    (projectile-commander)))
+
+;; Commander methods — keys chosen to avoid conflicts with projectile defaults
+(def-projectile-commander-method ?f
+  "Find file in project."
+  (projectile-find-file))
+
+(def-projectile-commander-method ?d
+  "Open project root in Dired."
+  (projectile-dired))
+
+(def-projectile-commander-method ?v
+  "Open vterm in project root."
+  (projectile-run-vterm))
+
+(def-projectile-commander-method ?e
+  "Open eshell in project root."
+  (projectile-run-eshell))
+
+(def-projectile-commander-method ?c
+  "Start an ECA session in project root."
+  (let ((default-directory (projectile-project-root)))
+    (if (fboundp 'eca)
+        (eca)
+      (message "ECA is not available"))))
 
 (defun my/ignore-project? (file-name)
   (s-contains? ".gitlibs" file-name))
