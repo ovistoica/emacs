@@ -1,6 +1,23 @@
 (with-eval-after-load 'dired
   (require 'dired-x)
 
+  ;; Open markdown files with Typora via dired-do-open
+  (setq dired-guess-shell-alist-user
+        '(("\\.md\\'" "typora")
+          ("\\.markdown\\'" "typora")))
+
+  ;; Advise dired-do-open to use typora for markdown files
+  (defun dired-do-open--markdown-typora (orig-fn &rest args)
+    "Open markdown files with Typora instead of xdg-open."
+    (let ((files (dired-get-marked-files)))
+      (if (and files
+               (cl-every (lambda (f)
+                           (string-match-p "\\.\\(md\\|markdown\\)\\'" f))
+                         files))
+          (apply #'start-process "typora" nil "typora" files)
+        (apply orig-fn args))))
+  (advice-add 'dired-do-open :around #'dired-do-open--markdown-typora)
+
   ;; Make dired less verbose, toggle with (
   (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
