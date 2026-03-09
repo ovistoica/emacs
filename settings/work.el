@@ -3,70 +3,6 @@
 (with-eval-after-load 'lsp-mode
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]docker/build"))
 
-;; (prodigy-define-service
-;;   :name "ShipClojure Datom Shadow-CLJS Watch"
-;;   :tags '(shipclojure-datom frontend)
-;;   :command "bb"
-;;   :args '("watch:frontend")
-;;   :cwd "~/workspace/shipclojure-datom"
-;;   :stop-signal 'sigkill
-;;   :kill-process-buffer-on-stop t)
-
-;; (prodigy-define-service
-;;   :name "ShipCLojure Datom CSS Watch"
-;;   :tags '(shipclojure-datom css)
-;;   :command "bb"
-;;   :args '("watch:css")
-;;   :cwd "~/workspace/shipclojure-datom"
-;;   :stop-signal 'sigkill
-;;   :kill-process-buffer-on-stop t)
-
-(prodigy-define-service
-  :name "Wavekit CSS Watch"
-  :tags '(wavekit-ai css)
-  :command "bb"
-  :args '("watch:css")
-  :cwd "~/workspace/wavekit-ai"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
-
-(prodigy-define-service
-  :name "Shipclojure Website CSS Watch"
-  :tags '(shipclojure-website css)
-  :command "bb"
-  :args '("watch:css")
-  :cwd "~/workspace/shipclojure-website"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
-
-;; (prodigy-define-service
-;;   :name "Wavekit Shadow-CLJS Watch"
-;;   :tags '(wavekit-ai frontend)
-;;   :command "bb"
-;;   :args '("watch:frontend")
-;;   :cwd "~/workspace/wavekit-ai"
-;;   :stop-signal 'sigkill
-;;   :kill-process-buffer-on-stop t)
-
-(prodigy-define-service
-  :name "replicant-daisyui CSS Watch"
-  :tags '(replicant-daisyui css)
-  :command "npm"
-  :args '("run" "css:watch")
-  :cwd "~/workspace/replicant-daisyui"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
-
-(prodigy-define-service
-  :name "replicant-daisyui Shadow Watch"
-  :tags '(replicant-daisyui shadow-cljs)
-  :command "npm"
-  :args '("run" "shadow:watch")
-  :cwd "~/workspace/replicant-daisyui"
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
-
-
 (setq world-clock-list
       '(("America/Chicago" "Houston/Texas")
         ("America/New_York" "New York")
@@ -102,7 +38,7 @@ For example: OH-20979 -> https://teamohana.atlassian.net/browse/OH-20979"
     url))
 
 (defun my/org-linkify-jira-ticket-at-point ()
-  "Wrap the JIRA ticket number at point in an org-mode link.
+  "Wrap the JIRA ticket number at point in an `org-mode' link.
 Converts OH-20979 to [[https://teamohana.atlassian.net/browse/OH-20979][OH-20979]]"
   (interactive)
   (save-excursion
@@ -118,7 +54,7 @@ Converts OH-20979 to [[https://teamohana.atlassian.net/browse/OH-20979][OH-20979
         (message "No ticket found at point")))))
 
 (defun my/org-insert-jira-link (full-url)
-  "Insert an org-mode link from a full JIRA ticket URL.
+  "Insert an `org-mode' link FULL-URL - a JIRA ticket URL.
 Takes https://teamohana.atlassian.net/browse/OH-20979
 and inserts [[https://teamohana.atlassian.net/browse/OH-20979][OH-20979]]"
   (interactive "sJIRA ticket URL: ")
@@ -132,6 +68,11 @@ and inserts [[https://teamohana.atlassian.net/browse/OH-20979][OH-20979]]"
     (if ticket-number
         (insert (format "[[%s][%s]]" full-url ticket-number))
       (message "Invalid JIRA URL format or no matching pattern"))))
+
+;; Jira helpers
+(define-key org-mode-map (kbd "C-x j l") #'my/org-linkify-jira-ticket-at-point)
+(define-key org-mode-map (kbd "C-x j i") #'my/org-insert-jira-link)
+
 
 (provide 'work)
 ;;; work.el ends here
