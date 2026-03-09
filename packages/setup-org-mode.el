@@ -41,9 +41,7 @@
   :bind (:map org-mode-map
               ("M-+" . org-shiftright)
               ("C-S-<down>" . org-metadown)
-              ("C-S-<up>" . org-metaup)
-              ("C-x j l" . my/org-linkify-jira-ticket-at-point)
-              ("C-x j i" . my/org-insert-jira-link))
+              ("C-S-<up>" . org-metaup))
 
   :hook (org-mode . auto-fill-mode)
 
