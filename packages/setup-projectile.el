@@ -24,6 +24,7 @@
   :config
   (projectile-mode +1)
   (define-key projectile-command-map (kbd "s-p") #'projectile-switch-project)
+  (define-key projectile-command-map (kbd "x m") #'my/projectile-run-tmux)
 
   (setq projectile-ignored-project-function 'my/ignore-project?)
 
@@ -75,6 +76,21 @@ On subsequent visits the perspective is simply restored and the menu shown."
                                    (if (fboundp 'eca)
                                        (eca)
                                      (message "ECA is not available"))))
+
+(def-projectile-commander-method ?m
+                                 "Open Ghostty with tmux in project root."
+                                 (my/projectile-run-tmux))
+
+(defun my/projectile-run-tmux ()
+  "Open Ghostty in the project root with a tmux session named after the project.
+Attaches to an existing session if one already exists."
+  (interactive)
+  (let* ((project-root (projectile-project-root))
+         (session-name (current-project-name))
+         (cmd (format "tmux new-session -A -s '%s'" session-name)))
+    (start-process "ghostty" nil "ghostty"
+                   (format "--working-directory=%s" project-root)
+                   "-e" "sh" "-c" cmd)))
 
 (defun my/ignore-project? (file-name)
   (s-contains? ".gitlibs" file-name))
