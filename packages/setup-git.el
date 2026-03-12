@@ -12,7 +12,7 @@
                                             (unstaged . show)
                                             (unpushed . show)
                                             (unpulled . show)
-                                            (stashes . show)))
+                                            (stashes . hide)))
   (magit-diff-regine-hunk t)
   (magit-push-always-verify nil)
   (magit-no-confirm '(stage-all-changes
@@ -24,6 +24,11 @@
   :config
   (wrap-fullscreen magit-status)
   (wrap-fullscreen magit-init)
+
+  ;; Show worktrees section in magit status buffer
+  (magit-add-section-hook 'magit-status-sections-hook
+                          'magit-insert-worktrees
+                          nil t)
 
   ;; move cursor into position when entering commit message
   (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix))
