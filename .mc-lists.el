@@ -23,6 +23,7 @@
         kill-sexp
         kill-visual-line
         mark-sexp
+        markdown-end-of-line
         markdown-outdent-or-delete
         mc/mark-next-lines
         my/cider-unload-current-namespace-aliases
