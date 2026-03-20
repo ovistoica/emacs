@@ -10,7 +10,19 @@
                      "~/.emacs.d/")))
     (projectile-switch-project-by-name emacs-dir)))
 
+(defun my/projectile-run-tmux ()
+  "Open Ghostty in the project root with a tmux session named after the project.
+Attaches to an existing session if one already exists."
+  (interactive)
+  (let* ((project-root (projectile-project-root))
+         (session-name (current-project-name))
+         (cmd (format "tmux new-session -A -s '%s'" session-name)))
+    (start-process "ghostty" nil "ghostty"
+                   (format "--working-directory=%s" project-root)
+                   "-e" "sh" "-c" cmd)))
+
 (use-package projectile
+  :ensure t
   :diminish projectile-mode
   :commands (projectile-switch-project-by-name)
 
@@ -30,7 +42,35 @@
 
   (require 'setup-perspective)
   (require 'project-processes)
-  (setq projectile-switch-project-action 'my/projectile-switch-project-action))
+  (setq projectile-switch-project-action 'my/projectile-switch-project-action)
+
+  ;; Commander methods — keys chosen to avoid conflicts with projectile defaults
+  (def-projectile-commander-method ?f
+    "Find file in project."
+    (projectile-find-file))
+
+  (def-projectile-commander-method ?d
+    "Open project root in Dired."
+    (projectile-dired))
+
+  (def-projectile-commander-method ?v
+    "Open vterm in project root."
+    (projectile-run-vterm))
+
+  (def-projectile-commander-method ?e
+    "Open eshell in project root."
+    (projectile-run-eshell))
+
+  (def-projectile-commander-method ?c
+    "Start an ECA session in project root."
+    (let ((default-directory (projectile-project-root)))
+      (if (fboundp 'eca)
+          (eca)
+        (message "ECA is not available"))))
+
+  (def-projectile-commander-method ?m
+    "Open Ghostty with tmux in project root."
+    (my/projectile-run-tmux)))
 
 (use-package project-processes
   :ensure nil
@@ -52,45 +92,6 @@ On first visit the perspective is initialized and the menu is shown.
 On subsequent visits the perspective is simply restored and the menu shown."
   (with-perspective (current-project-name)
     (projectile-commander)))
-
-;; Commander methods — keys chosen to avoid conflicts with projectile defaults
-(def-projectile-commander-method ?f
-                                 "Find file in project."
-                                 (projectile-find-file))
-
-(def-projectile-commander-method ?d
-                                 "Open project root in Dired."
-                                 (projectile-dired))
-
-(def-projectile-commander-method ?v
-                                 "Open vterm in project root."
-                                 (projectile-run-vterm))
-
-(def-projectile-commander-method ?e
-                                 "Open eshell in project root."
-                                 (projectile-run-eshell))
-
-(def-projectile-commander-method ?c
-                                 "Start an ECA session in project root."
-                                 (let ((default-directory (projectile-project-root)))
-                                   (if (fboundp 'eca)
-                                       (eca)
-                                     (message "ECA is not available"))))
-
-(def-projectile-commander-method ?m
-                                 "Open Ghostty with tmux in project root."
-                                 (my/projectile-run-tmux))
-
-(defun my/projectile-run-tmux ()
-  "Open Ghostty in the project root with a tmux session named after the project.
-Attaches to an existing session if one already exists."
-  (interactive)
-  (let* ((project-root (projectile-project-root))
-         (session-name (current-project-name))
-         (cmd (format "tmux new-session -A -s '%s'" session-name)))
-    (start-process "ghostty" nil "ghostty"
-                   (format "--working-directory=%s" project-root)
-                   "-e" "sh" "-c" cmd)))
 
 (defun my/ignore-project? (file-name)
   (s-contains? ".gitlibs" file-name))
