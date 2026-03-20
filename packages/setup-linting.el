@@ -20,7 +20,8 @@
                               '(save idle-change mode-enabled)
                             '(save mode-enabled)))))
 
-  (global-flycheck-mode))
+  (global-flycheck-mode)
+  (add-hook 'org-mode-hook (lambda () (flycheck-mode -1))))
 
 (provide 'setup-linting)
 ;;; setup-linting.el ends here
