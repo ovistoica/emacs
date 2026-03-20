@@ -41,22 +41,22 @@
               datomic-snippets deadgrep denote diff-hl diminish dired-quick-sort
               dired-subtree dired-toggle-sudo dockerfile-mode doom-themes
               dts-mode eca edit-indirect envrc exec-path-from-shell
-              expand-region fontaine frame-fns git-timemachine helpful
-              html-to-hiccup kaocha-runner keycast lin lsp-java lsp-pyright
-              lsp-tailwindcss lsp-ui magit marginalia mise modus-themes
-              move-text neil nerd-icons-completion nerd-icons-dired
-              notmuch-indicator ol-notmuch orderless ox-gfm perspective popper
-              prodigy projectile pulsar significant-other smartparens
-              smtpmail-multi time-zones undo-fu vertico visual-fill-column vterm
-              vundo wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
-              zprint-mode))
+              expand-region fontaine forge frame-fns git-timemachine groovy-mode
+              helpful hide-mode-line html-to-hiccup kaocha-runner keycast lin
+              lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia mise
+              modus-themes move-text neil nerd-icons-completion nerd-icons-dired
+              notmuch-indicator ol-notmuch orderless org-present ox-gfm ox-slack
+              perspective popper prodigy projectile pulsar significant-other
+              smartparens smtpmail-multi terraform-mode time-zones undo-fu
+              vertico visual-fill-column vterm vundo wgrep-deadgrep
+              whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
-   '((zoom-frm :url "https://github.com/emacsmirror/zoom-frm")
+   '((eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
+          "master" :lisp-dir "." :main-file "eca.el")
+     (zoom-frm :url "https://github.com/emacsmirror/zoom-frm")
      (frame-cmds :url "https://github.com/emacsmirror/frame-cmds")
      (frame-fns :url "https://github.com/emacsmirror/frame-fns")
      (blamer :url "https://github.com/artawower/blamer.el")
-     (eca :url "https://github.com/editor-code-assistant/eca-emacs" :lisp-dir
-          "." :main-file "eca.el")
      (claude-code-ide :url "https://github.com/manzaltu/claude-code-ide.el")
      (beancount :url "https://github.com/beancount/beancount-mode")
      (significant-other :url "https://github.com/ovistoica/significant-other.el")
@@ -69,7 +69,8 @@
  '(safe-local-variable-directories
    '("/home/ovistoica/Work/tries/2025-12-14-lambdaisland-launchpad/"))
  '(safe-local-variable-values
-   '((apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
+   '((cider-clojure-cli-global-options . "-A:dev:test")
+     (apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
      (eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
            (add-to-list 'cider-jack-in-nrepl-middlewares
                         "shadow.cljs.devtools.server.nrepl/middleware"))
