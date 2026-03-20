@@ -1,7 +1,25 @@
 (defvar snippets-dir (expand-file-name "snippets" user-emacs-directory))
 
+(defun yas/goto-end-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+         (position (yas--field-end (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-end-of-line 1)
+      (goto-char position))))
+
+(defun yas/goto-start-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+         (position (yas--field-start (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-beginning-of-line 1)
+      (goto-char position))))
+
 (use-package yasnippet
   :diminish yas-minor-mode
+  :ensure t
+  :demand t
   :bind ((:map yas-keymap
                ("<return>" . yas-exit-all-snippets)
                ("C-e" . yas/goto-end-of-active-field)
@@ -27,23 +45,6 @@
 (use-package datomic-snippets
   :after clojure-mode
   :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so)))
-
-(defun yas/goto-end-of-active-field ()
-  (interactive)
-  (let* ((snippet (car (yas--snippets-at-point)))
-         (position (yas--field-end (yas--snippet-active-field snippet))))
-    (if (= (point) position)
-        (move-end-of-line 1)
-      (goto-char position))))
-
-(defun yas/goto-start-of-active-field ()
-  (interactive)
-  (let* ((snippet (car (yas--snippets-at-point)))
-         (position (yas--field-start (yas--snippet-active-field snippet))))
-    (if (= (point) position)
-        (move-beginning-of-line 1)
-      (goto-char position))))
-
 
 ;; Snippet helpers
 (defun buffer-file-name-body ()
