@@ -41,30 +41,34 @@ detects and fixes that by regenerating autoloads properly."
                 (goto-char (point-max))
                 (insert "\n(provide 'eca-autoloads)\n;;; eca-autoloads.el ends here\n"))
               (write-region (point-min) (point-max) autoloads-file))))
-      (load autoloads-file nil t)
-      (message "ECA: Autoloads regenerated successfully.")))))
+        (load autoloads-file nil t)
+        (message "ECA: Autoloads regenerated successfully.")))))
 
 (defun my/eca-chat-mode-hook ()
   "Disable various minor modes in ECA chat buffers for cleaner experience."
   (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1)))
 
-(defun my/eca-send-prompt-from-minibuffer ()
-  "Prompt for a message in the minibuffer and send it to the current ECA chat."
-  (interactive)
-  (let ((prompt (read-string "ECA Prompt: ")))
-    (when (and prompt (not (string-empty-p prompt)))
-      (eca-chat-send-prompt prompt))))
-
-(defun my/eca-ensure-chat-window-visible (&rest _)
-  "Ensure the ECA chat window is visible before interacting with it."
-  (when-let* ((session (eca-session))
-              (buffer (eca-chat--get-last-buffer session)))
-    (unless (get-buffer-window buffer t)
-      (let ((eca-chat-focus-on-open nil))
-        (eca-chat--display-buffer buffer)))))
-
-
 (use-package eca
+  :defines (eca-chat-focus-on-open)
+  :functions (eca-session
+              eca-chat--get-last-buffer
+              eca-chat--display-buffer
+              eca-chat-send-prompt)
+  :preface
+  (defun my/eca-send-prompt-from-minibuffer ()
+    "Prompt for a message in the minibuffer and send it to the current ECA chat."
+    (interactive)
+    (let ((prompt (read-string "ECA Prompt: ")))
+      (when (and prompt (not (string-empty-p prompt)))
+        (eca-chat-send-prompt prompt))))
+
+  (defun my/eca-ensure-chat-window-visible (&rest _)
+    "Ensure the ECA chat window is visible before interacting with it."
+    (when-let* ((session (eca-session))
+                (buffer (eca-chat--get-last-buffer session)))
+      (unless (get-buffer-window buffer t)
+        (let ((eca-chat-focus-on-open nil))
+          (eca-chat--display-buffer buffer)))))
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest)
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
   :bind (("C-c ." . eca-transient-menu)
@@ -72,21 +76,15 @@ detects and fixes that by regenerating autoloads properly."
          ("C-c i" . eca-chat-add-context-to-user-prompt))
   :ensure t
   ;;:init
-  ;; Fix broken autoloads from package-vc before loading
-  ;;(my/eca-fix-autoloads)
+
   :config
   ;; Ensure chat window is visible before adding context
   (advice-add 'eca-chat-add-context-to-user-prompt :before #'my/eca-ensure-chat-window-visible)
 
-  ;; Customize transient menu keybindings
-  ;; Replace "p" (repeat prompt) with minibuffer prompt (more common use case)
-  (transient-suffix-put 'eca-transient-menu '(0 0 6) :key "P")
-  (transient-append-suffix 'eca-transient-menu '(0 0 6)
-    '("p" "Send prompt from minibuffer" my/eca-send-prompt-from-minibuffer))
-
   :custom
   ;;(setq eca-extra-args '("--verbose"))
-  (setq eca-chat-auto-add-repomap t)
+  (eca-chat-auto-add-repomap t)
+  (eca-worktree-mode 'isolated)
 
   )
 
