@@ -13,9 +13,10 @@
 
   ;; After threading all forms, check if we should maybe unwind once
   ;; according to my tastes
-  (defadvice clojure--thread-all (after possibly-unwind-once activate)
-    (when (my/clojure-should-unwind-once?)
-      (clojure-unwind)))
+  (advice-add 'clojure--thread-all :after
+              (lambda (&rest _)
+                (when (my/clojure-should-unwind-once?)
+                  (clojure-unwind))))
 
   :bind (:map clojure-mode-map
               ([remap paredit-forward] . clojure-forward-logical-sexp)
