@@ -84,7 +84,7 @@
   (setq denote-sort-keywords t)
   (setq denote-excluded-directories-regexp nil)
   (setq denote-date-format nil)         ; read its doc string
-  (setq denote-rename-no-confirm t)
+  (setq denote-rename-confirmations nil) ; skip all rename confirmations
   (setq denote-backlinks-show-context nil)
   (setq denote-rename-buffer-format "[D] %t")
 
