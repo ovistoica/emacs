@@ -55,7 +55,7 @@
 (set-default 'indent-tabs-mode nil)
 
 ;; Show me empty lines after buffer end
-(set-default 'indicate-empty-lines t)
+(set-default 'indicate-empty-lines nil)
 
 ;; Easily navigate sillycased words
 (use-package subword
