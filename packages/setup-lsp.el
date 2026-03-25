@@ -49,7 +49,15 @@
 
   (setq lsp-apply-edits-after-file-operations nil) ;; Disable broken lsp feature: https://github.com/clojure-lsp/clojure-lsp/issues/1813
 
+  ;; I'm working with dirs that have has ~1k legitimate source directories -
+  ;; raise the threshold to suppress the confirmation prompt without disabling
+  ;; watchers
+  (setq lsp-file-watch-threshold 2000)
+
   (setq lsp-signature-doc-lines 1)      ; Don't raise the echo area. It's distracting
+
+  ;; semgrep-ls is not installed and not needed - silence the prompt
+  (setq lsp-disabled-clients '(semgrep-ls))
 
 
   ;; To consider
@@ -58,9 +66,6 @@
   ;; (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
 
   :config
-  ;; Map edn-mode to clojure language server
-  (add-to-list 'lsp-language-id-configuration '(edn-mode . "clojure"))
-
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
   (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback)
   ;; (setq lsp-use-plists t) - disabled as currently getting errors
