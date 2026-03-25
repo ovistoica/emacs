@@ -31,6 +31,7 @@
         my/copy-buffer-as-prompt
         my/insert-lambda-symbol
         org-delete-char
+        org-end-of-line
         org-kill-line
         org-self-insert-command
         paredit-backward
