@@ -13,21 +13,32 @@
         olivetti-minimum-body-width 80
         olivetti-recall-visual-line-mode-entry-state t))
 
-;; place point at the top when changing pages
-(defun my/logos-recenter-top ()
-  "Use `recenter' to reposition the view at the top."
-  (recenter 0))
-
 
 
 (use-package logos
+  :ensure t
   :commands (logos-update-fringe-in-buffers logos-set-mode-arg)
 
   :preface
+  ;; place point at the top when changing pages
+  (defun my/logos-recenter-top ()
+    "Use `recenter' to reposition the view at the top."
+    (recenter 0))
+
   (defun my/logos-focus-hook ()
     (when logos-focus-mode
       (logos-set-mode-arg 'org-indent-mode -1)
       (logos-set-mode-arg 'display-line-numbers-mode -1)))
+
+  (defun logos-reveal-entry ()
+    "Reveal Org or Outline subtree when navigating logos pages."
+    (cond
+     ((and (eq major-mode 'org-mode)
+           (org-at-heading-p))
+      (org-show-subtree))
+     ((or (eq major-mode 'outline-mode)
+          (bound-and-true-p outline-minor-mode))
+      (outline-show-subtree))))
 
   :config
   ;; If you want to use outlines instead of page breaks (the ^L):
@@ -56,6 +67,7 @@
     (define-key map (kbd "<f9>") #'logos-focus-mode))
 
   (add-hook 'logos-page-motion-hook #'my/logos-recenter-top)
+  (add-hook 'logos-page-motion-hook #'logos-reveal-entry)
   (add-hook 'enable-theme-functions #'logos-update-fringe-in-buffers)
   (add-hook 'logos-focus-mode-hook #'my/logos-focus-hook))
 
