@@ -24,7 +24,9 @@
 
    ;; If you use Markdown or plain text files you want to fontify links
    ;; upon visiting the file (Org renders links as buttons right away).
-   (org-mode . denote-fontify-links-mode))
+   ;; Use `denote-fontify-links-mode-maybe' so it only activates in
+   ;; non-org Denote buffers.
+   (text-mode . denote-fontify-links-mode-maybe))
   :bind
   ;; Denote DOES NOT define any key bindings.  This is for the user to
   ;; decide.  For example:
@@ -121,4 +123,4 @@
 
 
 (provide 'setup-denote)
-;;; setup-notetaking.el ends here
+;;; setup-denote.el ends here
