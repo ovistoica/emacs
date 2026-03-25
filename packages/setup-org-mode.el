@@ -133,5 +133,7 @@ installed."
 (when (eq system-type 'darwin)
   (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
 
+(require 'org-slack-export)
+
 (provide 'setup-org-mode)
 ;;; setup-org-mode.el ends here

@@ -1,0 +1,43 @@
+#+title: Slack Export Test
+#+author: Ovi
+
+* Project Update
+
+Here is a quick summary of what shipped this week.
+We fixed a *critical bug* in the payment flow and deployed it to production.
+
+** What changed
+
+The root cause was an _off-by-one error_ in the date range query.
+The old approach was +completely wrong+ and had been there since day one.
+
+Use =deps.edn= to manage dependencies and ~lein repack~ to rebuild.
+
+*** Implementation detail
+
+The fix was straightforward:
+
+#+begin_src clojure
+(defn date-range [start end]
+  (let [days (time/days-between start end)]
+    (map #(time/plus start (time/days %))
+         (range (inc days)))))
+#+end_src
+
+** Links and references
+
+- Jira ticket: [[https://teamohana.atlassian.net/browse/OH-1234][OH-1234 Fix date range]]
+- PR: [[https://bitbucket.org/teamohana/kapital/pull-requests/42][PR #42]]
+- Docs: [[https://clojure.org/reference/deps_and_cli][Clojure CLI reference]]
+
+* Next Steps
+
+1. *Deploy* the migration script on Monday
+2. Monitor /error rates/ in Grafana for 24h
+3. Close the +old+ ticket and open a follow-up for the edge case
+
+Raw URL with no label: [[https://example.com]]
+
+#+begin_quote
+This is a cool quote
+#+end_quote
