@@ -170,4 +170,5 @@ Without a region, reads a message from the minibuffer and sends that."
          ("C-c C-m" . pi-coding-agent-menu)
          ("C-c C-p" . my/pi-coding-agent-toggle)))
 
+(provide 'setup-pi-coding-agent)
 ;;; setup-pi-coding-agent.el ends here
