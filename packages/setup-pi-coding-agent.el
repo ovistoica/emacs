@@ -15,45 +15,57 @@
   (defalias 'pi 'pi-coding-agent)
   :config
 
-  (defvar my/pi-coding-agent--saved-window-config nil
-    "Window configuration saved before showing the pi coding agent layout.")
+  (defcustom my/pi-panel-width 0.35
+    "Width of the pi side panel as a fraction of the frame width."
+    :type 'number
+    :group 'pi-coding-agent)
+
+  (defun my/pi--open-panel (chat-buf input-buf)
+    "Display CHAT-BUF (top) and INPUT-BUF (bottom) as a right side panel.
+Uses side windows so the main window layout is left untouched."
+    (let ((input-height (or (bound-and-true-p pi-coding-agent-input-window-height) 10))
+          (win-params   '((no-delete-other-windows . t))))
+      (display-buffer chat-buf
+        `((display-buffer-in-side-window)
+          (side             . right)
+          (slot             . 0)
+          (window-width     . ,my/pi-panel-width)
+          (window-parameters . ,win-params)))
+      (display-buffer input-buf
+        `((display-buffer-in-side-window)
+          (side             . right)
+          (slot             . 1)
+          (window-width     . ,my/pi-panel-width)
+          (window-height    . ,input-height)
+          (window-parameters . ,win-params)))))
+
+  (defun my/pi--close-panel (chat-buf input-buf)
+    "Close the pi side panel windows."
+    (dolist (buf (list chat-buf input-buf))
+      (when-let ((win (get-buffer-window buf)))
+        (delete-window win))))
 
   (defun my/pi-coding-agent-toggle ()
-    "Toggle a focused pi layout: chat on top, input on bottom.
-On first press, saves the current window configuration and shows the
-pi session for the current project fullscreen (split into two panes).
-On second press, restores the previous window configuration.
-Signals an error if no pi session exists for the current project."
+    "Toggle the pi side panel for the current project.
+Opens a right-side panel with chat on top and input on bottom.
+Creates a new session if none exists for the current project."
     (interactive)
-    (let* ((dir (pi-coding-agent--session-directory))
+    (let* ((dir      (pi-coding-agent--session-directory))
            (chat-buf (pi-coding-agent--find-session dir))
            (input-buf (and chat-buf
                            (buffer-local-value
                             'pi-coding-agent--input-buffer chat-buf))))
-      (cond
-       ;; Pi windows are visible → restore previous layout or bury buffers
-       ((and chat-buf (get-buffer-window chat-buf))
-        (if my/pi-coding-agent--saved-window-config
-            (set-window-configuration my/pi-coding-agent--saved-window-config)
-          (with-current-buffer chat-buf
-            (pi-coding-agent--hide-session-windows)))
-        (setq my/pi-coding-agent--saved-window-config nil))
-
-       ;; No session yet → start one, then show it
-       ;; Session exists but hidden → save layout and show it
-       (t
-        (setq my/pi-coding-agent--saved-window-config
-              (current-window-configuration))
+      (if (and chat-buf (get-buffer-window chat-buf))
+          ;; Panel visible → close it
+          (my/pi--close-panel chat-buf input-buf)
+        ;; Panel hidden or no session → open it
         (unless chat-buf
-          (setq chat-buf (pi-coding-agent--setup-session dir))
+          (setq chat-buf  (pi-coding-agent--setup-session dir))
           (setq input-buf (buffer-local-value
                            'pi-coding-agent--input-buffer chat-buf)))
-        (delete-other-windows)
-        (switch-to-buffer chat-buf)
-        (let* ((input-height (or (bound-and-true-p pi-coding-agent-input-window-height) 10))
-               (input-win (split-window-below (- (window-total-height) input-height))))
-          (set-window-buffer input-win input-buf)
-          (select-window input-win))))))
+        (my/pi--open-panel chat-buf input-buf)
+        (when-let ((win (get-buffer-window input-buf)))
+          (select-window win)))))
 
   (defun my/pi--mode-to-lang ()
     "Return a code-fence language string for the current buffer's major mode."
@@ -88,12 +100,12 @@ line range, e.g.:
   ```clojure
   (defn my-fn ...)
   ```"
-    (let* ((file  (buffer-file-name))
-           (root  (when-let* ((proj (project-current)))
-                    (project-root proj)))
-           (rel-file   (if (and file root)
-                           (file-relative-name file root)
-                         (buffer-name)))
+    (let* ((file     (buffer-file-name))
+           (root     (when-let* ((proj (project-current)))
+                       (project-root proj)))
+           (rel-file (if (and file root)
+                         (file-relative-name file root)
+                       (buffer-name)))
            (start-line (line-number-at-pos beg))
            (end-line   (let ((l (line-number-at-pos end)))
                          (if (and (> end beg)
@@ -107,8 +119,8 @@ line range, e.g.:
 
   (defun my/pi-send-to-input (text)
     "Append TEXT to the pi input buffer for the current project and focus it.
-Creates a new pi session if one does not exist yet.  If the pi windows are
-not currently visible, saves the window configuration and opens the layout."
+Creates a new pi session if one does not exist yet.
+Opens the side panel if not currently visible."
     (let* ((dir      (pi-coding-agent--session-directory))
            (chat-buf (or (pi-coding-agent--find-session dir)
                          (pi-coding-agent--setup-session dir)))
@@ -119,14 +131,9 @@ not currently visible, saves the window configuration and opens the layout."
           (unless (bolp) (insert "\n")))
         (insert text))
       (unless (get-buffer-window chat-buf)
-        (setq my/pi-coding-agent--saved-window-config (current-window-configuration))
-        (delete-other-windows)
-        (switch-to-buffer chat-buf)
-        (let* ((input-height (or (bound-and-true-p pi-coding-agent-input-window-height) 10))
-               (input-win (split-window-below (- (window-total-height) input-height))))
-          (set-window-buffer input-win input-buf)
-          (select-window input-win)))
-      (select-window (get-buffer-window input-buf))
+        (my/pi--open-panel chat-buf input-buf))
+      (when-let ((win (get-buffer-window input-buf)))
+        (select-window win))
       (goto-char (point-max))))
 
   (defun my/pi-send-dwim (beg end)
