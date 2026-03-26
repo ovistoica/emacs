@@ -1,20 +1,64 @@
 ;;; setup-pi-coding-agent.el --- Pi coding agent Emacs frontend -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Configuration for pi-coding-agent, an Emacs frontend for the pi CLI coding
-;; agent (https://github.com/dnouri/pi-coding-agent).
+;; Configuration for pi-coding-agent, an Emacs frontend for the pi CLI
+;; coding agent (https://github.com/dnouri/pi-coding-agent).
 ;;
-;; Provides:
-;;   - A toggleable right side panel (C-c C-p) with chat on top and input
-;;     below, leaving the main window layout untouched.  Uses Emacs side
-;;     windows so C-x 1 in the main area never kills the panel.
-;;   - `my/pi-send-dwim' (C-c TAB): with an active region, sends it as a
-;;     fenced code block annotated with file path and line range; without a
-;;     region, prompts for free-form text via the minibuffer.
-;;   - `my/pi-region-to-string': pure function that formats a buffer region
-;;     into a labelled fenced code block string.
-;;   - `my/pi-send-to-input': appends any text to the pi input buffer and
-;;     opens the side panel if it is not already visible.
+;; REQUIREMENTS
+;;   - Emacs 29+ with tree-sitter support
+;;   - pi CLI installed and authenticated:
+;;       npm install -g @mariozechner/pi-coding-agent
+;;       pi --login
+;;
+;; KEYBINDINGS
+;;
+;;   C-c C-p   Toggle the pi side panel for the current project.
+;;             Opens chat (top) + input (bottom) on the right without
+;;             disturbing your existing window layout.  Press again to
+;;             close.  If no session exists for the project yet, one is
+;;             created automatically.
+;;
+;;   C-c TAB   `my/pi-send-dwim' — context-aware send:
+;;             • With an active region: formats the selected code as a
+;;               fenced block annotated with the relative file path and
+;;               line range (e.g. `src/foo.clj` L42-67:), then appends
+;;               it to the pi input buffer and focuses it so you can
+;;               type your question immediately.
+;;             • Without a region: prompts for free-form text in the
+;;               minibuffer and sends that instead.
+;;
+;;   C-c C-m   Open the pi menu (inside pi buffers).
+;;             Frees up C-c C-p in pi's own keymaps for the toggle above.
+;;
+;; SIDE PANEL DESIGN
+;;   Uses `display-buffer-in-side-window' so the panel lives at the right
+;;   edge of the frame independently of your main windows.  C-x 1 in the
+;;   main area never kills it.  Width is controlled by `my/pi-panel-width'
+;;   (default 0.4 = 40% of the frame).
+;;
+;;   Mode-line tweaks applied when the panel opens:
+;;     - Chat buffer: mode-line hidden entirely (input below gives context).
+;;     - Input buffer: shortened to *pi:<project>* and auto-sudoedit-mode
+;;       (ASE) indicator suppressed.
+;;
+;; HELPER FUNCTIONS (reusable building blocks)
+;;   `my/pi-region-to-string' BEG END
+;;       Pure function.  Returns a markdown fenced code block string for
+;;       the region, with a `file` L<start>-<end> header.  Language is
+;;       inferred from the buffer's major mode.  Easy to compose with
+;;       other send targets beyond pi.
+;;
+;;   `my/pi-send-to-input' TEXT
+;;       Appends TEXT to the pi input buffer for the current project,
+;;       opens the side panel if hidden, and focuses the input window.
+;;       Use this to build your own send commands (e.g. send a compile
+;;       error, a git diff hunk, a CIDER exception, etc.).
+;;
+;; CIDER / CLOJURE NOTE
+;;   C-c C-p was previously bound to `cider-pprint-eval-last-sexp' in
+;;   cider-mode-map and to `nrepl-warn-when-not-connected' in
+;;   clojure-mode-map.  Both are unbound in setup-cider.el to free the
+;;   key for the pi toggle.
 
 ;;; Code:
 
@@ -27,16 +71,22 @@
 
   :preface
 
-  (defcustom my/pi-panel-width 0.35
+  (defcustom my/pi-panel-width 0.4
     "Width of the pi side panel as a fraction of the frame width."
     :type 'number
     :group 'pi-coding-agent)
 
-  (defun my/pi--open-panel (chat-buf input-buf)
+  (defun my/pi--short-name (dir)
+    "Return the last path component of DIR as a short project name."
+    (file-name-nondirectory (directory-file-name dir)))
+
+  (defun my/pi--open-panel (chat-buf input-buf dir)
     "Display CHAT-BUF (top) and INPUT-BUF (bottom) as a right side panel.
-Uses side windows so the main window layout is left untouched."
+DIR is the session directory used to derive the short project name shown
+in the mode-line.  Uses side windows so the main window layout is untouched."
     (let ((input-height (or (bound-and-true-p pi-coding-agent-input-window-height) 10))
-          (win-params   '((no-delete-other-windows . t))))
+          (win-params   '((no-delete-other-windows . t)))
+          (label        (format " *pi:%s*" (my/pi--short-name dir))))
       (display-buffer chat-buf
         `((display-buffer-in-side-window)
           (side              . right)
@@ -49,7 +99,17 @@ Uses side windows so the main window layout is left untouched."
           (slot              . 1)
           (window-width      . ,my/pi-panel-width)
           (window-height     . ,input-height)
-          (window-parameters . ,win-params)))))
+          (window-parameters . ,win-params)))
+      ;; Chat: hide mode-line entirely (input below provides context)
+      (with-current-buffer chat-buf
+        (setq-local mode-line-format nil))
+      ;; Input: short label + suppress ASE indicator
+      (with-current-buffer input-buf
+        (setq-local mode-line-buffer-identification
+                    (list (propertize label 'face 'mode-line-buffer-id)))
+        (make-local-variable 'minor-mode-alist)
+        (setq minor-mode-alist
+              (assq-delete-all 'auto-sudoedit-mode minor-mode-alist)))))
 
   (defun my/pi--close-panel (chat-buf input-buf)
     "Close the pi side panel windows for CHAT-BUF and INPUT-BUF."
@@ -73,7 +133,7 @@ Creates a new session if none exists for the current project."
           (setq chat-buf  (pi-coding-agent--setup-session dir))
           (setq input-buf (buffer-local-value
                            'pi-coding-agent--input-buffer chat-buf)))
-        (my/pi--open-panel chat-buf input-buf)
+        (my/pi--open-panel chat-buf input-buf dir)
         (when-let ((win (get-buffer-window input-buf)))
           (select-window win)))))
 
@@ -83,7 +143,7 @@ Creates a new session if none exists for the current project."
       ((or 'clojure-mode 'clojurec-mode)  "clojure")
       ('clojurescript-mode                "clojurescript")
       ((or 'emacs-lisp-mode
-           'lisp-interaction-mode)        "emacs-lisp")
+           'lisp-interation-mode)        "emacs-lisp")
       ((or 'python-mode 'python-ts-mode)  "python")
       ((or 'js-mode 'js-ts-mode)          "javascript")
       ((or 'typescript-mode
@@ -141,7 +201,7 @@ Opens the side panel if not currently visible."
           (unless (bolp) (insert "\n")))
         (insert text))
       (unless (get-buffer-window chat-buf)
-        (my/pi--open-panel chat-buf input-buf))
+        (my/pi--open-panel chat-buf input-buf dir))
       (when-let ((win (get-buffer-window input-buf)))
         (select-window win))
       (goto-char (point-max))))
