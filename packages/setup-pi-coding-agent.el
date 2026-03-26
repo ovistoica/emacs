@@ -210,6 +210,52 @@ Opens the side panel if not currently visible."
         (select-window win))
       (goto-char (point-max))))
 
+  ;; ── Image paste support ──────────────────────────────────────────────────
+  ;; When in the pi input buffer and the clipboard holds an image, C-y saves
+  ;; it to a temp file and inserts @/tmp/pi-screenshot-<uuid>.<ext> so pi
+  ;; picks it up as a file reference.  Plain text yanks are unaffected.
+  ;; Mirrors the approach used by eca (eca-chat-context.el).
+
+  (defun my/pi--yank-image-handler (type data)
+    "Save clipboard image DATA of MIME TYPE to a temp file and insert @path."
+    (let* ((ext  (if (string-match "image/\\(.*\\)" (symbol-name type))
+                     (match-string 1 (symbol-name type))
+                   "png"))
+           (path (make-temp-file "pi-screenshot-" nil (concat "." ext))))
+      (let ((coding-system-for-write 'no-conversion))
+        (write-region data nil path nil 'silent))
+      (insert "@" path " ")
+      (message "Image saved to %s" path)))
+
+  (defun my/pi--clipboard-has-image-p ()
+    "Return non-nil if the clipboard contains image data."
+    (when-let* ((targets (ignore-errors
+                           (gui-get-selection 'CLIPBOARD 'TARGETS))))
+      (seq-some (lambda (type)
+                  (and (symbolp type)
+                       (string-match-p "^image/" (symbol-name type))))
+                (if (vectorp targets) (append targets nil) targets))))
+
+  (defun my/pi--yank-considering-image (orig-fun &rest args)
+    "Yank image from clipboard when in pi input buffer, else call ORIG-FUN."
+    (if (and (display-graphic-p)
+             (derived-mode-p 'pi-coding-agent-input-mode)
+             (fboundp 'yank-media)
+             (boundp 'yank-media--registered-handlers)
+             yank-media--registered-handlers
+             (my/pi--clipboard-has-image-p))
+        (call-interactively #'yank-media)
+      (apply orig-fun args)))
+
+  (defun my/pi--setup-image-yank ()
+    "Register image yank handlers for the current pi input buffer."
+    (when (fboundp 'yank-media-handler)
+      (setq-local yank-media--registered-handlers nil)
+      (dolist (mime '("image/png" "image/jpeg" "image/jpg"
+                      "image/gif" "image/webp"))
+        (yank-media-handler mime #'my/pi--yank-image-handler)))
+    (advice-add 'yank :around #'my/pi--yank-considering-image))
+
   (defun my/pi-send-dwim (beg end)
     "Send to pi: region as a fenced code block, or prompt for free-form text.
 With an active region, formats it with file path and line range and sends it.
@@ -220,6 +266,9 @@ Without a region, reads a message from the minibuffer and sends that."
       (let ((text (read-string "Send to pi: ")))
         (unless (string-empty-p text)
           (my/pi-send-to-input (concat text "\n"))))))
+
+  :hook
+  (pi-coding-agent-input-mode . my/pi--setup-image-yank)
 
   :custom
   (pi-coding-agent-input-markdown-highlighting t)
