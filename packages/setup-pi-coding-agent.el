@@ -1,19 +1,31 @@
-;; setup-pi-coding-agent.el --- Pi coding agent Emacs frontend
+;;; setup-pi-coding-agent.el --- Pi coding agent Emacs frontend -*- lexical-binding: t -*-
+
+;;; Commentary:
+;; Configuration for pi-coding-agent, an Emacs frontend for the pi CLI coding
+;; agent (https://github.com/dnouri/pi-coding-agent).
+;;
+;; Provides:
+;;   - A toggleable right side panel (C-c C-p) with chat on top and input
+;;     below, leaving the main window layout untouched.  Uses Emacs side
+;;     windows so C-x 1 in the main area never kills the panel.
+;;   - `my/pi-send-dwim' (C-c TAB): with an active region, sends it as a
+;;     fenced code block annotated with file path and line range; without a
+;;     region, prompts for free-form text via the minibuffer.
+;;   - `my/pi-region-to-string': pure function that formats a buffer region
+;;     into a labelled fenced code block string.
+;;   - `my/pi-send-to-input': appends any text to the pi input buffer and
+;;     opens the side panel if it is not already visible.
+
+;;; Code:
 
 (use-package pi-coding-agent
   :vc (:url "https://github.com/dnouri/pi-coding-agent" :rev :newest)
-  :bind (("C-c C-p"   . my/pi-coding-agent-toggle)
-         ("C-c TAB"   . my/pi-send-dwim)
-         :map pi-coding-agent-input-mode-map
-         ("C-c C-m" . pi-coding-agent-menu)
-         ("C-c C-p" . my/pi-coding-agent-toggle)
-         :map pi-coding-agent-chat-mode-map
-         ("C-c C-m" . pi-coding-agent-menu)
-         ("C-c C-p" . my/pi-coding-agent-toggle))
-  :init
-  ;; Allow M-x pi as a shorthand
-  (defalias 'pi 'pi-coding-agent)
-  :config
+
+  :preface
+  ;; Silence byte-compiler warnings for pi-coding-agent internals used below.
+  (declare-function pi-coding-agent--session-directory "pi-coding-agent")
+  (declare-function pi-coding-agent--find-session       "pi-coding-agent")
+  (declare-function pi-coding-agent--setup-session      "pi-coding-agent")
 
   (defcustom my/pi-panel-width 0.35
     "Width of the pi side panel as a fraction of the frame width."
@@ -27,20 +39,20 @@ Uses side windows so the main window layout is left untouched."
           (win-params   '((no-delete-other-windows . t))))
       (display-buffer chat-buf
         `((display-buffer-in-side-window)
-          (side             . right)
-          (slot             . 0)
-          (window-width     . ,my/pi-panel-width)
+          (side              . right)
+          (slot              . 0)
+          (window-width      . ,my/pi-panel-width)
           (window-parameters . ,win-params)))
       (display-buffer input-buf
         `((display-buffer-in-side-window)
-          (side             . right)
-          (slot             . 1)
-          (window-width     . ,my/pi-panel-width)
-          (window-height    . ,input-height)
+          (side              . right)
+          (slot              . 1)
+          (window-width      . ,my/pi-panel-width)
+          (window-height     . ,input-height)
           (window-parameters . ,win-params)))))
 
   (defun my/pi--close-panel (chat-buf input-buf)
-    "Close the pi side panel windows."
+    "Close the pi side panel windows for CHAT-BUF and INPUT-BUF."
     (dolist (buf (list chat-buf input-buf))
       (when-let ((win (get-buffer-window buf)))
         (delete-window win))))
@@ -50,15 +62,13 @@ Uses side windows so the main window layout is left untouched."
 Opens a right-side panel with chat on top and input on bottom.
 Creates a new session if none exists for the current project."
     (interactive)
-    (let* ((dir      (pi-coding-agent--session-directory))
-           (chat-buf (pi-coding-agent--find-session dir))
+    (let* ((dir       (pi-coding-agent--session-directory))
+           (chat-buf  (pi-coding-agent--find-session dir))
            (input-buf (and chat-buf
                            (buffer-local-value
                             'pi-coding-agent--input-buffer chat-buf))))
       (if (and chat-buf (get-buffer-window chat-buf))
-          ;; Panel visible → close it
           (my/pi--close-panel chat-buf input-buf)
-        ;; Panel hidden or no session → open it
         (unless chat-buf
           (setq chat-buf  (pi-coding-agent--setup-session dir))
           (setq input-buf (buffer-local-value
@@ -145,4 +155,19 @@ Without a region, reads a message from the minibuffer and sends that."
         (my/pi-send-to-input (my/pi-region-to-string beg end))
       (let ((text (read-string "Send to pi: ")))
         (unless (string-empty-p text)
-          (my/pi-send-to-input (concat text "\n")))))))
+          (my/pi-send-to-input (concat text "\n"))))))
+
+  :init
+  ;; Allow M-x pi as a shorthand
+  (defalias 'pi 'pi-coding-agent)
+
+  :bind (("C-c C-p" . my/pi-coding-agent-toggle)
+         ("C-c TAB" . my/pi-send-dwim)
+         :map pi-coding-agent-input-mode-map
+         ("C-c C-m" . pi-coding-agent-menu)
+         ("C-c C-p" . my/pi-coding-agent-toggle)
+         :map pi-coding-agent-chat-mode-map
+         ("C-c C-m" . pi-coding-agent-menu)
+         ("C-c C-p" . my/pi-coding-agent-toggle)))
+
+;;; setup-pi-coding-agent.el ends here
