@@ -157,6 +157,9 @@ Without a region, reads a message from the minibuffer and sends that."
         (unless (string-empty-p text)
           (my/pi-send-to-input (concat text "\n"))))))
 
+  :custom
+  (pi-coding-agent-input-markdown-highlighting t)
+
   :init
   ;; Allow M-x pi as a shorthand
   (defalias 'pi 'pi-coding-agent)
