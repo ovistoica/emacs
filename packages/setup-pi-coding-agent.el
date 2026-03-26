@@ -2,7 +2,8 @@
 
 (use-package pi-coding-agent
   :vc (:url "https://github.com/dnouri/pi-coding-agent" :rev :newest)
-  :bind (("C-c C-p" . my/pi-coding-agent-toggle)
+  :bind (("C-c C-p"   . my/pi-coding-agent-toggle)
+         ("C-c TAB"   . my/pi-send-dwim)
          :map pi-coding-agent-input-mode-map
          ("C-c C-m" . pi-coding-agent-menu)
          ("C-c C-p" . my/pi-coding-agent-toggle)
@@ -128,9 +129,13 @@ not currently visible, saves the window configuration and opens the layout."
       (select-window (get-buffer-window input-buf))
       (goto-char (point-max))))
 
-  (defun my/pi-send-region (beg end)
-    "Send the active region to the pi input buffer as a fenced code block."
+  (defun my/pi-send-dwim (beg end)
+    "Send to pi: region as a fenced code block, or prompt for free-form text.
+With an active region, formats it with file path and line range and sends it.
+Without a region, reads a message from the minibuffer and sends that."
     (interactive "r")
-    (unless (use-region-p)
-      (user-error "No active region"))
-    (my/pi-send-to-input (my/pi-region-to-string beg end))))
+    (if (use-region-p)
+        (my/pi-send-to-input (my/pi-region-to-string beg end))
+      (let ((text (read-string "Send to pi: ")))
+        (unless (string-empty-p text)
+          (my/pi-send-to-input (concat text "\n")))))))
