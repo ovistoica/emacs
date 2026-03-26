@@ -202,6 +202,10 @@ Opens the side panel if not currently visible."
         (insert text))
       (unless (get-buffer-window chat-buf)
         (my/pi--open-panel chat-buf input-buf dir))
+      ;; Scroll chat to bottom so window-point-insertion-type keeps it there
+      ;; as pi streams its response.
+      (when-let ((chat-win (get-buffer-window chat-buf)))
+        (set-window-point chat-win (with-current-buffer chat-buf (point-max))))
       (when-let ((win (get-buffer-window input-buf)))
         (select-window win))
       (goto-char (point-max))))
