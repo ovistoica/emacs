@@ -21,11 +21,11 @@
 (use-package pi-coding-agent
   :vc (:url "https://github.com/dnouri/pi-coding-agent" :rev :newest)
 
+  :functions (pi-coding-agent--session-directory
+              pi-coding-agent--find-session
+              pi-coding-agent--setup-session)
+
   :preface
-  ;; Silence byte-compiler warnings for pi-coding-agent internals used below.
-  (declare-function pi-coding-agent--session-directory "pi-coding-agent")
-  (declare-function pi-coding-agent--find-session       "pi-coding-agent")
-  (declare-function pi-coding-agent--setup-session      "pi-coding-agent")
 
   (defcustom my/pi-panel-width 0.35
     "Width of the pi side panel as a fraction of the frame width."
