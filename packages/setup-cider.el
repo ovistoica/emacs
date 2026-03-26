@@ -64,6 +64,9 @@ in `clojure-mode-map'."
   :config
   ;; Warn about missing nREPL instead of doing stupid things
   (my/shadow-cider-keys-with-warning)
+  ;; Free up C-c C-p for pi-coding-agent toggle
+  (define-key cider-mode-map (kbd "C-c C-p") nil)
+  (define-key clojure-mode-map (kbd "C-c C-p") nil)
 
   ;; Show the port number when figwheel comes online
   (add-to-list 'cider--repl-stderr-functions #'my/cider-maybe-log-figwheel-main-port)
