@@ -212,19 +212,19 @@ Opens the side panel if not currently visible."
 
   ;; ── Image paste support ──────────────────────────────────────────────────
   ;; When in the pi input buffer and the clipboard holds an image, C-y saves
-  ;; it to a temp file and inserts @/tmp/pi-screenshot-<uuid>.<ext> so pi
-  ;; picks it up as a file reference.  Plain text yanks are unaffected.
+  ;; it to a temp file and inserts the path so pi picks it up as a file
+  ;; reference.  Plain text yanks are unaffected.
   ;; Mirrors the approach used by eca (eca-chat-context.el).
 
   (defun my/pi--yank-image-handler (type data)
-    "Save clipboard image DATA of MIME TYPE to a temp file and insert @path."
+    "Save clipboard image DATA of MIME TYPE to a temp file and insert path."
     (let* ((ext  (if (string-match "image/\\(.*\\)" (symbol-name type))
                      (match-string 1 (symbol-name type))
                    "png"))
-           (path (make-temp-file "pi-screenshot-" nil (concat "." ext))))
+           (path (make-temp-file "pi-clipboard-picture-" nil (concat "." ext))))
       (let ((coding-system-for-write 'no-conversion))
         (write-region data nil path nil 'silent))
-      (insert "@" path " ")
+      (insert path " ")
       (message "Image saved to %s" path)))
 
   (defun my/pi--clipboard-has-image-p ()
