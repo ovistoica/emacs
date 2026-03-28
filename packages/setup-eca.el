@@ -44,6 +44,27 @@ detects and fixes that by regenerating autoloads properly."
         (load autoloads-file nil t)
         (message "ECA: Autoloads regenerated successfully.")))))
 
+(defun my/eca-recover-completion-item (item)
+  "Return ITEM with `eca-chat-completion-item' text property restored if missing.
+Some completion UIs (e.g. `consult-completion-in-region') call `completing-read'
+and insert the returned string without text properties.  This searches the
+buffer-local completion caches for a candidate whose plain text matches ITEM
+and returns the original propertized string."
+  (if (get-text-property 0 'eca-chat-completion-item item)
+      item
+    (let ((found nil))
+      (dolist (cache (list eca-chat--context-completion-cache
+                           eca-chat--file-completion-cache))
+        (unless found
+          (maphash (lambda (_query candidates)
+                     (unless found
+                       (setq found (seq-find
+                                    (lambda (c)
+                                      (string= (substring-no-properties c) item))
+                                    candidates))))
+                   cache)))
+      (or found item))))
+
 (defun my/eca-chat-mode-hook ()
   "Disable various minor modes in ECA chat buffers for cleaner experience."
   (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1)))
@@ -80,6 +101,20 @@ detects and fixes that by regenerating autoloads properly."
   :config
   ;; Ensure chat window is visible before adding context
   (advice-add 'eca-chat-add-context-to-user-prompt :before #'my/eca-ensure-chat-window-visible)
+
+  ;; Fix @file completion with consult-completion-in-region (and any completing-read-based
+  ;; UI).  Those UIs call completing-read and insert the returned string, which strips text
+  ;; properties — including `eca-chat-completion-item' that exit functions need to resolve
+  ;; the selected candidate.  The advice recovers the propertized original from the cache.
+  (advice-add 'eca-chat--completion-context-from-prompt-exit-function
+              :filter-args (lambda (args)
+                             (cons (my/eca-recover-completion-item (car args)) (cdr args))))
+  (advice-add 'eca-chat--completion-context-from-new-context-exit-function
+              :filter-args (lambda (args)
+                             (cons (my/eca-recover-completion-item (car args)) (cdr args))))
+  (advice-add 'eca-chat--completion-file-from-prompt-exit-function
+              :filter-args (lambda (args)
+                             (cons (my/eca-recover-completion-item (car args)) (cdr args))))
 
   :custom
   ;;(setq eca-extra-args '("--verbose"))
