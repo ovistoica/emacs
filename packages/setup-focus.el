@@ -25,10 +25,18 @@
     "Use `recenter' to reposition the view at the top."
     (recenter 0))
 
+  (defun my/logos-markdown-focus ()
+    "Toggle GFM-style markup hiding in markdown buffers with focus mode.
+Hides raw markup syntax (**, *, #, etc.) when focus mode is on and
+restores it when focus mode is off, matching the eca-chat-mode experience."
+    (when (derived-mode-p 'markdown-mode)
+      (markdown-toggle-markup-hiding (if logos-focus-mode 1 -1))))
+
   (defun my/logos-focus-hook ()
     (when logos-focus-mode
       (logos-set-mode-arg 'org-indent-mode -1)
-      (logos-set-mode-arg 'display-line-numbers-mode -1)))
+      (logos-set-mode-arg 'display-line-numbers-mode -1))
+    (my/logos-markdown-focus))
 
   (defun logos-reveal-entry ()
     "Reveal Org or Outline subtree when navigating logos pages."
