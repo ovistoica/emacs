@@ -74,7 +74,9 @@ and returns the original propertized string."
   :functions (eca-session
               eca-chat--get-last-buffer
               eca-chat--display-buffer
-              eca-chat-send-prompt)
+              eca-chat-send-prompt
+              eca-chat--expandable-content-toggle
+              eca-chat--add-expandable-content)
   :preface
   (defun my/eca-send-prompt-from-minibuffer ()
     "Prompt for a message in the minibuffer and send it to the current ECA chat."
@@ -90,17 +92,57 @@ and returns the original propertized string."
       (unless (get-buffer-window buffer t)
         (let ((eca-chat-focus-on-open nil))
           (eca-chat--display-buffer buffer)))))
+
+  (defvar-local my/eca-auto-expand-blocks nil
+    "When non-nil, auto-expand new expandable blocks as they are added.")
+
+  (defun my/eca-auto-expand-block (id &rest _)
+    "Expand ID immediately if `my/eca-auto-expand-blocks' is set in this buffer."
+    (when (and (derived-mode-p 'eca-chat-mode) my/eca-auto-expand-blocks)
+      (eca-chat--expandable-content-toggle id t nil)))
+
+  (defun my/eca-chat-expand-all-blocks (&optional sticky)
+    "Expand all collapsed blocks in the current ECA chat buffer.
+With prefix argument STICKY, also keep all future blocks in this
+buffer expanded automatically."
+    (interactive "P")
+    (dolist (ov (overlays-in (point-min) (point-max)))
+      (when-let* ((id (overlay-get ov 'eca-chat--expandable-content-id)))
+        (eca-chat--expandable-content-toggle id t nil)))
+    (when sticky
+      (setq-local my/eca-auto-expand-blocks t)
+      (message "ECA: future blocks in this buffer will auto-expand")))
+
+  (defun my/eca-chat-collapse-all-blocks (&optional sticky)
+    "Collapse all expanded blocks in the current ECA chat buffer.
+With prefix argument STICKY, also disable future auto-expansion in
+this buffer."
+    (interactive "P")
+    (dolist (ov (overlays-in (point-min) (point-max)))
+      (when-let* ((id (overlay-get ov 'eca-chat--expandable-content-id)))
+        (eca-chat--expandable-content-toggle id t t)))
+    (when sticky
+      (setq-local my/eca-auto-expand-blocks nil)
+      (message "ECA: auto-expand disabled for this buffer")))
+
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest)
   :hook (eca-chat-mode . my/eca-chat-mode-hook)
   :bind (("C-c ." . eca-transient-menu)
          ("C-c e" . eca-chat-toggle-window)
-         ("C-c i" . eca-chat-add-context-to-user-prompt))
+         ("C-c i" . eca-chat-add-context-to-user-prompt)
+         (:map eca-chat-mode-map
+               ("C-c C-o" . my/eca-chat-expand-all-blocks)
+               ("C-c C-c" . my/eca-chat-collapse-all-blocks)))
   :ensure t
   ;;:init
 
   :config
   ;; Ensure chat window is visible before adding context
   (advice-add 'eca-chat-add-context-to-user-prompt :before #'my/eca-ensure-chat-window-visible)
+
+  ;; Register the auto-expand advice once globally — it is a no-op in buffers
+  ;; where my/eca-auto-expand-blocks is nil (the default).
+  (advice-add 'eca-chat--add-expandable-content :after #'my/eca-auto-expand-block)
 
   ;; Fix @file completion with consult-completion-in-region (and any completing-read-based
   ;; UI).  Those UIs call completing-read and insert the returned string, which strips text
@@ -120,6 +162,8 @@ and returns the original propertized string."
   ;;(setq eca-extra-args '("--verbose"))
   (eca-chat-auto-add-repomap t)
   (eca-worktree-mode 'isolated)
+  ;; Keep tool call blocks open after they complete — no manual tabbing needed.
+  (eca-chat-shrink-called-tools nil)
 
   )
 
