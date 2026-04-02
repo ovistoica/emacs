@@ -4,7 +4,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("59753158ccaa2c7a1b7c32c4c004b08d9ba1b065f7acdeb887a7aa98a2082157"
+   '("dde7fb0b1ed1bb5b61e62bf1a00696cf099a2b290718aee9b377365b3ed992f0"
+     "59753158ccaa2c7a1b7c32c4c004b08d9ba1b065f7acdeb887a7aa98a2082157"
      "9e316771bf4271ac27ad101e42e9dac64d0f711276d02660bc9268428c3a3a26"
      "11971ea90f49018cb855a836accbadeaad7db30e4af58951f47a7c2f33170507"
      "b1cb24ab81c3c0b5534a6e7e433948f342a42893f7c0032d1a5ab417f822b642"
@@ -46,11 +47,11 @@
               logos lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia
               mise modus-themes move-text neil nerd-icons-completion
               nerd-icons-dired notmuch-indicator ol-notmuch olivetti orderless
-              org-present ox-gfm ox-slack perspective popper prodigy projectile
-              pulsar significant-other smartparens smtpmail-multi terraform-mode
-              time-zones undo-fu vertico visual-fill-column vterm vundo
-              wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
-              zprint-mode))
+              org-present ox-gfm ox-slack perspective pi-coding-agent popper
+              prodigy projectile pulsar significant-other smartparens
+              smtpmail-multi terraform-mode time-zones undo-fu vertico
+              visual-fill-column vterm vundo wgrep-deadgrep
+              whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
    '((eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
           "master" :lisp-dir "." :main-file "eca.el")

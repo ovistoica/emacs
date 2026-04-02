@@ -25,12 +25,29 @@
     "Use `recenter' to reposition the view at the top."
     (recenter 0))
 
+  (declare-function markdown-toggle-markup-hiding "markdown-mode" (&optional arg))
+  (declare-function eca-table-update-faces "eca-table" ())
+  (declare-function eca-table-align "eca-table" (from end))
+  (declare-function eca-table-beautify "eca-table" (from end))
+  (declare-function eca-table-remove-overlays "eca-table" (beg end))
+
   (defun my/logos-markdown-focus ()
-    "Toggle GFM-style markup hiding in markdown buffers with focus mode.
-Hides raw markup syntax (**, *, #, etc.) when focus mode is on and
-restores it when focus mode is off, matching the eca-chat-mode experience."
+    "Toggle GFM-style markdown enhancements with logos focus mode.
+On enter: hides raw markup syntax and beautifies tables (header
+highlighting, zebra rows, wide-table horizontal scroll toggle).
+On exit: restores markup visibility and removes table overlays."
     (when (derived-mode-p 'markdown-mode)
-      (markdown-toggle-markup-hiding (if logos-focus-mode 1 -1))))
+      (markdown-toggle-markup-hiding (if logos-focus-mode 1 -1))
+      (if logos-focus-mode
+          (when (require 'eca-table nil t)
+            (eca-table-update-faces)
+            (eca-table-align (point-min) (point-max))
+            ;; eca-table-beautify reads eca-chat-table-beautify as a dynamic
+            ;; global — set it buffer-locally to t so the gate passes.
+            (setq-local eca-chat-table-beautify t)
+            (eca-table-beautify (point-min) (point-max)))
+        (when (fboundp 'eca-table-remove-overlays)
+          (eca-table-remove-overlays (point-min) (point-max))))))
 
   (defun my/logos-focus-hook ()
     (when logos-focus-mode
