@@ -18,7 +18,7 @@
 
 (use-package chezmoi
   :vc (:url "https://github.com/tuh8888/chezmoi.el")
-  :commands (chezmoi-find chezmoi-write chezmoi-sync chezmoi-diff chezmoi-ediff)
+  :commands (chezmoi-find chezmoi-write chezmoi-sync-files chezmoi-diff chezmoi-ediff)
   :bind (("C-c C-f" . chezmoi-find)
          ("C-c C-s" . chezmoi-write)
          ("C-c C-a" . chezmoi-add-current-file)
