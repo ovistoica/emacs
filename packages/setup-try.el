@@ -147,7 +147,14 @@ With a prefix argument, prompt for INITIAL-INPUT to pre-filter the list."
   (try--ensure-dir)
   (let* ((entries (try--list-entries))
          (choices (mapcar #'car entries))
-         (selection (completing-read "Try: " choices nil nil initial-input)))
+         ;; Wrap in a completion table that preserves recency order.
+         ;; Without this, UIs like Vertico re-sort candidates alphabetically.
+         (table (lambda (string pred action)
+                  (if (eq action 'metadata)
+                      '(metadata (display-sort-function . identity)
+                                 (cycle-sort-function   . identity))
+                    (complete-with-action action choices string pred))))
+         (selection (completing-read "Try: " table nil nil initial-input)))
     (when (and selection (not (string-empty-p selection)))
       (if-let ((path (cdr (assoc selection entries))))
           (dired path)
