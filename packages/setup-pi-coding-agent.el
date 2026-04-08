@@ -187,6 +187,16 @@ line range, e.g.:
       (format "`%s` L%d-%d:\n```%s\n%s```\n"
               rel-file start-line end-line lang code)))
 
+  (defun my/pi-copy-region-as-code-block (beg end)
+    "Copy the region BEG to END as a fenced code block to the kill ring.
+The block includes the relative file path and line range as a header,
+ready to paste into any agent chat."
+    (interactive "r")
+    (let ((block (my/pi-region-to-string beg end)))
+      (kill-new block)
+      (message "Copied code block (%s) to kill ring"
+               (buffer-substring-no-properties beg (min end (+ beg 40))))))
+
   (defun my/pi-send-to-input (text)
     "Append TEXT to the pi input buffer for the current project and focus it.
 Creates a new pi session if one does not exist yet.
@@ -279,6 +289,7 @@ Without a region, reads a message from the minibuffer and sends that."
 
   :bind (("C-c C-p" . my/pi-coding-agent-toggle)
          ("C-c TAB" . my/pi-send-dwim)
+         ("C-c w" . my/pi-copy-region-as-code-block)
          :map pi-coding-agent-input-mode-map
          ("C-c C-m" . pi-coding-agent-menu)
          ("C-c C-p" . my/pi-coding-agent-toggle)
