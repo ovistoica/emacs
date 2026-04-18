@@ -14,5 +14,8 @@
   (unbind-key "C-M-@" vterm-mode-map)
   (unbind-key "M-&" vterm-mode-map))
 
+(use-package ghostel
+  :ensure t)
 
-(provide 'setup-vterm)
+
+(provide 'setup-terminal)

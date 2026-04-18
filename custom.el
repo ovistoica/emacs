@@ -4,7 +4,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("1b7e575c6681e66d8d83634c2c160b40af12f3756360a4dd81b8032f4495cb5e"
+   '("21c4c4b7d3ab161aaa28b15ca846854d395c33cfb7c6863ab601adfe10d70ce0"
+     "1b7e575c6681e66d8d83634c2c160b40af12f3756360a4dd81b8032f4495cb5e"
      "dde7fb0b1ed1bb5b61e62bf1a00696cf099a2b290718aee9b377365b3ed992f0"
      "59753158ccaa2c7a1b7c32c4c004b08d9ba1b065f7acdeb887a7aa98a2082157"
      "9e316771bf4271ac27ad101e42e9dac64d0f711276d02660bc9268428c3a3a26"
@@ -54,13 +55,14 @@
               visual-fill-column vterm vundo wgrep-deadgrep
               whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
-   '((eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
+   '((claude-code-ide :vc-backend Git :url
+                      "https://github.com/parsnips/claude-code-ide.el")
+     (eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
           "master" :lisp-dir "." :main-file "eca.el")
      (zoom-frm :url "https://github.com/emacsmirror/zoom-frm")
      (frame-cmds :url "https://github.com/emacsmirror/frame-cmds")
      (frame-fns :url "https://github.com/emacsmirror/frame-fns")
      (blamer :url "https://github.com/artawower/blamer.el")
-     (claude-code-ide :url "https://github.com/manzaltu/claude-code-ide.el")
      (beancount :url "https://github.com/beancount/beancount-mode")
      (significant-other :url "https://github.com/ovistoica/significant-other.el")
      (acp :url "https://github.com/xenodium/acp.el" :branch "main")

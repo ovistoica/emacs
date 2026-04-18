@@ -1,8 +1,9 @@
 ;; claude-code-ide.el
-
+;; Using parsnips' fork with ghostel backend support (PR #190 against upstream)
+;; Once merged upstream, switch back to: :vc (:url "https://github.com/manzaltu/claude-code-ide.el")
 
 (use-package claude-code-ide
-  :vc (:url "https://github.com/manzaltu/claude-code-ide.el")
+  :vc (:url "https://github.com/parsnips/claude-code-ide.el" :branch "codex/ghostel-backend-support")
   :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
   :custom
   ;; Window configuration
@@ -23,8 +24,8 @@
   ;; MCP tools
   (claude-code-ide-mcp-allowed-tools 'auto)
 
-  ;; Terminal backend
-  (claude-code-ide-terminal-backend 'vterm)
+  ;; Terminal backend — set to 'ghostel to test, 'vterm is the default
+  (claude-code-ide-terminal-backend 'ghostel)
   (claude-code-ide-prevent-reflow-glitch t)
   :config
   (claude-code-ide-emacs-tools-setup)) ; Enable Emacs MCP tools
