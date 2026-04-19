@@ -51,7 +51,7 @@
     (border        "#53685B")  ; color8
 
     ;; ---- Foregrounds ----
-    (fg-main       "#C1C497")  ; foreground (Omarchy)
+    (fg-main       "#f1e9d2")  ; foreground (Omarchy)
     (fg-dim        "#838781")  ; bamboo light_grey (muted)
     (fg-alt        "#e2c792")  ; bamboo bg_yellow (comments)
     (cursor        "#D7C995")  ; Omarchy cursor
@@ -145,7 +145,7 @@ syntax palette.")
     (property-use    bamboo-cyan)
     (string          bamboo-green)          ; String
     (docstring       bamboo-doc-green)      ; @string.documentation
-    (comment         bamboo-bg-yellow)      ; Comment -> warm yellow, italic
+    (comment         bamboo-light-grey)      ; Comment -> warm yellow, italic
     (preprocessor    bamboo-purple)         ; PreProc = Keyword
     (operator        bamboo-light-purple)   ; Operator
     (punctuation     bamboo-light-grey)     ; Delimiter
@@ -246,7 +246,7 @@ Same format as `modus-themes-common-palette-overrides'."
 
 (modus-themes-theme
  'osaka-jade
- 'osaka-jade
+ 'omarchy-themes
  "Osaka Jade, derived from Modus Vivendi."
  'dark
  'modus-themes-vivendi-palette
