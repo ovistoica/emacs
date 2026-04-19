@@ -57,3 +57,11 @@
           pdf-outline-buffer-mode-hook
           proced-mode-hook
           tabulated-list-mode-hook)))
+
+(use-package rainbow-mode
+  :ensure t
+  :hook (prog-mode . rainbow-mode)
+  :diminish "")
+
+(provide 'setup-appearance)
+;;; setup-appearance.el ends here
