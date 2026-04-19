@@ -1,334 +1,259 @@
-;;; flexoki-light.el --- Flexoki light theme for Emacs -*- lexical-binding: t; -*-
+;;; flexoki-light-theme.el --- Flexoki light, derived from Modus  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025
-
-;; Author: Generated with Claude Code
-;; Version: 1.0.0
-;; Package-Requires: ((emacs "24.1"))
+;; Author: Ovidiu Stoica <ovidiu.stoica1094@gmail.com>
+;; URL: https://github.com/ovistoica/omarchy
+;; Version: 2.0.0
+;; Package-Requires: ((emacs "29.1") (modus-themes "4.4"))
 ;; Keywords: faces, theme
-;; URL: https://github.com/kepano/flexoki
 
 ;;; Commentary:
-
-;; Flexoki is an inky color scheme for prose and code.
-;; Designed by Steph Ango.
-;; This is the light variant.
+;;
+;; Flexoki Light for Emacs, derived from Modus Operandi Tinted via
+;; `modus-themes-theme'.  Mirrors the canonical flexoki-emacs-theme
+;; (https://codeberg.org/crmsnbleyd/flexoki-emacs-theme) face mapping
+;; so Emacs renders code the same way as the reference implementation.
+;;
+;; Flexoki palette (from Steph Ango's design, https://stephango.com/flexoki):
+;;   paper    #fffcf0   bg-main
+;;   base-50  #f2f0e5   bg-dim
+;;   base-100 #e6e4d9   ui / bg-alt
+;;   base-150 #dad8ce   ui-2
+;;   base-200 #cecdc3   ui-3 / region / show-paren bg
+;;   base-300 #b7b5ac   hl-line / tx-3
+;;   base-500 #878580   comments, muted text
+;;   base-700 #575653   fg-alt
+;;   base-800 #403e3c   fg-faint
+;;   base-900 #232726   deep text
+;;   black    #100f0f   default fg
+;;   red      #af3029   errors, diff remove
+;;   orange   #bc5215   function names
+;;   yellow   #ad8301   types, warnings, paren match
+;;   green    #66800b   builtins, diff add, success
+;;   cyan     #24837b   strings
+;;   blue     #205ea6   variables, types, diff changed
+;;   purple   #5e409d   constants, minibuffer prompt
+;;   magenta  #a02f6f   keywords
+;;
+;; Uses modus-operandi-tinted as the base since flexoki shares its paper
+;; tinted background philosophy.  Because this theme uses the Modus
+;; face-generation machinery, it covers the full Modus face catalog
+;; (magit, org, eglot, tree-sitter, corfu, vertico, etc.) without
+;; enumerating faces by hand.
 
 ;;; Code:
 
-(deftheme flexoki-light
-  "Flexoki light theme - an inky color scheme for prose and code.")
+(eval-and-compile
+  (require 'modus-themes))
 
-(let ((class '((class color) (min-colors 89)))
-      ;; Base colors
-      (paper      "#FFFCF0")
-      (base-50    "#F2F0E5")
-      (base-100   "#E6E4D9")
-      (base-150   "#DAD8CE")
-      (base-200   "#CECDC3")
-      (base-300   "#B7B5AC")
-      (base-500   "#878580")
-      (base-600   "#6F6E69")
-      (base-700   "#575653")
-      (base-800   "#403E3C")
-      (base-850   "#343331")
-      (base-900   "#282726")
-      (base-950   "#1C1B1A")
-      (black      "#100F0F")
+(defconst flexoki-light-palette-partial
+  '(;; Core surfaces
+    (bg-main       "#fffcf0")  ; paper
+    (bg-dim        "#f2f0e5")  ; base-50
+    (bg-alt        "#e6e4d9")  ; base-100 / ui
+    (bg-active     "#cecdc3")  ; base-200 / region
+    (bg-inactive   "#f2f0e5")  ; base-50
+    (border        "#dad8ce")  ; base-150
 
-      ;; Accent colors (light mode uses 600 values)
-      (red        "#AF3029")
-      (orange     "#BC5215")
-      (yellow     "#AD8301")
-      (green      "#66800B")
-      (cyan       "#24837B")
-      (blue       "#205EA6")
-      (purple     "#5E409D")
-      (magenta    "#A02F6F")
+    ;; Foregrounds
+    (fg-main       "#100f0f")  ; black
+    (fg-dim        "#878580")  ; base-500
+    (fg-alt        "#575653")  ; base-700
+    (cursor        "#100f0f")  ; black
 
-      ;; Semantic mappings for light mode
-      (bg         "#FFFCF0")  ; paper
-      (bg-2       "#F2F0E5")  ; base-50
-      (ui         "#E6E4D9")  ; base-100
-      (ui-2       "#DAD8CE")  ; base-150
-      (ui-3       "#CECDC3")  ; base-200
-      (tx         "#100F0F")  ; black
-      (tx-2       "#878580")  ; base-500
-      (tx-3       "#B7B5AC")) ; base-300
+    ;; Named Flexoki slots
+    (flex-red      "#af3029")
+    (flex-orange   "#bc5215")
+    (flex-yellow   "#ad8301")
+    (flex-green    "#66800b")
+    (flex-cyan     "#24837b")
+    (flex-blue     "#205ea6")
+    (flex-purple   "#5e409d")
+    (flex-magenta  "#a02f6f")
+    (flex-meek     "#878580")  ; base-500
+    (flex-tx-3     "#b7b5ac")  ; base-300
+    (flex-ui-2     "#dad8ce")  ; base-150
 
-  (custom-theme-set-faces
-   'flexoki-light
+    ;; Modus primary color slots — mapped to Flexoki equivalents
+    (red           "#af3029")
+    (red-warmer    "#bc5215")  ; orange
+    (red-cooler    "#af3029")
+    (red-faint     "#af3029")
+    (red-intense   "#af3029")
+    (green         "#66800b")
+    (green-warmer  "#66800b")
+    (green-cooler  "#24837b")  ; cyan
+    (green-faint   "#66800b")
+    (green-intense "#66800b")
+    (yellow        "#ad8301")
+    (yellow-warmer "#bc5215")  ; orange
+    (yellow-cooler "#ad8301")
+    (yellow-faint  "#ad8301")
+    (yellow-intense "#ad8301")
+    (blue          "#205ea6")
+    (blue-warmer   "#5e409d")  ; purple
+    (blue-cooler   "#205ea6")
+    (blue-faint    "#205ea6")
+    (blue-intense  "#205ea6")
+    (magenta       "#a02f6f")
+    (magenta-warmer "#a02f6f")
+    (magenta-cooler "#5e409d")  ; purple
+    (magenta-faint "#a02f6f")
+    (magenta-intense "#a02f6f")
+    (cyan          "#24837b")
+    (cyan-warmer   "#24837b")
+    (cyan-cooler   "#205ea6")  ; blue
+    (cyan-faint    "#24837b")
+    (cyan-intense  "#24837b")
 
-   ;; Basic faces
-   `(default ((,class (:foreground ,tx :background ,bg))))
-   `(cursor ((,class (:background ,tx))))
-   `(region ((,class (:background ,ui-2))))
-   `(highlight ((,class (:background ,ui))))
-   `(hl-line ((,class (:background ,bg-2))))
-   `(fringe ((,class (:background ,bg :foreground ,tx-3))))
-   `(vertical-border ((,class (:foreground ,ui-2))))
-   `(window-divider ((,class (:foreground ,ui-2))))
-   `(window-divider-first-pixel ((,class (:foreground ,ui-2))))
-   `(window-divider-last-pixel ((,class (:foreground ,ui-2))))
+    ;; Diff backgrounds — tuned to read on paper bg
+    (bg-added            "#dce6c4")
+    (bg-added-faint      "#e8eed6")
+    (bg-added-refine     "#c8d6a8")
+    (bg-added-intense    "#b0c48c")
+    (fg-added            "#4a5f09")
+    (fg-added-intense    "#36470a")
 
-   ;; Mode line
-   `(mode-line ((,class (:background ,ui :foreground ,tx :box (:line-width 1 :color ,ui-3)))))
-   `(mode-line-inactive ((,class (:background ,bg-2 :foreground ,tx-2 :box (:line-width 1 :color ,ui-2)))))
-   `(mode-line-buffer-id ((,class (:weight bold :foreground ,tx))))
-   `(mode-line-emphasis ((,class (:weight bold))))
+    (bg-removed          "#efcfcc")
+    (bg-removed-faint    "#f5dedb")
+    (bg-removed-refine   "#e5b5b0")
+    (bg-removed-intense  "#d59890")
+    (fg-removed          "#8a241f")
+    (fg-removed-intense  "#6b1915")
 
-   ;; Header line
-   `(header-line ((,class (:background ,bg-2 :foreground ,tx-2))))
+    (bg-changed          "#e6dfc0")
+    (bg-changed-faint    "#eee9d3")
+    (bg-changed-refine   "#d6cb94")
+    (bg-changed-intense  "#c2b26a")
+    (fg-changed          "#6d5300")
+    (fg-changed-intense  "#523e00"))
+  "Flexoki Light base colors, in Modus palette format.
+Unspecified entries are filled in by `modus-themes-generate-palette'
+from `modus-themes-operandi-tinted-palette'.")
 
-   ;; Minibuffer
-   `(minibuffer-prompt ((,class (:foreground ,blue :weight bold))))
+(defconst flexoki-light-palette-mappings-partial
+  '(;; ---- Syntax (matches crmsnbleyd/flexoki-emacs-theme) ----
+    (keyword         flex-magenta)   ; Keyword, Conditional, Include
+    (builtin         flex-green)     ; Builtin
+    (constant        flex-purple)    ; Constant, Character, Number
+    (fnname          flex-orange)    ; Function definitions
+    (fnname-call     flex-orange)    ; Function calls
+    (name            flex-orange)
+    (type            flex-yellow)    ; Type, TypeDef, Structure
+    (variable        flex-blue)      ; @variable
+    (variable-use    flex-blue)      ; usages
+    (identifier      flex-blue)      ; Identifier
+    (property        flex-blue)      ; @property, @field
+    (property-use    flex-blue)
+    (string          flex-cyan)      ; String, @string
+    (docstring       flex-cyan)      ; docstrings — muted + italic
+    (comment         flex-meek)      ; Comment — base-500, italic
+    (preprocessor    fg-main)        ; PreProc — strong black
+    (operator        fg-main)        ; Operator
+    (punctuation     fg-alt)         ; Delimiter
+    (rx-construct    flex-purple)    ; regex constructs
+    (rx-backslash    flex-purple)    ; escapes
 
-   ;; Font lock (syntax highlighting)
-   `(font-lock-builtin-face ((,class (:foreground ,purple))))
-   `(font-lock-comment-face ((,class (:foreground ,tx-3 :slant italic))))
-   `(font-lock-comment-delimiter-face ((,class (:foreground ,tx-3 :slant italic))))
-   `(font-lock-constant-face ((,class (:foreground ,purple))))
-   `(font-lock-doc-face ((,class (:foreground ,tx-3 :slant italic))))
-   `(font-lock-function-name-face ((,class (:foreground ,orange :weight bold))))
-   `(font-lock-keyword-face ((,class (:foreground ,green :weight bold))))
-   `(font-lock-preprocessor-face ((,class (:foreground ,magenta))))
-   `(font-lock-string-face ((,class (:foreground ,cyan))))
-   `(font-lock-type-face ((,class (:foreground ,blue))))
-   `(font-lock-variable-name-face ((,class (:foreground ,blue))))
-   `(font-lock-warning-face ((,class (:foreground ,red :weight bold))))
-   `(font-lock-negation-char-face ((,class (:foreground ,red))))
-   `(font-lock-regexp-grouping-construct ((,class (:foreground ,purple))))
-   `(font-lock-regexp-grouping-backslash ((,class (:foreground ,purple))))
+    ;; ---- Status / diagnostics ----
+    (err             flex-red)
+    (warning         flex-yellow)
+    (info            flex-blue)
+    (note            flex-purple)
+    (success         flex-green)
 
-   ;; Line numbers
-   `(line-number ((,class (:foreground ,tx-3 :background ,bg))))
-   `(line-number-current-line ((,class (:foreground ,tx :background ,bg-2 :weight bold))))
+    ;; ---- Mode line ----
+    (bg-mode-line-active       bg-alt)
+    (fg-mode-line-active       fg-main)
+    (border-mode-line-active   border)
+    (bg-mode-line-inactive     bg-main)
+    (fg-mode-line-inactive     fg-dim)
+    (border-mode-line-inactive bg-active)
+    (modeline-err              flex-red)
+    (modeline-warning          flex-yellow)
+    (modeline-info             flex-blue)
 
-   ;; Search
-   `(isearch ((,class (:foreground ,bg :background ,yellow :weight bold))))
-   `(isearch-fail ((,class (:foreground ,red :background ,bg-2))))
-   `(lazy-highlight ((,class (:foreground ,tx :background ,ui-2))))
+    ;; ---- Line numbers ----
+    (fg-line-number-inactive   flex-tx-3)
+    (fg-line-number-active     flex-purple)
+    (bg-line-number-inactive   bg-main)
+    (bg-line-number-active     bg-alt)
 
-   ;; Links
-   `(link ((,class (:foreground ,blue :underline t))))
-   `(link-visited ((,class (:foreground ,purple :underline t))))
+    ;; ---- Region / highlight / search ----
+    (bg-region                 bg-active)
+    (fg-region                 fg-main)
+    (bg-hl-line                bg-dim)
+    (bg-paren-match            bg-active)
+    (fg-paren-match            flex-yellow)
+    (bg-search-current         flex-yellow)
+    (bg-search-lazy            bg-active)
 
-   ;; Buttons
-   `(button ((,class (:foreground ,blue :underline t))))
+    ;; ---- Completion / popups ----
+    (bg-completion             bg-alt)
+    (bg-hover                  bg-active)
+    (bg-hover-secondary        bg-alt)
 
-   ;; Parenthesis matching
-   `(show-paren-match ((,class (:foreground ,bg :background ,green :weight bold))))
-   `(show-paren-mismatch ((,class (:foreground ,bg :background ,red :weight bold))))
+    ;; ---- Links / prompts ----
+    (link                      flex-blue)
+    (link-symbolic             flex-cyan)
+    (cursor                    fg-main)
+    (prompt                    flex-purple)
 
-   ;; Error/Warning/Success
-   `(error ((,class (:foreground ,red :weight bold))))
-   `(warning ((,class (:foreground ,yellow :weight bold))))
-   `(success ((,class (:foreground ,green :weight bold))))
+    ;; ---- Headings (match flexoki-emacs-theme outline-N) ----
+    (fg-heading-0              flex-blue)
+    (fg-heading-1              flex-blue)
+    (fg-heading-2              flex-purple)
+    (fg-heading-3              flex-orange)
+    (fg-heading-4              flex-magenta)
+    (fg-heading-5              flex-cyan)
+    (fg-heading-6              flex-green)
+    (fg-heading-7              flex-yellow)
+    (fg-heading-8              flex-red))
+  "Semantic slot mappings for Flexoki Light.
+Mirrors the canonical flexoki-emacs-theme face specification so Emacs
+renders source code consistently with the reference implementation.")
 
-   ;; Compilation
-   `(compilation-info ((,class (:foreground ,green))))
-   `(compilation-warning ((,class (:foreground ,yellow))))
-   `(compilation-error ((,class (:foreground ,red))))
-   `(compilation-line-number ((,class (:foreground ,tx-2))))
-   `(compilation-column-number ((,class (:foreground ,tx-2))))
+(defconst flexoki-light-palette
+  (modus-themes-generate-palette
+   flexoki-light-palette-partial
+   nil                                      ; cool-or-warm — infer
+   modus-themes-operandi-tinted-palette     ; tinted paper base
+   flexoki-light-palette-mappings-partial)
+  "Complete Flexoki Light palette for use with `modus-themes-theme'.")
 
-   ;; Dired
-   `(dired-directory ((,class (:foreground ,blue :weight bold))))
-   `(dired-symlink ((,class (:foreground ,cyan))))
-   `(dired-flagged ((,class (:foreground ,red :weight bold))))
-   `(dired-marked ((,class (:foreground ,yellow :weight bold))))
-   `(dired-header ((,class (:foreground ,orange :weight bold))))
+(defcustom flexoki-light-palette-overrides nil
+  "User-level palette overrides for the Flexoki Light theme.
+Same format as `modus-themes-common-palette-overrides'."
+  :type '(repeat (list symbol (choice symbol string)))
+  :group 'modus-themes)
 
-   ;; Org mode
-   `(org-level-1 ((,class (:foreground ,orange :weight bold :height 1.3))))
-   `(org-level-2 ((,class (:foreground ,blue :weight bold :height 1.2))))
-   `(org-level-3 ((,class (:foreground ,green :weight bold :height 1.1))))
-   `(org-level-4 ((,class (:foreground ,purple :weight bold))))
-   `(org-level-5 ((,class (:foreground ,cyan :weight bold))))
-   `(org-level-6 ((,class (:foreground ,magenta :weight bold))))
-   `(org-level-7 ((,class (:foreground ,yellow :weight bold))))
-   `(org-level-8 ((,class (:foreground ,red :weight bold))))
-   `(org-document-title ((,class (:foreground ,tx :weight bold :height 1.5))))
-   `(org-document-info ((,class (:foreground ,tx-2))))
-   `(org-document-info-keyword ((,class (:foreground ,tx-3))))
-   `(org-meta-line ((,class (:foreground ,tx-3))))
-   `(org-link ((,class (:foreground ,blue :underline t))))
-   `(org-todo ((,class (:foreground ,red :weight bold))))
-   `(org-done ((,class (:foreground ,green :weight bold))))
-   `(org-date ((,class (:foreground ,purple))))
-   `(org-tag ((,class (:foreground ,tx-2 :weight normal))))
-   `(org-block ((,class (:background ,bg-2 :foreground ,tx :extend t))))
-   `(org-block-begin-line ((,class (:background ,ui :foreground ,tx-3 :extend t))))
-   `(org-block-end-line ((,class (:background ,ui :foreground ,tx-3 :extend t))))
-   `(org-code ((,class (:foreground ,orange :background ,bg-2))))
-   `(org-verbatim ((,class (:foreground ,cyan :background ,bg-2))))
-   `(org-special-keyword ((,class (:foreground ,tx-3))))
-   `(org-table ((,class (:foreground ,blue))))
+;; Extra faces: Flexoki italicizes only comments/docstrings (not
+;; variables).  Modus's `modus-themes-italic-constructs' makes
+;; `modus-themes-slant' italic, which then inherits into variable
+;; faces via `help-argument-name' / `font-lock-variable-*'.  Override
+;; just the variable faces back to upright.
+(defvar flexoki-light-custom-faces
+  '(`(font-lock-variable-name-face ((,c :foreground ,flex-blue :slant normal)))
+    `(font-lock-variable-use-face  ((,c :foreground ,flex-blue :slant normal)))
+    `(help-argument-name           ((,c :foreground ,flex-blue :slant normal))))
+  "Additional face specs layered on top of the Modus-generated faces.")
 
-   ;; Markdown
-   `(markdown-header-face-1 ((,class (:foreground ,orange :weight bold :height 1.3))))
-   `(markdown-header-face-2 ((,class (:foreground ,blue :weight bold :height 1.2))))
-   `(markdown-header-face-3 ((,class (:foreground ,green :weight bold :height 1.1))))
-   `(markdown-header-face-4 ((,class (:foreground ,purple :weight bold))))
-   `(markdown-header-face-5 ((,class (:foreground ,cyan :weight bold))))
-   `(markdown-header-face-6 ((,class (:foreground ,magenta :weight bold))))
-   `(markdown-code-face ((,class (:foreground ,orange :background ,bg-2))))
-   `(markdown-inline-code-face ((,class (:foreground ,orange :background ,bg-2))))
-   `(markdown-pre-face ((,class (:foreground ,tx :background ,bg-2))))
-   `(markdown-link-face ((,class (:foreground ,blue :underline t))))
-   `(markdown-url-face ((,class (:foreground ,cyan :underline t))))
-   `(markdown-list-face ((,class (:foreground ,green))))
+(defvar flexoki-light-custom-variables nil
+  "Custom-variable specs layered on top of Modus defaults.")
 
-   ;; Company
-   `(company-tooltip ((,class (:background ,ui :foreground ,tx))))
-   `(company-tooltip-selection ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-   `(company-tooltip-common ((,class (:foreground ,blue :weight bold))))
-   `(company-tooltip-common-selection ((,class (:foreground ,blue :weight bold))))
-   `(company-tooltip-annotation ((,class (:foreground ,tx-2))))
-   `(company-tooltip-annotation-selection ((,class (:foreground ,tx-2))))
-   `(company-scrollbar-bg ((,class (:background ,ui))))
-   `(company-scrollbar-fg ((,class (:background ,ui-3))))
-   `(company-preview ((,class (:foreground ,tx-2 :background ,bg-2))))
-   `(company-preview-common ((,class (:foreground ,blue :background ,bg-2))))
-
-   ;; Ivy/Counsel
-   `(ivy-current-match ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-   `(ivy-minibuffer-match-face-1 ((,class (:foreground ,tx-2))))
-   `(ivy-minibuffer-match-face-2 ((,class (:foreground ,blue :weight bold))))
-   `(ivy-minibuffer-match-face-3 ((,class (:foreground ,green :weight bold))))
-   `(ivy-minibuffer-match-face-4 ((,class (:foreground ,yellow :weight bold))))
-   `(ivy-confirm-face ((,class (:foreground ,green))))
-   `(ivy-match-required-face ((,class (:foreground ,red))))
-
-   ;; Helm
-   `(helm-header ((,class (:background ,bg-2 :foreground ,tx))))
-   `(helm-source-header ((,class (:background ,ui :foreground ,orange :weight bold :height 1.1))))
-   `(helm-selection ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-   `(helm-match ((,class (:foreground ,blue :weight bold))))
-   `(helm-candidate-number ((,class (:foreground ,tx-2))))
-
-   ;; Magit
-   `(magit-section-heading ((,class (:foreground ,orange :weight bold))))
-   `(magit-section-highlight ((,class (:background ,bg-2))))
-   `(magit-branch-local ((,class (:foreground ,blue :weight bold))))
-   `(magit-branch-remote ((,class (:foreground ,green :weight bold))))
-   `(magit-tag ((,class (:foreground ,yellow))))
-   `(magit-hash ((,class (:foreground ,tx-2))))
-   `(magit-diff-file-heading ((,class (:foreground ,tx :weight bold))))
-   `(magit-diff-file-heading-highlight ((,class (:background ,bg-2 :foreground ,tx :weight bold))))
-   `(magit-diff-hunk-heading ((,class (:background ,ui :foreground ,tx-2))))
-   `(magit-diff-hunk-heading-highlight ((,class (:background ,ui-2 :foreground ,tx))))
-   `(magit-diff-context ((,class (:foreground ,tx-2))))
-   `(magit-diff-context-highlight ((,class (:background ,bg-2 :foreground ,tx))))
-   `(magit-diff-added ((,class (:foreground ,green :background ,bg))))
-   `(magit-diff-added-highlight ((,class (:foreground ,green :background ,bg-2))))
-   `(magit-diff-removed ((,class (:foreground ,red :background ,bg))))
-   `(magit-diff-removed-highlight ((,class (:foreground ,red :background ,bg-2))))
-   `(magit-diffstat-added ((,class (:foreground ,green))))
-   `(magit-diffstat-removed ((,class (:foreground ,red))))
-
-   ;; Diff mode
-   `(diff-added ((,class (:foreground ,green :background ,bg))))
-   `(diff-removed ((,class (:foreground ,red :background ,bg))))
-   `(diff-changed ((,class (:foreground ,yellow :background ,bg))))
-   `(diff-header ((,class (:background ,ui :foreground ,tx))))
-   `(diff-file-header ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-   `(diff-hunk-header ((,class (:background ,ui :foreground ,tx-2))))
-
-   ;; Flycheck
-   `(flycheck-error ((,class (:underline (:style wave :color ,red)))))
-   `(flycheck-warning ((,class (:underline (:style wave :color ,yellow)))))
-   `(flycheck-info ((,class (:underline (:style wave :color ,blue)))))
-
-   ;; Flymake
-   `(flymake-error ((,class (:underline (:style wave :color ,red)))))
-   `(flymake-warning ((,class (:underline (:style wave :color ,yellow)))))
-   `(flymake-note ((,class (:underline (:style wave :color ,blue)))))
-
-   ;; LSP
-   `(lsp-face-highlight-textual ((,class (:background ,ui-2))))
-   `(lsp-face-highlight-read ((,class (:background ,ui-2))))
-   `(lsp-face-highlight-write ((,class (:background ,ui-2 :weight bold))))
-
-   ;; Tree-sitter
-   `(tree-sitter-hl-face:function ((,class (:foreground ,orange))))
-   `(tree-sitter-hl-face:function.call ((,class (:foreground ,orange))))
-   `(tree-sitter-hl-face:method ((,class (:foreground ,orange))))
-   `(tree-sitter-hl-face:method.call ((,class (:foreground ,orange))))
-   `(tree-sitter-hl-face:variable ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:variable.parameter ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:property ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:keyword ((,class (:foreground ,green :weight bold))))
-   `(tree-sitter-hl-face:string ((,class (:foreground ,cyan))))
-   `(tree-sitter-hl-face:number ((,class (:foreground ,purple))))
-   `(tree-sitter-hl-face:constant ((,class (:foreground ,purple))))
-   `(tree-sitter-hl-face:type ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:comment ((,class (:foreground ,tx-3 :slant italic))))
-
-   ;; Which-key
-   `(which-key-key-face ((,class (:foreground ,blue :weight bold))))
-   `(which-key-separator-face ((,class (:foreground ,tx-3))))
-   `(which-key-command-description-face ((,class (:foreground ,tx))))
-   `(which-key-group-description-face ((,class (:foreground ,orange))))
-
-   ;; Vertico
-   `(vertico-current ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-
-   ;; Orderless
-   `(orderless-match-face-0 ((,class (:foreground ,blue :weight bold))))
-   `(orderless-match-face-1 ((,class (:foreground ,green :weight bold))))
-   `(orderless-match-face-2 ((,class (:foreground ,yellow :weight bold))))
-   `(orderless-match-face-3 ((,class (:foreground ,orange :weight bold))))
-
-   ;; Corfu
-   `(corfu-default ((,class (:background ,ui :foreground ,tx))))
-   `(corfu-current ((,class (:background ,ui-2 :foreground ,tx :weight bold))))
-   `(corfu-bar ((,class (:background ,ui-3))))
-   `(corfu-border ((,class (:background ,ui-2))))
-
-   ;; Marginalia
-   `(marginalia-key ((,class (:foreground ,blue))))
-   `(marginalia-documentation ((,class (:foreground ,tx-2))))
-   `(marginalia-file-name ((,class (:foreground ,tx))))
-
-   ;; Rainbow delimiters
-   `(rainbow-delimiters-depth-1-face ((,class (:foreground ,blue))))
-   `(rainbow-delimiters-depth-2-face ((,class (:foreground ,green))))
-   `(rainbow-delimiters-depth-3-face ((,class (:foreground ,orange))))
-   `(rainbow-delimiters-depth-4-face ((,class (:foreground ,purple))))
-   `(rainbow-delimiters-depth-5-face ((,class (:foreground ,cyan))))
-   `(rainbow-delimiters-depth-6-face ((,class (:foreground ,magenta))))
-   `(rainbow-delimiters-depth-7-face ((,class (:foreground ,yellow))))
-   `(rainbow-delimiters-depth-8-face ((,class (:foreground ,red))))
-   `(rainbow-delimiters-depth-9-face ((,class (:foreground ,blue))))
-   `(rainbow-delimiters-unmatched-face ((,class (:foreground ,red :weight bold))))
-
-   ;; Clojure specific
-   `(clojure-keyword-face ((,class (:foreground ,cyan))))
-
-   ;; CIDER
-   `(cider-result-overlay-face ((,class (:background ,ui :foreground ,tx))))
-   `(cider-repl-prompt-face ((,class (:foreground ,blue :weight bold))))
-   `(cider-repl-stdout-face ((,class (:foreground ,tx))))
-   `(cider-repl-stderr-face ((,class (:foreground ,red))))
-   `(cider-test-failure-face ((,class (:foreground ,red :weight bold))))
-   `(cider-test-success-face ((,class (:foreground ,green :weight bold))))
-
-   ;; Terminal
-   `(term-color-black ((,class (:foreground ,black :background ,black))))
-   `(term-color-red ((,class (:foreground ,red :background ,red))))
-   `(term-color-green ((,class (:foreground ,green :background ,green))))
-   `(term-color-yellow ((,class (:foreground ,yellow :background ,yellow))))
-   `(term-color-blue ((,class (:foreground ,blue :background ,blue))))
-   `(term-color-magenta ((,class (:foreground ,magenta :background ,magenta))))
-   `(term-color-cyan ((,class (:foreground ,cyan :background ,cyan))))
-   `(term-color-white ((,class (:foreground ,base-200 :background ,base-200))))))
+(modus-themes-theme
+ 'flexoki-light
+ 'omarchy-themes
+ "Flexoki Light, derived from Modus Operandi Tinted."
+ 'light
+ 'modus-themes-operandi-tinted-palette
+ 'flexoki-light-palette
+ 'flexoki-light-palette-overrides
+ 'flexoki-light-custom-faces
+ 'flexoki-light-custom-variables)
 
 ;;;###autoload
 (when load-file-name
   (add-to-list 'custom-theme-load-path
                (file-name-as-directory (file-name-directory load-file-name))))
 
-(provide-theme 'flexoki-light)
-
-;;; flexoki-light.el ends here
+(provide 'flexoki-light-theme)
+;;; flexoki-light-theme.el ends here

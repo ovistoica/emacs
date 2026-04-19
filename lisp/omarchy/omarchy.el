@@ -58,7 +58,7 @@ Set this to a theme that is guaranteed to be loadable in your config."
     ("Catppuccin Latte" . (lambda () (setq catppuccin-flavor 'latte)
                             (omarchy--raw-load-theme 'catppuccin)))
     ("Everforest"       . everforest)
-    ("Flexoki Light"    . modus-operandi-tinted)
+    ("Flexoki Light"    . flexoki-light)
     ("Gruvbox"          . doom-gruvbox)
     ("Kanagawa"         . kanagawa)
     ("Matte Black"      . matte-black)
