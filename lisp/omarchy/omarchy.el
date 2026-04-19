@@ -105,9 +105,13 @@ Returns nil if PROGRAM is not on PATH."
             (unless (string-empty-p out) out)))))))
 
 (defun omarchy--run-async (program &rest args)
-  "Run PROGRAM with ARGS in the background.  Message and no-op if missing."
+  "Run PROGRAM with ARGS fully detached from Emacs.
+Uses a `setsid'-wrapped shell so child processes the script
+backgrounds (e.g. waybar) survive after the script exits."
   (if (executable-find program)
-      (apply #'start-process program nil program args)
+      (let ((cmd (mapconcat #'shell-quote-argument (cons program args) " ")))
+        (call-process "setsid" nil 0 nil "sh" "-c"
+                      (concat cmd " </dev/null >/dev/null 2>&1 &")))
     (message "omarchy: %s not found on PATH" program)))
 
 ;;; State queries
