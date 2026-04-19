@@ -8,7 +8,12 @@
 (use-package modus-themes
   :ensure t
   :config
-  (setq modus-themes-disable-other-themes t))
+  (setq modus-themes-disable-other-themes t
+
+        ;; Must be set before `modus-themes-theme' runs: `modus-themes--slant'
+        ;; reads this variable at face-spec-evaluation time to decide whether
+        ;; comments/docstrings get italic.  Bamboo italicizes comments.
+        modus-themes-italic-constructs t))
 
 (use-package doom-themes
   :ensure t)

@@ -222,23 +222,15 @@ Same format as `modus-themes-common-palette-overrides'."
 (defvar rose-pine-custom-faces
   '(`(font-lock-variable-name-face ((,c :foreground ,fg-main :slant normal)))
     `(font-lock-variable-use-face  ((,c :foreground ,fg-main :slant normal)))
-    `(help-argument-name            ((,c :foreground ,fg-main :slant normal)))
-    `(org-level-1        ((,c :inherit default :weight bold :height 1.3)))
-    `(org-level-2        ((,c :inherit default :weight bold :height 1.2)))
-    `(org-level-3        ((,c :inherit default :weight bold :height 1.1)))
-    `(org-document-title ((,c :inherit default :weight bold :height 1.5))))
+    `(help-argument-name            ((,c :foreground ,fg-main :slant normal))))
   "Additional face specs layered on top of the Modus-generated faces.")
 
 (defvar rose-pine-custom-variables nil
   "Custom-variable specs layered on top of Modus defaults.")
 
-;; Must be set before `modus-themes-theme' runs: `modus-themes--slant'
-;; reads this variable at face-spec-evaluation time.
-(setq modus-themes-italic-constructs t)
-
 (modus-themes-theme
  'rose-pine
- 'rose-pine
+ 'omarchy-themes
  "Rose Pine Dawn, derived from Modus Operandi."
  'light
  'modus-themes-operandi-palette
