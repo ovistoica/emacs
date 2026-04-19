@@ -1,5 +1,10 @@
-;; vterm is a performant terminal emulator, which is better suited for long
-;; running processes like claude code
+;;; setup-terminal.el --- Terminal emulator configuration -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;;; For most usecases ghostel should be chosen as it is more performant
+
+;;; Code:
 
 (use-package vterm
   :ensure vterm
@@ -15,7 +20,13 @@
   (unbind-key "M-&" vterm-mode-map))
 
 (use-package ghostel
-  :ensure t)
+  :ensure t
+  :config
+  (unbind-key "S-<up>"    ghostel-mode-map)
+  (unbind-key "S-<down>"  ghostel-mode-map)
+  (unbind-key "S-<left>"  ghostel-mode-map)
+  (unbind-key "S-<right>" ghostel-mode-map))
 
 
 (provide 'setup-terminal)
+;;; setup-terminal.el ends here
