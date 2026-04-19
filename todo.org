@@ -8,3 +8,6 @@
 * TODO Add denote for articles/blogs/wiki - doing book reviews
 
 * TODO Add config for typescript with treesitter
+
+* DONE Add rainbow-mode for color highlighting
+CLOSED: [2026-04-19 Sun 14:57]

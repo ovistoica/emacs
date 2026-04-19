@@ -50,9 +50,9 @@
               mise modus-themes move-text neil nerd-icons-completion
               nerd-icons-dired notmuch-indicator ol-notmuch olivetti orderless
               org-present ox-gfm ox-slack perspective pi-coding-agent popper
-              prodigy projectile pulsar significant-other smartparens
-              smtpmail-multi terraform-mode time-zones undo-fu vertico
-              visual-fill-column vterm vundo wgrep-deadgrep
+              prodigy projectile pulsar rainbow-mode significant-other
+              smartparens smtpmail-multi terraform-mode time-zones undo-fu
+              vertico visual-fill-column vterm vundo wgrep-deadgrep
               whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
    '((claude-code-ide :vc-backend Git :url
