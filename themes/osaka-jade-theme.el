@@ -1,329 +1,264 @@
-;;; osaka-jade-theme.el --- Osaka Jade theme for Emacs -*- lexical-binding: t; -*-
+;;; osaka-jade-theme.el --- Osaka Jade, derived from Modus  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025
-
-;; Author: Generated with Claude Code
-;; Version: 1.0.0
-;; Package-Requires: ((emacs "24.1"))
-;; Keywords: faces, theme
+;; Author: Ovidiu Stoica <ovidiu.stoica1094@gmail.com>
 ;; URL: https://github.com/ovistoica/omarchy
+;; Version: 2.0.0
+;; Package-Requires: ((emacs "29.1") (modus-themes "4.4"))
+;; Keywords: faces, theme
 
 ;;; Commentary:
-
-;; Osaka Jade is a dark, soothing theme with jade and green tones.
-;; Based on the osaka-jade color scheme.
+;;
+;; Osaka Jade for Emacs, derived from Modus Vivendi via
+;; `modus-themes-theme'.  Mirrors the Neovim `bamboo.nvim' (vulgaris)
+;; highlight mapping that Omarchy uses as the Osaka Jade Neovim theme,
+;; while keeping the terminal's bg/fg from Omarchy's colors.toml so
+;; Emacs, the terminal, and other system surfaces render consistently.
+;;
+;; Key palette correspondences (bamboo vulgaris):
+;;   fg           #C1C497   default foreground (from Omarchy)
+;;   bg           #111c18   default background (from Omarchy)
+;;   bg_yellow    #e2c792   comments
+;;   green        #8fb573   strings
+;;   orange       #ff9966   constants, numbers, booleans
+;;   yellow       #dbb651   types, constructors
+;;   blue         #57a5e5   functions (def + call)
+;;   cyan         #70c2be   @variable.member, @property
+;;   purple       #aaaaff   keywords, conditionals, statements
+;;   bright_purple #df73ff  macros
+;;   red          #e75a7c   identifiers, @variable.builtin, errors
+;;   coral        #f08080   @variable.parameter, @string.escape
+;;   light_grey   #838781   delimiters, punctuation
+;;   light_blue   #96c7ef   @module / namespaces
+;;   diff_add     #40531b   diff backgrounds
+;;   diff_delete  #893f45
+;;
+;; Because this theme uses the Modus face-generation machinery, it
+;; covers the full Modus face catalog (magit, org, eglot, tree-sitter,
+;; corfu, vertico, etc.) without enumerating faces by hand.
 
 ;;; Code:
 
-(deftheme osaka-jade
-  "Osaka Jade theme - a dark theme with jade and green tones.")
+(eval-and-compile
+  (require 'modus-themes))
 
-(let ((class '((class color) (min-colors 89)))
-      ;; Base colors
-      (bg         "#111C18")
-      (bg-alt     "#1a2822")
-      (bg-hl      "#23372B")
-      (fg         "#C1C497")
-      (fg-alt     "#9ba082")
-      (fg-dim     "#6d7a65")
+(defconst osaka-jade-palette-partial
+  '(;; ---- Core surfaces (from Omarchy colors.toml) ----
+    (bg-main       "#111c18")  ; background
+    (bg-dim        "#1a2822")  ; slightly lifted
+    (bg-alt        "#23372B")  ; color0 / selection-like
+    (bg-active     "#2a3f35")  ; borders / selected
+    (bg-inactive   "#141f1b")  ; deeper
+    (border        "#53685B")  ; color8
 
-      ;; UI colors
-      (cursor     "#D7C995")
-      (selection  "#C1C497")
-      (line       "#1f2e28")
-      (border     "#2a3f35")
-      (ui         "#23372B")
-      (ui-alt     "#53685B")
+    ;; ---- Foregrounds ----
+    (fg-main       "#C1C497")  ; foreground (Omarchy)
+    (fg-dim        "#838781")  ; bamboo light_grey (muted)
+    (fg-alt        "#e2c792")  ; bamboo bg_yellow (comments)
+    (cursor        "#D7C995")  ; Omarchy cursor
 
-      ;; Accent colors
-      (red        "#FF5345")
-      (red-dim    "#DB9F9C")
-      (green      "#549E6A")
-      (green-br   "#63b07a")
-      (yellow     "#E5C736")
-      (yellow-dim "#459451")
-      (blue       "#509475")
-      (blue-br    "#ACD4CF")
-      (magenta    "#D2689C")
-      (cyan       "#2DD5B7")
-      (cyan-dim   "#8CD3CB")
-      (teal       "#75BBB3")
-      (white      "#F6F5DD")
-      (white-br   "#9EEBB3"))
+    ;; ---- Named bamboo slots ----
+    (bamboo-green         "#8fb573")
+    (bamboo-orange        "#ff9966")
+    (bamboo-yellow        "#dbb651")
+    (bamboo-blue          "#57a5e5")
+    (bamboo-light-blue    "#96c7ef")
+    (bamboo-cyan          "#70c2be")
+    (bamboo-purple        "#aaaaff")
+    (bamboo-bright-purple "#df73ff")
+    (bamboo-light-purple  "#c9bde0")  ; blend(purple, fg, 0.375) — operator color
+    (bamboo-red           "#e75a7c")
+    (bamboo-coral         "#f08080")
+    (bamboo-light-grey    "#838781")
+    (bamboo-bg-yellow     "#e2c792")
+    (bamboo-doc-green     "#b1cc99")  ; blend(green, white, 0.25) — @string.documentation
 
-  (custom-theme-set-faces
-   'osaka-jade
+    ;; ---- Modus primary color slots ----
+    (red           "#e75a7c")  ; bamboo red
+    (red-warmer    "#f08080")  ; coral
+    (red-cooler    "#db9f9c")
+    (red-faint     "#db9f9c")
+    (red-intense   "#FF5345")
+    (green         "#8fb573")  ; bamboo green (strings)
+    (green-warmer  "#63b07a")
+    (green-cooler  "#70c2be")  ; bamboo cyan
+    (green-faint   "#549e6a")
+    (green-intense "#9eebb3")
+    (yellow        "#dbb651")  ; bamboo yellow
+    (yellow-warmer "#ff9966")  ; bamboo orange
+    (yellow-cooler "#e2c792")  ; bg_yellow
+    (yellow-faint  "#E5C736")
+    (yellow-intense "#dbb651")
+    (blue          "#57a5e5")  ; bamboo blue
+    (blue-warmer   "#aaaaff")  ; bamboo purple
+    (blue-cooler   "#96c7ef")  ; light_blue
+    (blue-faint    "#75bbb3")
+    (blue-intense  "#57a5e5")
+    (magenta       "#aaaaff")  ; purple (keywords use magenta slot in some specs)
+    (magenta-warmer "#df73ff") ; bright_purple
+    (magenta-cooler "#aaaaff")
+    (magenta-faint "#D2689C")
+    (magenta-intense "#df73ff")
+    (cyan          "#70c2be")  ; bamboo cyan
+    (cyan-warmer   "#ACD4CF")
+    (cyan-cooler   "#8CD3CB")
+    (cyan-faint    "#70c2be")
+    (cyan-intense  "#2DD5B7")
 
-   ;; Basic faces
-   `(default ((,class (:foreground ,fg :background ,bg))))
-   `(cursor ((,class (:background ,cursor))))
-   `(region ((,class (:background ,ui :foreground ,selection))))
-   `(highlight ((,class (:background ,bg-hl))))
-   `(hl-line ((,class (:background ,line))))
-   `(fringe ((,class (:background ,bg :foreground ,ui-alt))))
-   `(vertical-border ((,class (:foreground ,border))))
-   `(window-divider ((,class (:foreground ,border))))
-   `(window-divider-first-pixel ((,class (:foreground ,border))))
-   `(window-divider-last-pixel ((,class (:foreground ,border))))
+    ;; ---- Diff backgrounds (bamboo vulgaris) ----
+    (bg-added            "#40531b")
+    (bg-added-faint      "#2f3e14")
+    (bg-added-refine     "#557128")
+    (bg-added-intense    "#6b8e32")
+    (fg-added            "#b1cc99")
+    (fg-added-intense    "#c8dcae")
 
-   ;; Mode line
-   `(mode-line ((,class (:background ,ui :foreground ,fg :box (:line-width 1 :color ,border)))))
-   `(mode-line-inactive ((,class (:background ,bg-alt :foreground ,fg-dim :box (:line-width 1 :color ,bg-hl)))))
-   `(mode-line-buffer-id ((,class (:weight bold :foreground ,cyan))))
-   `(mode-line-emphasis ((,class (:weight bold :foreground ,green-br))))
+    (bg-removed          "#893f45")
+    (bg-removed-faint    "#5a2a30")
+    (bg-removed-refine   "#a5545a")
+    (bg-removed-intense  "#c26870")
+    (fg-removed          "#f5b8bc")
+    (fg-removed-intense  "#ffd1d5")
 
-   ;; Header line
-   `(header-line ((,class (:background ,bg-alt :foreground ,fg-alt))))
+    (bg-changed          "#2a3a57")
+    (bg-changed-faint    "#1f2a42")
+    (bg-changed-refine   "#3a4a67")
+    (bg-changed-intense  "#4a5b7c")
+    (fg-changed          "#b3c4df")
+    (fg-changed-intense  "#d0deef"))
+  "Osaka Jade base colors, in Modus palette format.
+Blends Omarchy's colors.toml surfaces with bamboo.nvim's vulgaris
+syntax palette.")
 
-   ;; Minibuffer
-   `(minibuffer-prompt ((,class (:foreground ,cyan :weight bold))))
+(defconst osaka-jade-palette-mappings-partial
+  '(;; ---- Syntax (matches bamboo.nvim vulgaris) ----
+    (keyword         bamboo-purple)         ; Keyword, Conditional, Statement, PreProc, Include
+    (builtin         bamboo-bright-purple)  ; Macro, @function.macro
+    (constant        bamboo-orange)         ; Constant, Number, Boolean, Character, Float
+    (fnname          bamboo-blue)           ; Function (def)
+    (fnname-call     bamboo-blue)           ; Function calls
+    (name            bamboo-blue)
+    (type            bamboo-yellow)         ; Type, @constructor, @type
+    (variable        fg-main)               ; @variable -> fg
+    (variable-use    fg-main)
+    (identifier      bamboo-red)            ; Identifier, @variable.builtin
+    (property        bamboo-cyan)           ; @property, @variable.member, @field
+    (property-use    bamboo-cyan)
+    (string          bamboo-green)          ; String
+    (docstring       bamboo-doc-green)      ; @string.documentation
+    (comment         bamboo-bg-yellow)      ; Comment -> warm yellow, italic
+    (preprocessor    bamboo-purple)         ; PreProc = Keyword
+    (operator        bamboo-light-purple)   ; Operator
+    (punctuation     bamboo-light-grey)     ; Delimiter
+    (rx-construct    bamboo-bright-purple)
+    (rx-backslash    bamboo-coral)          ; @string.escape
 
-   ;; Font lock (syntax highlighting)
-   `(font-lock-builtin-face ((,class (:foreground ,blue-br))))
-   `(font-lock-comment-face ((,class (:foreground ,fg-dim :slant italic))))
-   `(font-lock-comment-delimiter-face ((,class (:foreground ,fg-dim :slant italic))))
-   `(font-lock-constant-face ((,class (:foreground ,magenta))))
-   `(font-lock-doc-face ((,class (:foreground ,cyan-dim :slant italic))))
-   `(font-lock-function-name-face ((,class (:foreground ,yellow :weight bold))))
-   `(font-lock-keyword-face ((,class (:foreground ,green-br :weight bold))))
-   `(font-lock-preprocessor-face ((,class (:foreground ,teal))))
-   `(font-lock-string-face ((,class (:foreground ,cyan-dim))))
-   `(font-lock-type-face ((,class (:foreground ,blue))))
-   `(font-lock-variable-name-face ((,class (:foreground ,blue-br))))
-   `(font-lock-warning-face ((,class (:foreground ,red :weight bold))))
-   `(font-lock-negation-char-face ((,class (:foreground ,red))))
-   `(font-lock-regexp-grouping-construct ((,class (:foreground ,magenta))))
-   `(font-lock-regexp-grouping-backslash ((,class (:foreground ,magenta))))
+    ;; ---- Status / diagnostics ----
+    (err             bamboo-red)
+    (warning         bamboo-yellow)
+    (info            bamboo-blue)
+    (note            bamboo-cyan)
+    (success         bamboo-green)
 
-   ;; Line numbers
-   `(line-number ((,class (:foreground ,ui-alt :background ,bg))))
-   `(line-number-current-line ((,class (:foreground ,fg :background ,line :weight bold))))
+    ;; ---- Mode line ----
+    (bg-mode-line-active       bg-alt)
+    (fg-mode-line-active       fg-main)
+    (border-mode-line-active   bg-active)
+    (bg-mode-line-inactive     bg-main)
+    (fg-mode-line-inactive     fg-dim)
+    (border-mode-line-inactive bg-dim)
+    (modeline-err              bamboo-red)
+    (modeline-warning          bamboo-yellow)
+    (modeline-info             bamboo-blue)
 
-   ;; Search
-   `(isearch ((,class (:foreground ,bg :background ,yellow :weight bold))))
-   `(isearch-fail ((,class (:foreground ,red :background ,bg-alt))))
-   `(lazy-highlight ((,class (:foreground ,bg :background ,yellow-dim))))
+    ;; ---- Line numbers ----
+    (fg-line-number-inactive   border)
+    (fg-line-number-active     fg-main)
+    (bg-line-number-inactive   bg-main)
+    (bg-line-number-active     bg-alt)
 
-   ;; Links
-   `(link ((,class (:foreground ,cyan :underline t))))
-   `(link-visited ((,class (:foreground ,magenta :underline t))))
+    ;; ---- Region / highlight / search ----
+    (bg-region                 bg-active)
+    (fg-region                 fg-main)
+    (bg-hl-line                bg-dim)
+    (bg-paren-match            bg-active)
+    (fg-paren-match            bamboo-orange)
+    (bg-search-current         bamboo-bg-yellow)
+    (bg-search-lazy            bg-active)
 
-   ;; Buttons
-   `(button ((,class (:foreground ,cyan :underline t))))
+    ;; ---- Completion / popups ----
+    (bg-completion             bg-alt)
+    (bg-hover                  bg-active)
+    (bg-hover-secondary        bg-alt)
 
-   ;; Parenthesis matching
-   `(show-paren-match ((,class (:foreground ,bg :background ,green-br :weight bold))))
-   `(show-paren-mismatch ((,class (:foreground ,bg :background ,red :weight bold))))
+    ;; ---- Links / prompts ----
+    (link                      bamboo-blue)
+    (link-symbolic             bamboo-cyan)
+    (cursor                    fg-main)
+    (prompt                    bamboo-cyan)
 
-   ;; Error/Warning/Success
-   `(error ((,class (:foreground ,red :weight bold))))
-   `(warning ((,class (:foreground ,yellow :weight bold))))
-   `(success ((,class (:foreground ,green-br :weight bold))))
+    ;; ---- Headings (bamboo uses cyan for Title) ----
+    (fg-heading-0              bamboo-cyan)
+    (fg-heading-1              bamboo-cyan)
+    (fg-heading-2              bamboo-blue)
+    (fg-heading-3              bamboo-green)
+    (fg-heading-4              bamboo-yellow)
+    (fg-heading-5              bamboo-purple)
+    (fg-heading-6              bamboo-orange)
+    (fg-heading-7              bamboo-red)
+    (fg-heading-8              bamboo-coral))
+  "Semantic slot mappings for Osaka Jade.
+Mirrors the bamboo.nvim vulgaris variant that Omarchy uses for
+Neovim, so both editors render the same code near-identically.")
 
-   ;; Compilation
-   `(compilation-info ((,class (:foreground ,green-br))))
-   `(compilation-warning ((,class (:foreground ,yellow))))
-   `(compilation-error ((,class (:foreground ,red))))
-   `(compilation-line-number ((,class (:foreground ,fg-alt))))
-   `(compilation-column-number ((,class (:foreground ,fg-alt))))
+(defconst osaka-jade-palette
+  (modus-themes-generate-palette
+   osaka-jade-palette-partial
+   nil                              ; cool-or-warm — infer from bg-main
+   modus-themes-vivendi-palette     ; dark base for unmapped slots
+   osaka-jade-palette-mappings-partial)
+  "Complete Osaka Jade palette for use with `modus-themes-theme'.")
 
-   ;; Dired
-   `(dired-directory ((,class (:foreground ,blue-br :weight bold))))
-   `(dired-symlink ((,class (:foreground ,cyan))))
-   `(dired-flagged ((,class (:foreground ,red :weight bold))))
-   `(dired-marked ((,class (:foreground ,yellow :weight bold))))
-   `(dired-header ((,class (:foreground ,green-br :weight bold))))
+(defcustom osaka-jade-palette-overrides nil
+  "User-level palette overrides for the Osaka Jade theme.
+Same format as `modus-themes-common-palette-overrides'."
+  :type '(repeat (list symbol (choice symbol string)))
+  :group 'modus-themes)
 
-   ;; Org mode
-   `(org-level-1 ((,class (:foreground ,cyan :weight bold :height 1.3))))
-   `(org-level-2 ((,class (:foreground ,green-br :weight bold :height 1.2))))
-   `(org-level-3 ((,class (:foreground ,yellow :weight bold :height 1.1))))
-   `(org-level-4 ((,class (:foreground ,blue-br :weight bold))))
-   `(org-level-5 ((,class (:foreground ,magenta :weight bold))))
-   `(org-level-6 ((,class (:foreground ,teal :weight bold))))
-   `(org-level-7 ((,class (:foreground ,cyan-dim :weight bold))))
-   `(org-level-8 ((,class (:foreground ,green :weight bold))))
-   `(org-document-title ((,class (:foreground ,cyan :weight bold :height 1.5))))
-   `(org-document-info ((,class (:foreground ,fg-alt))))
-   `(org-document-info-keyword ((,class (:foreground ,fg-dim))))
-   `(org-meta-line ((,class (:foreground ,fg-dim))))
-   `(org-link ((,class (:foreground ,cyan :underline t))))
-   `(org-todo ((,class (:foreground ,red :weight bold))))
-   `(org-done ((,class (:foreground ,green-br :weight bold))))
-   `(org-date ((,class (:foreground ,blue-br))))
-   `(org-tag ((,class (:foreground ,fg-alt :weight normal))))
-   `(org-block ((,class (:background ,bg-alt :foreground ,fg :extend t))))
-   `(org-block-begin-line ((,class (:background ,bg-hl :foreground ,fg-dim :extend t))))
-   `(org-block-end-line ((,class (:background ,bg-hl :foreground ,fg-dim :extend t))))
-   `(org-code ((,class (:foreground ,yellow :background ,bg-alt))))
-   `(org-verbatim ((,class (:foreground ,cyan :background ,bg-alt))))
-   `(org-special-keyword ((,class (:foreground ,fg-dim))))
-   `(org-table ((,class (:foreground ,blue-br))))
+;; Extra faces: match bamboo.nvim behaviour where Variable / @variable
+;; are plain fg, not italic.  Also scale org headings.
+(defvar osaka-jade-custom-faces
+  '(`(font-lock-variable-name-face ((,c :foreground ,fg-main :slant normal)))
+    `(font-lock-variable-use-face  ((,c :foreground ,fg-main :slant normal)))
+    `(help-argument-name           ((,c :foreground ,fg-main :slant normal)))
+    `(org-level-1        ((,c :inherit default :weight bold :height 1.3)))
+    `(org-level-2        ((,c :inherit default :weight bold :height 1.2)))
+    `(org-level-3        ((,c :inherit default :weight bold :height 1.1)))
+    `(org-document-title ((,c :inherit default :weight bold :height 1.5))))
+  "Additional face specs layered on top of the Modus-generated faces.")
 
-   ;; Markdown
-   `(markdown-header-face-1 ((,class (:foreground ,cyan :weight bold :height 1.3))))
-   `(markdown-header-face-2 ((,class (:foreground ,green-br :weight bold :height 1.2))))
-   `(markdown-header-face-3 ((,class (:foreground ,yellow :weight bold :height 1.1))))
-   `(markdown-header-face-4 ((,class (:foreground ,blue-br :weight bold))))
-   `(markdown-header-face-5 ((,class (:foreground ,magenta :weight bold))))
-   `(markdown-header-face-6 ((,class (:foreground ,teal :weight bold))))
-   `(markdown-code-face ((,class (:foreground ,yellow :background ,bg-alt))))
-   `(markdown-inline-code-face ((,class (:foreground ,yellow :background ,bg-alt))))
-   `(markdown-pre-face ((,class (:foreground ,fg :background ,bg-alt))))
-   `(markdown-link-face ((,class (:foreground ,cyan :underline t))))
-   `(markdown-url-face ((,class (:foreground ,blue-br :underline t))))
-   `(markdown-list-face ((,class (:foreground ,green-br))))
+(defvar osaka-jade-custom-variables nil
+  "Custom-variable specs layered on top of Modus defaults.")
 
-   ;; Company
-   `(company-tooltip ((,class (:background ,bg-hl :foreground ,fg))))
-   `(company-tooltip-selection ((,class (:background ,ui :foreground ,selection :weight bold))))
-   `(company-tooltip-common ((,class (:foreground ,cyan :weight bold))))
-   `(company-tooltip-common-selection ((,class (:foreground ,cyan :weight bold))))
-   `(company-tooltip-annotation ((,class (:foreground ,fg-alt))))
-   `(company-tooltip-annotation-selection ((,class (:foreground ,fg-alt))))
-   `(company-scrollbar-bg ((,class (:background ,bg-hl))))
-   `(company-scrollbar-fg ((,class (:background ,ui))))
-   `(company-preview ((,class (:foreground ,fg-dim :background ,bg-alt))))
-   `(company-preview-common ((,class (:foreground ,cyan :background ,bg-alt))))
+;; Must be set before `modus-themes-theme' runs: `modus-themes--slant'
+;; reads this variable at face-spec-evaluation time to decide whether
+;; comments/docstrings get italic.  Bamboo italicizes comments.
+(setq modus-themes-italic-constructs t)
 
-   ;; Ivy/Counsel
-   `(ivy-current-match ((,class (:background ,ui :foreground ,selection :weight bold))))
-   `(ivy-minibuffer-match-face-1 ((,class (:foreground ,fg-alt))))
-   `(ivy-minibuffer-match-face-2 ((,class (:foreground ,cyan :weight bold))))
-   `(ivy-minibuffer-match-face-3 ((,class (:foreground ,green-br :weight bold))))
-   `(ivy-minibuffer-match-face-4 ((,class (:foreground ,yellow :weight bold))))
-   `(ivy-confirm-face ((,class (:foreground ,green-br))))
-   `(ivy-match-required-face ((,class (:foreground ,red))))
-
-   ;; Helm
-   `(helm-header ((,class (:background ,bg-alt :foreground ,fg))))
-   `(helm-source-header ((,class (:background ,bg-hl :foreground ,cyan :weight bold :height 1.1))))
-   `(helm-selection ((,class (:background ,ui :foreground ,selection :weight bold))))
-   `(helm-match ((,class (:foreground ,cyan :weight bold))))
-   `(helm-candidate-number ((,class (:foreground ,fg-alt))))
-
-   ;; Magit
-   `(magit-section-heading ((,class (:foreground ,cyan :weight bold))))
-   `(magit-section-highlight ((,class (:background ,bg-alt))))
-   `(magit-branch-local ((,class (:foreground ,green-br :weight bold))))
-   `(magit-branch-remote ((,class (:foreground ,blue-br :weight bold))))
-   `(magit-tag ((,class (:foreground ,yellow))))
-   `(magit-hash ((,class (:foreground ,fg-alt))))
-   `(magit-diff-file-heading ((,class (:foreground ,fg :weight bold))))
-   `(magit-diff-file-heading-highlight ((,class (:background ,bg-alt :foreground ,fg :weight bold))))
-   `(magit-diff-hunk-heading ((,class (:background ,bg-hl :foreground ,fg-alt))))
-   `(magit-diff-hunk-heading-highlight ((,class (:background ,ui :foreground ,fg))))
-   `(magit-diff-context ((,class (:foreground ,fg-alt))))
-   `(magit-diff-context-highlight ((,class (:background ,bg-alt :foreground ,fg))))
-   `(magit-diff-added ((,class (:foreground ,green-br :background ,bg))))
-   `(magit-diff-added-highlight ((,class (:foreground ,green-br :background ,bg-alt))))
-   `(magit-diff-removed ((,class (:foreground ,red :background ,bg))))
-   `(magit-diff-removed-highlight ((,class (:foreground ,red :background ,bg-alt))))
-   `(magit-diffstat-added ((,class (:foreground ,green-br))))
-   `(magit-diffstat-removed ((,class (:foreground ,red))))
-
-   ;; Diff mode
-   `(diff-added ((,class (:foreground ,green-br :background ,bg))))
-   `(diff-removed ((,class (:foreground ,red :background ,bg))))
-   `(diff-changed ((,class (:foreground ,yellow :background ,bg))))
-   `(diff-header ((,class (:background ,bg-hl :foreground ,fg))))
-   `(diff-file-header ((,class (:background ,ui :foreground ,fg :weight bold))))
-   `(diff-hunk-header ((,class (:background ,bg-hl :foreground ,fg-alt))))
-
-   ;; Flycheck
-   `(flycheck-error ((,class (:underline (:style wave :color ,red)))))
-   `(flycheck-warning ((,class (:underline (:style wave :color ,yellow)))))
-   `(flycheck-info ((,class (:underline (:style wave :color ,cyan)))))
-
-   ;; Flymake
-   `(flymake-error ((,class (:underline (:style wave :color ,red)))))
-   `(flymake-warning ((,class (:underline (:style wave :color ,yellow)))))
-   `(flymake-note ((,class (:underline (:style wave :color ,cyan)))))
-
-   ;; LSP
-   `(lsp-face-highlight-textual ((,class (:background ,bg-hl))))
-   `(lsp-face-highlight-read ((,class (:background ,bg-hl))))
-   `(lsp-face-highlight-write ((,class (:background ,ui :weight bold))))
-
-   ;; Tree-sitter
-   `(tree-sitter-hl-face:function ((,class (:foreground ,yellow))))
-   `(tree-sitter-hl-face:function.call ((,class (:foreground ,yellow))))
-   `(tree-sitter-hl-face:method ((,class (:foreground ,yellow))))
-   `(tree-sitter-hl-face:method.call ((,class (:foreground ,yellow))))
-   `(tree-sitter-hl-face:variable ((,class (:foreground ,blue-br))))
-   `(tree-sitter-hl-face:variable.parameter ((,class (:foreground ,blue-br))))
-   `(tree-sitter-hl-face:property ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:keyword ((,class (:foreground ,green-br :weight bold))))
-   `(tree-sitter-hl-face:string ((,class (:foreground ,cyan))))
-   `(tree-sitter-hl-face:number ((,class (:foreground ,magenta))))
-   `(tree-sitter-hl-face:constant ((,class (:foreground ,magenta))))
-   `(tree-sitter-hl-face:type ((,class (:foreground ,blue))))
-   `(tree-sitter-hl-face:comment ((,class (:foreground ,fg-dim :slant italic))))
-
-   ;; Which-key
-   `(which-key-key-face ((,class (:foreground ,cyan :weight bold))))
-   `(which-key-separator-face ((,class (:foreground ,fg-dim))))
-   `(which-key-command-description-face ((,class (:foreground ,fg))))
-   `(which-key-group-description-face ((,class (:foreground ,green-br))))
-
-   ;; Vertico
-   `(vertico-current ((,class (:background ,ui :foreground ,selection :weight bold))))
-
-   ;; Orderless
-   `(orderless-match-face-0 ((,class (:foreground ,cyan :weight bold))))
-   `(orderless-match-face-1 ((,class (:foreground ,green-br :weight bold))))
-   `(orderless-match-face-2 ((,class (:foreground ,yellow :weight bold))))
-   `(orderless-match-face-3 ((,class (:foreground ,magenta :weight bold))))
-
-   ;; Corfu
-   `(corfu-default ((,class (:background ,bg-hl :foreground ,fg))))
-   `(corfu-current ((,class (:background ,ui :foreground ,selection :weight bold))))
-   `(corfu-bar ((,class (:background ,ui-alt))))
-   `(corfu-border ((,class (:background ,border))))
-
-   ;; Marginalia
-   `(marginalia-key ((,class (:foreground ,cyan))))
-   `(marginalia-documentation ((,class (:foreground ,fg-alt))))
-   `(marginalia-file-name ((,class (:foreground ,fg))))
-
-   ;; Rainbow delimiters
-   `(rainbow-delimiters-depth-1-face ((,class (:foreground ,cyan))))
-   `(rainbow-delimiters-depth-2-face ((,class (:foreground ,green-br))))
-   `(rainbow-delimiters-depth-3-face ((,class (:foreground ,yellow))))
-   `(rainbow-delimiters-depth-4-face ((,class (:foreground ,blue-br))))
-   `(rainbow-delimiters-depth-5-face ((,class (:foreground ,magenta))))
-   `(rainbow-delimiters-depth-6-face ((,class (:foreground ,teal))))
-   `(rainbow-delimiters-depth-7-face ((,class (:foreground ,cyan-dim))))
-   `(rainbow-delimiters-depth-8-face ((,class (:foreground ,green))))
-   `(rainbow-delimiters-depth-9-face ((,class (:foreground ,blue))))
-   `(rainbow-delimiters-unmatched-face ((,class (:foreground ,red :weight bold))))
-
-   ;; Clojure specific
-   `(clojure-keyword-face ((,class (:foreground ,magenta))))
-
-   ;; CIDER
-   `(cider-result-overlay-face ((,class (:background ,bg-hl :foreground ,fg))))
-   `(cider-repl-prompt-face ((,class (:foreground ,cyan :weight bold))))
-   `(cider-repl-stdout-face ((,class (:foreground ,fg))))
-   `(cider-repl-stderr-face ((,class (:foreground ,red))))
-   `(cider-test-failure-face ((,class (:foreground ,red :weight bold))))
-   `(cider-test-success-face ((,class (:foreground ,green-br :weight bold))))
-
-   ;; Terminal
-   `(term-color-black ((,class (:foreground ,bg-hl :background ,bg-hl))))
-   `(term-color-red ((,class (:foreground ,red :background ,red))))
-   `(term-color-green ((,class (:foreground ,green :background ,green))))
-   `(term-color-yellow ((,class (:foreground ,yellow :background ,yellow))))
-   `(term-color-blue ((,class (:foreground ,blue :background ,blue))))
-   `(term-color-magenta ((,class (:foreground ,magenta :background ,magenta))))
-   `(term-color-cyan ((,class (:foreground ,cyan :background ,cyan))))
-   `(term-color-white ((,class (:foreground ,white :background ,white))))))
+(modus-themes-theme
+ 'osaka-jade
+ 'osaka-jade
+ "Osaka Jade, derived from Modus Vivendi."
+ 'dark
+ 'modus-themes-vivendi-palette
+ 'osaka-jade-palette
+ 'osaka-jade-palette-overrides
+ 'osaka-jade-custom-faces
+ 'osaka-jade-custom-variables)
 
 ;;;###autoload
 (when load-file-name
   (add-to-list 'custom-theme-load-path
                (file-name-as-directory (file-name-directory load-file-name))))
 
-(provide-theme 'osaka-jade)
-
+(provide 'osaka-jade-theme)
 ;;; osaka-jade-theme.el ends here

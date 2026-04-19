@@ -90,6 +90,18 @@
             (message "Starting emacs server...")
             (server-start)))
 
+;; Daemon readiness notification — fires once at end of daemon startup,
+;; before any client frame is created.
+(defun my/notify-daemon-ready ()
+  "Send a desktop notification that the Emacs daemon is ready."
+  (start-process "emacs-notify" nil "notify-send"
+                 "--app-name=Emacs"
+                 "Emacs initialized!"
+                 "Emacs daemon is ready to use."))
+
+(when (daemonp)
+  (add-hook 'emacs-startup-hook #'my/notify-daemon-ready))
+
 ;; Show more than 4 levels when evaling expressions
 (setq eval-expression-print-level 100)
 

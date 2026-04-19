@@ -3,6 +3,7 @@
 (use-package fontaine
   :ensure t
   :if (or (display-graphic-p) (daemonp))
+  :demand t
   :hook
   ;; Persist the latest font preset when closing/starting Emacs and
   ;; while switching between themes.

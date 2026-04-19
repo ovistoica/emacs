@@ -6,7 +6,9 @@
 ;;; Code:
 
 (use-package modus-themes
-  :ensure t)
+  :ensure t
+  :config
+  (setq modus-themes-disable-other-themes t))
 
 (use-package doom-themes
   :ensure t)
