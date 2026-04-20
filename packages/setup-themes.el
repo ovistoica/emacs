@@ -9,6 +9,7 @@
   :ensure t
   :config
   (setq modus-themes-disable-other-themes t
+        modus-themes-bold-constructs nil
 
         ;; Must be set before `modus-themes-theme' runs: `modus-themes--slant'
         ;; reads this variable at face-spec-evaluation time to decide whether

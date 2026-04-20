@@ -28,6 +28,8 @@
           (small
            :default-height 130)
           (regular) ; like this it uses all the fallback values and is named `regular'
+          (fair
+           :default-height 135)
           (medium
            :default-height 140)
           (large
@@ -106,3 +108,6 @@
            :italic-height 1.0
 
            :line-spacing nil))))
+
+(provide 'setup-font)
+;;; setup-font.el ends here
