@@ -89,13 +89,19 @@
 (defun cider-run-in-dev-namespace ()
   (interactive)
   (if-let ((ns+forms (cider-run--find-dev-namespace-and-comment-forms)))
-      (cider-run--run-in-repl (car ns+forms)
-                              (completing-read (format "Eval in %s: " (car ns+forms))
-                                               (or (cdr ns+forms)
-                                                   cider-run-in-dev-namespace-default-suggestions)))
+      (let* ((ns (car ns+forms))
+             (form (completing-read (format "Eval in %s: " ns)
+                                    (or (cdr ns+forms)
+                                        cider-run-in-dev-namespace-default-suggestions)))
+             ;; Require the dev ns before evaluating so its (:require ...)
+             ;; aliases (e.g. `main/...`) resolve — even when the REPL was
+             ;; booted without user.clj importing it.
+             (wrapped (format "(do (require '%s) (in-ns '%s) %s)" ns ns form)))
+        (cider-run--run-in-repl ns wrapped))
     (message "No dev namespace found")))
 
 (defvar cider-run-in-dev-namespace-default-suggestions
   '("(start)" "(reset)"))
 
 (provide 'cider-run)
+;;; cider-run.el ends here

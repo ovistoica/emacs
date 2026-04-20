@@ -15,6 +15,21 @@
 (defun kaocha-runner--is-test? (s)
   (string-match-p "/test/.+\.clj" s))
 
+(defun kaocha-runner--project-has-kaocha? ()
+  "Return non-nil when the current project declares kaocha as a dep.
+
+Like `cljr--project-depends-on-p' but also checks `deps.local.edn'
+alongside `deps.edn', so kaocha declared only in a personal
+`deps.local.edn' still enables the on-load test runner."
+  (or (cljr--project-depends-on-p "kaocha")
+      (when-let* ((project-dir (cljr--project-dir))
+                  (local (expand-file-name "deps.local.edn" project-dir)))
+        (and (file-exists-p local)
+             (with-temp-buffer
+               (insert-file-contents local)
+               (goto-char (point-min))
+               (search-forward "kaocha" nil t))))))
+
 (defun kaocha-runner--significant-other-find-existing-test ()
   (car (significant-other-find-tests)))
 
@@ -26,7 +41,7 @@
 
 (defun kaocha-runner-run-relevant-tests ()
   (interactive)
-  (when (cljr--project-depends-on-p "kaocha")
+  (when (kaocha-runner--project-has-kaocha?)
     (if (kaocha-runner--is-test? (buffer-file-name))
         (when (kaocha-runner--should-run-tests?)
           (kaocha-runner--run-tests
@@ -45,3 +60,4 @@
 (add-hook 'cider-file-loaded-hook #'kaocha-runner-run-relevant-tests)
 
 (provide 'setup-kaocha-runner)
+;;; setup-kaocha-runner.el ends here
