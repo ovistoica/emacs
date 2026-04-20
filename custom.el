@@ -75,7 +75,8 @@
  '(safe-local-variable-directories
    '("/home/ovistoica/Work/tries/2025-12-14-lambdaisland-launchpad/"))
  '(safe-local-variable-values
-   '((cider-clojure-cli-global-options . "-A:dev:test")
+   '((kaocha-runner-extra-configuration . "{:config-file \"tests.local.edn\"}")
+     (cider-clojure-cli-global-options . "-A:dev:test")
      (apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
      (eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
            (add-to-list 'cider-jack-in-nrepl-middlewares
