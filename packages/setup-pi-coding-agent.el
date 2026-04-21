@@ -62,6 +62,8 @@
 
 ;;; Code:
 
+(require 'buffers)
+
 (use-package pi-coding-agent
   :vc (:url "https://github.com/dnouri/pi-coding-agent" :rev :newest)
 
@@ -88,18 +90,18 @@ in the mode-line.  Uses side windows so the main window layout is untouched."
           (win-params   '((no-delete-other-windows . t)))
           (label        (format " *pi:%s*" (my/pi--short-name dir))))
       (display-buffer chat-buf
-        `((display-buffer-in-side-window)
-          (side              . right)
-          (slot              . 0)
-          (window-width      . ,my/pi-panel-width)
-          (window-parameters . ,win-params)))
+                      `((display-buffer-in-side-window)
+                        (side              . right)
+                        (slot              . 0)
+                        (window-width      . ,my/pi-panel-width)
+                        (window-parameters . ,win-params)))
       (display-buffer input-buf
-        `((display-buffer-in-side-window)
-          (side              . right)
-          (slot              . 1)
-          (window-width      . ,my/pi-panel-width)
-          (window-height     . ,input-height)
-          (window-parameters . ,win-params)))
+                      `((display-buffer-in-side-window)
+                        (side              . right)
+                        (slot              . 1)
+                        (window-width      . ,my/pi-panel-width)
+                        (window-height     . ,input-height)
+                        (window-parameters . ,win-params)))
       ;; Chat: hide mode-line entirely (input below provides context)
       (with-current-buffer chat-buf
         (setq-local mode-line-format nil))
@@ -137,65 +139,7 @@ Creates a new session if none exists for the current project."
         (when-let ((win (get-buffer-window input-buf)))
           (select-window win)))))
 
-  (defun my/pi--mode-to-lang ()
-    "Return a code-fence language string for the current buffer's major mode."
-    (pcase major-mode
-      ((or 'clojure-mode 'clojurec-mode)  "clojure")
-      ('clojurescript-mode                "clojurescript")
-      ((or 'emacs-lisp-mode
-           'lisp-interation-mode)        "emacs-lisp")
-      ((or 'python-mode 'python-ts-mode)  "python")
-      ((or 'js-mode 'js-ts-mode)          "javascript")
-      ((or 'typescript-mode
-           'typescript-ts-mode)           "typescript")
-      ('tsx-ts-mode                       "tsx")
-      ((or 'rust-mode 'rust-ts-mode)      "rust")
-      ((or 'go-mode 'go-ts-mode)          "go")
-      ((or 'sh-mode 'bash-ts-mode)        "bash")
-      ((or 'css-mode 'css-ts-mode)        "css")
-      ((or 'html-mode 'mhtml-mode)        "html")
-      ((or 'json-mode 'json-ts-mode)      "json")
-      ((or 'yaml-mode 'yaml-ts-mode)      "yaml")
-      ('sql-mode                          "sql")
-      (_
-       (string-remove-suffix
-        "-ts-mode"
-        (string-remove-suffix "-mode" (symbol-name major-mode))))))
 
-  (defun my/pi-region-to-string (beg end)
-    "Return a fenced code block string for the region from BEG to END.
-The block is prefixed with the file path (relative to project root) and
-line range, e.g.:
-  `src/foo.clj` L42-67:
-  ```clojure
-  (defn my-fn ...)
-  ```"
-    (let* ((file     (buffer-file-name))
-           (root     (when-let* ((proj (project-current)))
-                       (project-root proj)))
-           (rel-file (if (and file root)
-                         (file-relative-name file root)
-                       (buffer-name)))
-           (start-line (line-number-at-pos beg))
-           (end-line   (let ((l (line-number-at-pos end)))
-                         (if (and (> end beg)
-                                  (save-excursion (goto-char end) (bolp)))
-                             (1- l) l)))
-           (lang (my/pi--mode-to-lang))
-           (code (buffer-substring-no-properties beg end))
-           (code (if (string-suffix-p "\n" code) code (concat code "\n"))))
-      (format "`%s` L%d-%d:\n```%s\n%s```\n"
-              rel-file start-line end-line lang code)))
-
-  (defun my/pi-copy-region-as-code-block (beg end)
-    "Copy the region BEG to END as a fenced code block to the kill ring.
-The block includes the relative file path and line range as a header,
-ready to paste into any agent chat."
-    (interactive "r")
-    (let ((block (my/pi-region-to-string beg end)))
-      (kill-new block)
-      (message "Copied code block (%s) to kill ring"
-               (buffer-substring-no-properties beg (min end (+ beg 40))))))
 
   (defun my/pi-send-to-input (text)
     "Append TEXT to the pi input buffer for the current project and focus it.
@@ -219,6 +163,7 @@ Opens the side panel if not currently visible."
       (when-let ((win (get-buffer-window input-buf)))
         (select-window win))
       (goto-char (point-max))))
+
 
   ;; ── Image paste support ──────────────────────────────────────────────────
   ;; When in the pi input buffer and the clipboard holds an image, C-y saves
@@ -272,7 +217,7 @@ With an active region, formats it with file path and line range and sends it.
 Without a region, reads a message from the minibuffer and sends that."
     (interactive "r")
     (if (use-region-p)
-        (my/pi-send-to-input (my/pi-region-to-string beg end))
+        (my/pi-send-to-input (region-to-string beg end))
       (let ((text (read-string "Send to pi: ")))
         (unless (string-empty-p text)
           (my/pi-send-to-input (concat text "\n"))))))
@@ -289,7 +234,6 @@ Without a region, reads a message from the minibuffer and sends that."
 
   :bind (("C-c C-p" . my/pi-coding-agent-toggle)
          ("C-c TAB" . my/pi-send-dwim)
-         ("C-c w" . my/pi-copy-region-as-code-block)
          :map pi-coding-agent-input-mode-map
          ("C-c C-m" . pi-coding-agent-menu)
          ("C-c C-p" . my/pi-coding-agent-toggle)
