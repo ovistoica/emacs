@@ -7,7 +7,7 @@
 (global-set-key (kbd "C-x C-r") 'rename-current-buffer-file)
 (global-set-key (kbd "C-x C-k") 'delete-current-buffer-file)
 
-;; Copy the file path for the current buffer
+;; Copy the file path or region code block for the current buffer
 (global-set-key (kbd "C-x M-w") 'copy-current-buffer-dwim)
 
 ;; Touch the buffer (save without changing)
@@ -59,7 +59,6 @@
         (delete-file filename)
         (kill-buffer buffer)
         (message "File '%s' succesfully removed" filename)))))
-
 
 (defun copy-current-file-path ()
   "Add current file path to kill ring.
