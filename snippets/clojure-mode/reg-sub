@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# --
+(rf/reg-sub
+  ${1::key}
+  (fn [db _]
+    ${2:body})

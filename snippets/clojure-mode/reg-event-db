@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# --
+(rf/reg-event-db
+ ${1::key}
+ (fn [db _]
+   ${2:body}))
