@@ -68,6 +68,19 @@ Nested headings are indented with spaces proportional to their level."
   (let ((code (string-trim-right (org-element-property :value src-block))))
     (format "```\n%s\n```" code)))
 
+(defun org-slack-paragraph (paragraph contents info)
+  "Transcode PARAGRAPH to Slack, collapsing hard line breaks from auto-fill.
+CONTENTS is the paragraph contents.  INFO is the export plist.
+Unless `:preserve-breaks' is set, internal newlines (from `auto-fill-mode' or
+manual wrapping) are replaced by spaces so Slack renders the paragraph as a
+single flowing line — matching the behavior of ox-gfm's paragraph exporter."
+  (unless (plist-get info :preserve-breaks)
+    (setq contents (concat (mapconcat #'identity (split-string contents) " ") "\n")))
+  (let ((first-object (car (org-element-contents paragraph))))
+    (if (and (stringp first-object) (string-prefix-p "#" first-object))
+        (concat "\\" contents)
+      contents)))
+
 (defun org-slack-link (link contents info)
   "Transcode LINK to standard Markdown [label](url) format.
 CONTENTS is the link description, if any.
@@ -103,6 +116,7 @@ Falls back to the default markdown transcoder for internal links."
     (verbatim      . org-slack-verbatim)
     (headline      . org-slack-headline)
     (src-block     . org-slack-src-block)
+    (paragraph     . org-slack-paragraph)
     (link          . org-slack-link)))
 
 ;;; Interactive entry points
