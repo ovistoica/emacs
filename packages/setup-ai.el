@@ -474,6 +474,9 @@ this buffer."
   :init
   (require 'diff)
   :hook (agent-shell-mode . agent-chat-mode)
+  :config
+  (setq agent-shell-thought-process-expand-by-default t
+        agent-shell-tool-use-expand-by-default t)
   :custom
   ;; Window configuration
   (agent-shell-display-action
