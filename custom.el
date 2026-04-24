@@ -40,21 +40,21 @@
      "b9c002dc827fb75b825da3311935c9f505d48d7ee48f470f0aa7ac5d2a595ab2"
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
  '(package-selected-packages
-   '(apheleia auto-sudoedit beancount blamer browse-at-remote catppuccin-theme
-              chezmoi claude-code-ide clj-refactor consult-flycheck dashboard
-              datomic-snippets deadgrep denote diff-hl diminish dired-quick-sort
-              dired-subtree dired-toggle-sudo dockerfile-mode doom-themes
-              doric-themes dts-mode eca edit-indirect envrc exec-path-from-shell
-              expand-region fontaine forge frame-fns git-timemachine groovy-mode
-              helpful hide-mode-line html-to-hiccup kaocha-runner keycast lin
-              logos lsp-java lsp-pyright lsp-tailwindcss lsp-ui magit marginalia
-              mise modus-themes move-text neil nerd-icons-completion
-              nerd-icons-dired notmuch-indicator ol-notmuch olivetti orderless
-              org-present ox-gfm ox-slack perspective pi-coding-agent popper
-              prodigy projectile pulsar rainbow-mode significant-other
-              smartparens smtpmail-multi terraform-mode time-zones undo-fu
-              vertico visual-fill-column vterm vundo wgrep-deadgrep
-              whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
+   '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
+         catppuccin-theme chezmoi claude-code-ide clj-refactor consult-flycheck
+         dashboard datomic-snippets deadgrep denote diff-hl diminish
+         dired-quick-sort dired-subtree dired-toggle-sudo dockerfile-mode
+         doom-themes doric-themes dts-mode eca edit-indirect envrc
+         exec-path-from-shell expand-region fontaine forge frame-fns
+         git-timemachine groovy-mode helpful hide-mode-line hl-todo
+         html-to-hiccup kaocha-runner keycast lin logos lsp-java lsp-pyright
+         lsp-tailwindcss lsp-ui magit marginalia mise modus-themes move-text
+         neil nerd-icons-completion nerd-icons-dired notmuch-indicator
+         ol-notmuch olivetti orderless org-present ox-gfm ox-slack perspective
+         pi-coding-agent popper prodigy projectile pulsar rainbow-mode
+         significant-other smartparens smtpmail-multi terraform-mode time-zones
+         undo-fu vertico visual-fill-column vterm vundo wgrep-deadgrep
+         whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
    '((claude-code-ide :vc-backend Git :url
                       "https://github.com/parsnips/claude-code-ide.el")
