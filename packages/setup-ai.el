@@ -4,86 +4,250 @@
 ;; Configuration for AI-related packages.
 ;;
 ;; Sections:
-;;   1. agent-shell  (xenodium/agent-shell, ACP-based)
-;;   2. eca          (editor-code-assistant/eca-emacs)
-;;   3. claude-code-ide (manzaltu/claude-code-ide.el — parsnips' ghostel fork)
-;;   4. pi-coding-agent (dnouri/pi-coding-agent)
+;;   0. agent protocol — standardized keys across all harnesses
+;;   1. eca            — editor-code-assistant/eca-emacs
+;;   2. claude-code-ide — manzaltu/claude-code-ide.el (parsnips' ghostel fork)
+;;   3. agent-shell    — xenodium/agent-shell, ACP-based
+;;   4. pi-coding-agent — dnouri/pi-coding-agent
+;;
+;; Standard keys (active globally when `agent-mode' is on):
+;;   C-c e   toggle the current harness's chat window (and focus it)
+;;   C-c i   send region (or prompted text) to the current harness
+;;   C-c .   open the current harness's menu
+;;   C-c ,   switch the global harness default
+;;
+;; Standard in-buffer keys (active in every harness's chat/input buffer):
+;;   C-c .     open menu
+;;   C-c C-k   interrupt / abort generation
+;;   C-c C-n   new session
+;;   C-c C-f   pick / switch session
+;;
+;; Queueing a message (send-when-idle semantics) is available via the harness
+;; transient menu (`C-c .` then RET in agent-shell).
+;;
+;; "The current harness" is resolved by `agent--active-backend' in three
+;; tiers:
+;;   1. if point is inside a harness chat buffer, that harness wins;
+;;   2. else the value of `agent-current' (settable per-project via
+;;      .dir-locals.el thanks to its :safe predicate);
+;;   3. else the defcustom default.
 
 ;;; Code:
 
 (require 'transient)
 (require 'buffers)
 
+;; Forward declarations — the underlying packages are loaded lazily via
+;; use-package, so the dispatcher references them before they are defined.
+(declare-function eca-chat-toggle-window "eca-chat")
+(declare-function eca-chat-add-context-to-user-prompt "eca-chat")
+(declare-function eca-chat-send-prompt "eca-chat")
+(declare-function eca-transient-menu "eca")
+(declare-function eca-chat-stop-prompt "eca-chat")
+(declare-function eca-chat-new "eca-chat")
+(declare-function eca-chat-select "eca-chat")
+
+(declare-function agent-shell "agent-shell")
+(declare-function agent-shell-menu "agent-shell")
+(declare-function agent-shell-interrupt "agent-shell")
+(declare-function agent-shell-new-shell "agent-shell")
+(declare-function agent-shell-other-buffer "agent-shell")
+(declare-function agent-shell-send-region "agent-shell" (&optional pick-shell))
+(declare-function agent-shell-queue-request "agent-shell")
+(declare-function pi-coding-agent-queue-steering "pi-coding-agent")
+(declare-function agent-shell-project-buffers "agent-shell")
+
+(declare-function claude-code-ide "claude-code-ide")
+(declare-function claude-code-ide-toggle "claude-code-ide")
+(declare-function claude-code-ide-menu "claude-code-ide")
+(declare-function claude-code-ide-send-escape "claude-code-ide")
+(declare-function claude-code-ide-send-prompt "claude-code-ide")
+(declare-function claude-code-ide-insert-at-mentioned "claude-code-ide")
+(declare-function claude-code-ide-list-sessions "claude-code-ide")
+
+(declare-function pi-coding-agent "pi-coding-agent")
+(declare-function pi-coding-agent-menu "pi-coding-agent")
+(declare-function pi-coding-agent-abort "pi-coding-agent")
+(declare-function pi-coding-agent-new-session "pi-coding-agent")
+(declare-function pi-coding-agent-resume-session "pi-coding-agent")
+
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; 1. agent-shell
+;; 0. Agent protocol
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(defun my/agent-shell-toggle ()
-  "Toggle agent shell display, falling back to any shell if none for project."
+(defgroup agent nil
+  "Unified keymap and dispatch across AI coding-agent harnesses."
+  :group 'tools
+  :prefix "agent-")
+
+(defconst agent-backends '(eca agent-shell pi claude-code-ide)
+  "Known agent backends, in display order.")
+
+(defcustom agent-current 'agent-shell
+  "Which agent harness the standard keys target by default.
+Override per-project via `.dir-locals.el':
+  ((nil . ((agent-current . eca))))"
+  :type '(choice (const eca)
+                 (const agent-shell)
+                 (const pi)
+                 (const claude-code-ide))
+  :safe (lambda (v) (memq v agent-backends))
+  :group 'agent)
+
+(defvar-local agent--claude-buffer-p nil
+  "Non-nil in buffers created by claude-code-ide.
+Set by an after-advice on `claude-code-ide' because the package does not
+define its own major mode — the buffer inherits from vterm/eat/ghostel.")
+
+(defun agent--active-backend ()
+  "Resolve the agent backend for the current buffer.
+Inside a harness chat/input buffer the backend is inferred from the major
+mode; elsewhere the value of `agent-current' is used."
+  (cond
+   ((derived-mode-p 'eca-chat-mode) 'eca)
+   ((derived-mode-p 'agent-shell-mode) 'agent-shell)
+   ((derived-mode-p 'pi-coding-agent-chat-mode
+                    'pi-coding-agent-input-mode) 'pi)
+   (agent--claude-buffer-p 'claude-code-ide)
+   (t agent-current)))
+
+(defun agent--label (backend)
+  "Return a human-readable label for BACKEND."
+  (pcase backend
+    ('eca             "ECA")
+    ('agent-shell     "agent-shell")
+    ('pi              "pi")
+    ('claude-code-ide "Claude Code IDE")
+    (_ (symbol-name backend))))
+
+(defun agent-toggle-window ()
+  "Toggle the chat window of the current agent backend and focus it."
   (interactive)
-  (if-let ((shell-buffer (or (and (derived-mode-p 'agent-shell-mode)
-                                  (current-buffer))
-                             (seq-first (agent-shell-project-buffers))
-                             (seq-first (agent-shell-buffers)))))
-      (if-let ((window (get-buffer-window shell-buffer)))
-          (if (> (count-windows) 1)
-              (delete-window window)
-            (switch-to-prev-buffer))
-        (agent-shell--display-buffer shell-buffer))
-    (call-interactively #'agent-shell)))
+  (pcase (agent--active-backend)
+    ('eca             (call-interactively #'eca-chat-toggle-window))
+    ('agent-shell     (call-interactively #'my/agent-shell-toggle))
+    ('pi              (call-interactively #'my/pi-coding-agent-toggle))
+    ('claude-code-ide (call-interactively #'claude-code-ide-toggle))
+    (backend (user-error "Unknown agent backend: %s" backend))))
 
-(use-package acp
-  :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
+(defun agent-send-region-or-prompt (beg end)
+  "Send the region BEG..END to the current agent, or prompt for text.
+With an active region, delegates to the backend's region-sender (which is
+expected to toggle/focus its chat window).  Without a region, reads free-form
+text from the minibuffer and sends it as a prompt."
+  (interactive "r")
+  (let ((backend (agent--active-backend)))
+    (if (use-region-p)
+        (pcase backend
+          ('eca             (call-interactively #'eca-chat-add-context-to-user-prompt))
+          ('agent-shell     (call-interactively #'agent-shell-send-region))
+          ('pi              (my/pi-send-dwim beg end))
+          ('claude-code-ide (call-interactively #'claude-code-ide-insert-at-mentioned))
+          (_ (user-error "Unknown agent backend: %s" backend)))
+      (let ((text (read-string (format "Send to %s: " (agent--label backend)))))
+        (unless (string-empty-p text)
+          (pcase backend
+            ('eca             (eca-chat-send-prompt text))
+            ('agent-shell     (progn (my/agent-shell-toggle)
+                                     (insert text)))
+            ('pi              (my/pi-send-to-input (concat text "\n")))
+            ('claude-code-ide (claude-code-ide-send-prompt text))
+            (_ (user-error "Unknown agent backend: %s" backend))))))))
 
-(use-package agent-shell
-  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest)
-  :init
-  (require 'diff)
-  :bind (("C-c C-;" . agent-shell)
-         ("C-c ;"   . my/agent-shell-toggle)
-         ("C-c '"   . agent-shell-menu))
-  :custom
-  ;; Window configuration
-  (agent-shell-display-action
-   '((display-buffer-in-side-window)
-     (side . right)
-     (window-width . 90)))
-  ;; Show icons for different agent configs
-  (agent-shell-show-config-icons t)
-  ;; Expand tool use blocks by default
-  (agent-shell-tool-use-expand-by-default nil)
-  ;; Context sources for prompts
-  (agent-shell-context-sources '(files region error line))
-  :config
-  (transient-define-prefix agent-shell-menu ()
-    "Agent Shell commands."
-    ["Shell"
-     [("a" "Open shell" agent-shell)
-      ("t" "Toggle shell" agent-shell-toggle)
-      ("n" "New shell" agent-shell-new-shell)
-      ("c" "Compose prompt" agent-shell-prompt-compose)
-      ("o" "Other buffer" agent-shell-other-buffer)]
-     [("i" "Interrupt" agent-shell-interrupt)
-      ("r" "Resume pending" agent-shell-resume-pending-requests)
-      ("R" "Remove pending" agent-shell-remove-pending-request)]]
-    ["Session"
-     [("m" "Set model" agent-shell-set-session-model)
-      ("M" "Set mode" agent-shell-set-session-mode)
-      ("C" "Cycle mode" agent-shell-cycle-session-mode)]]
-    ["Send"
-     [("f" "Send file" agent-shell-send-file)
-      ("F" "Send other file" agent-shell-send-other-file)
-      ("s" "Send screenshot" agent-shell-send-screenshot)
-      ("!" "Insert shell output" agent-shell-insert-shell-command-output)]]
-    ["Logs & Debug"
-     [("T" "Open transcript" agent-shell-open-transcript)
-      ("v" "View traffic" agent-shell-view-traffic)
-      ("l" "View ACP logs" agent-shell-view-acp-logs)
-      ("L" "Toggle logging" agent-shell-toggle-logging)
-      ("V" "Version" agent-shell-version)]]))
+(defun agent-open-menu ()
+  "Open the transient menu of the current agent backend."
+  (interactive)
+  (pcase (agent--active-backend)
+    ('eca             (call-interactively #'eca-transient-menu))
+    ('agent-shell     (call-interactively #'agent-shell-menu))
+    ('pi              (call-interactively #'pi-coding-agent-menu))
+    ('claude-code-ide (call-interactively #'claude-code-ide-menu))
+    (backend (user-error "Unknown agent backend: %s" backend))))
+
+(defun agent-interrupt ()
+  "Stop the in-progress generation for the current agent backend."
+  (interactive)
+  (pcase (agent--active-backend)
+    ('eca             (call-interactively #'eca-chat-stop-prompt))
+    ('agent-shell     (call-interactively #'agent-shell-interrupt))
+    ('pi              (call-interactively #'pi-coding-agent-abort))
+    ('claude-code-ide (call-interactively #'claude-code-ide-send-escape))
+    (backend (user-error "Unknown agent backend: %s" backend))))
+
+(defun agent-new-session ()
+  "Start a new session with the current agent backend."
+  (interactive)
+  (pcase (agent--active-backend)
+    ('eca             (call-interactively #'eca-chat-new))
+    ('agent-shell     (call-interactively #'agent-shell-new-shell))
+    ('pi              (call-interactively #'pi-coding-agent-new-session))
+    ('claude-code-ide (call-interactively #'claude-code-ide))
+    (backend (user-error "Unknown agent backend: %s" backend))))
+
+(defun agent-switch-session ()
+  "Pick among existing sessions of the current agent backend."
+  (interactive)
+  (pcase (agent--active-backend)
+    ('eca             (call-interactively #'eca-chat-select))
+    ('agent-shell     (call-interactively #'agent-shell-other-buffer))
+    ('pi              (call-interactively #'pi-coding-agent-resume-session))
+    ('claude-code-ide (call-interactively #'claude-code-ide-list-sessions))
+    (backend (user-error "Unknown agent backend: %s" backend))))
+
+(defun agent-queue-message ()
+  "Queue a message to the current agent backend (send now if idle)."
+  (interactive)
+  (pcase (agent--active-backend)
+    ('agent-shell     (call-interactively #'agent-shell-queue-request))
+    ('pi              (call-interactively #'pi-coding-agent-queue-steering))
+    (backend (user-error "Queue not supported for backend: %s" backend))))
+
+(defun agent-switch-backend ()
+  "Interactively set `agent-current' for this Emacs session."
+  (interactive)
+  (let* ((choice (completing-read
+                  "Set default agent backend: "
+                  (mapcar #'symbol-name agent-backends)
+                  nil t nil nil
+                  (symbol-name agent-current))))
+    (setq agent-current (intern choice))
+    (message "Agent backend: %s" (agent--label agent-current))))
+
+(defvar agent-chat-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c .")   #'agent-open-menu)
+    (define-key map (kbd "C-c C-k") #'agent-interrupt)
+    (define-key map (kbd "C-c C-n") #'agent-new-session)
+    (define-key map (kbd "C-c C-f") #'agent-switch-session)
+    map)
+  "Keymap for `agent-chat-mode', active inside harness chat/input buffers.")
+
+(define-minor-mode agent-chat-mode
+  "Minor mode installed in every agent harness chat/input buffer.
+Provides a consistent set of keybindings across eca, agent-shell,
+pi-coding-agent, and claude-code-ide buffers."
+  :lighter " Agent"
+  :keymap agent-chat-mode-map)
+
+(defvar agent-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c e") #'agent-toggle-window)
+    (define-key map (kbd "C-c i") #'agent-send-region-or-prompt)
+    (define-key map (kbd "C-c .") #'agent-open-menu)
+    (define-key map (kbd "C-c ,") #'agent-switch-backend)
+    map)
+  "Global keymap for `agent-mode'.")
+
+(define-minor-mode agent-mode
+  "Global minor mode installing the unified agent-harness keybindings."
+  :global t
+  :lighter nil
+  :keymap agent-mode-map)
+
+(agent-mode 1)
 
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; 2. eca — Editor Code Assistant (vendor-neutral agent interface)
+;; 1. eca — Editor Code Assistant
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (defun my/eca-fix-autoloads ()
@@ -206,11 +370,9 @@ this buffer."
       (message "ECA: auto-expand disabled for this buffer")))
 
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest)
-  :hook (eca-chat-mode . my/eca-chat-mode-hook)
-  :bind (("C-c ." . eca-transient-menu)
-         ("C-c e" . eca-chat-toggle-window)
-         ("C-c i" . eca-chat-add-context-to-user-prompt)
-         (:map eca-chat-mode-map
+  :hook ((eca-chat-mode . my/eca-chat-mode-hook)
+         (eca-chat-mode . agent-chat-mode))
+  :bind ((:map eca-chat-mode-map
                ("C-c C-o" . my/eca-chat-expand-all-blocks)
                ("C-c C-c" . my/eca-chat-collapse-all-blocks)))
   :ensure t
@@ -243,15 +405,19 @@ this buffer."
   (eca-chat-shrink-called-tools nil))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; 3. claude-code-ide
+;; 2. claude-code-ide
 ;;    Using parsnips' fork with ghostel backend support (PR #190 upstream).
 ;;    Once merged upstream, switch back to:
 ;;      :vc (:url "https://github.com/manzaltu/claude-code-ide.el")
 ;; ─────────────────────────────────────────────────────────────────────────────
 
+(defun my/claude-code-ide--mark-buffer (&rest _)
+  "Mark the current buffer as a claude-code-ide buffer and enable agent keys."
+  (setq-local agent--claude-buffer-p t)
+  (agent-chat-mode 1))
+
 (use-package claude-code-ide
   :vc (:url "https://github.com/parsnips/claude-code-ide.el" :branch "codex/ghostel-backend-support")
-  :bind ("C-c C-'" . claude-code-ide-menu)
   :custom
   ;; Window configuration
   (claude-code-ide-window-side 'right)
@@ -275,7 +441,79 @@ this buffer."
   (claude-code-ide-terminal-backend 'ghostel)
   (claude-code-ide-prevent-reflow-glitch t)
   :config
-  (claude-code-ide-emacs-tools-setup))
+  (claude-code-ide-emacs-tools-setup)
+  ;; After claude-code-ide creates its session buffer, mark it and enable
+  ;; the unified in-buffer keymap.  The package does not define its own major
+  ;; mode, so we cannot hook on that — we rely on the command creating the
+  ;; buffer and leaving it current.
+  (advice-add 'claude-code-ide :after #'my/claude-code-ide--mark-buffer))
+
+;; ─────────────────────────────────────────────────────────────────────────────
+;; 3. agent-shell
+;; ─────────────────────────────────────────────────────────────────────────────
+
+(defun my/agent-shell-toggle ()
+  "Toggle agent shell display, falling back to any shell if none for project."
+  (interactive)
+  (if-let ((shell-buffer (or (and (derived-mode-p 'agent-shell-mode)
+                                  (current-buffer))
+                             (seq-first (agent-shell-project-buffers))
+                             (seq-first (agent-shell-buffers)))))
+      (if-let ((window (get-buffer-window shell-buffer)))
+          (if (> (count-windows) 1)
+              (delete-window window)
+            (switch-to-prev-buffer))
+        (agent-shell--display-buffer shell-buffer))
+    (call-interactively #'agent-shell)))
+
+(use-package acp
+  :vc (:url "https://github.com/xenodium/acp.el" :rev :newest))
+
+(use-package agent-shell
+  :vc (:url "https://github.com/xenodium/agent-shell" :rev :newest)
+  :init
+  (require 'diff)
+  :hook (agent-shell-mode . agent-chat-mode)
+  :custom
+  ;; Window configuration
+  (agent-shell-display-action
+   '((display-buffer-in-side-window)
+     (side . right)
+     (window-width . 90)))
+  ;; Show icons for different agent configs
+  (agent-shell-show-config-icons t)
+  ;; Expand tool use blocks by default
+  (agent-shell-tool-use-expand-by-default nil)
+  ;; Context sources for prompts
+  (agent-shell-context-sources '(files region error line))
+  :config
+  (transient-define-prefix agent-shell-menu ()
+    "Agent Shell commands."
+    ["Shell"
+     [("a" "Open shell" agent-shell)
+      ("t" "Toggle shell" agent-shell-toggle)
+      ("n" "New shell" agent-shell-new-shell)
+      ("c" "Compose prompt" agent-shell-prompt-compose)
+      ("o" "Other buffer" agent-shell-other-buffer)]
+     [("i" "Interrupt" agent-shell-interrupt)
+      ("r" "Resume pending" agent-shell-resume-pending-requests)
+      ("R" "Remove pending" agent-shell-remove-pending-request)]]
+    ["Session"
+     [("m" "Set model" agent-shell-set-session-model)
+      ("M" "Set mode" agent-shell-set-session-mode)
+      ("C" "Cycle mode" agent-shell-cycle-session-mode)]]
+    ["Send"
+     [("RET" "Queue request" agent-shell-queue-request)
+      ("f" "Send file" agent-shell-send-file)
+      ("F" "Send other file" agent-shell-send-other-file)
+      ("s" "Send screenshot" agent-shell-send-screenshot)
+      ("!" "Insert shell output" agent-shell-insert-shell-command-output)]]
+    ["Logs & Debug"
+     [("T" "Open transcript" agent-shell-open-transcript)
+      ("v" "View traffic" agent-shell-view-traffic)
+      ("l" "View ACP logs" agent-shell-view-acp-logs)
+      ("L" "Toggle logging" agent-shell-toggle-logging)
+      ("V" "Version" agent-shell-version)]]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; 4. pi-coding-agent — Emacs frontend for the pi CLI coding agent
@@ -286,26 +524,6 @@ this buffer."
 ;;   - pi CLI installed and authenticated:
 ;;       npm install -g @mariozechner/pi-coding-agent
 ;;       pi --login
-;;
-;; KEYBINDINGS
-;;
-;;   C-c C-p   Toggle the pi side panel for the current project.
-;;             Opens chat (top) + input (bottom) on the right without
-;;             disturbing your existing window layout.  Press again to
-;;             close.  If no session exists for the project yet, one is
-;;             created automatically.
-;;
-;;   C-c TAB   `my/pi-send-dwim' — context-aware send:
-;;             • With an active region: formats the selected code as a
-;;               fenced block annotated with the relative file path and
-;;               line range (e.g. `src/foo.clj` L42-67:), then appends
-;;               it to the pi input buffer and focuses it so you can
-;;               type your question immediately.
-;;             • Without a region: prompts for free-form text in the
-;;               minibuffer and sends that instead.
-;;
-;;   C-c C-m   Open the pi menu (inside pi buffers).
-;;             Frees up C-c C-p in pi's own keymaps for the toggle above.
 ;;
 ;; SIDE PANEL DESIGN
 ;;   Uses `display-buffer-in-side-window' so the panel lives at the right
@@ -319,23 +537,11 @@ this buffer."
 ;;       (ASE) indicator suppressed.
 ;;
 ;; HELPER FUNCTIONS (reusable building blocks)
-;;   `my/pi-region-to-string' BEG END
-;;       Pure function.  Returns a markdown fenced code block string for
-;;       the region, with a `file` L<start>-<end> header.  Language is
-;;       inferred from the buffer's major mode.  Easy to compose with
-;;       other send targets beyond pi.
-;;
 ;;   `my/pi-send-to-input' TEXT
 ;;       Appends TEXT to the pi input buffer for the current project,
 ;;       opens the side panel if hidden, and focuses the input window.
 ;;       Use this to build your own send commands (e.g. send a compile
 ;;       error, a git diff hunk, a CIDER exception, etc.).
-;;
-;; CIDER / CLOJURE NOTE
-;;   C-c C-p was previously bound to `cider-pprint-eval-last-sexp' in
-;;   cider-mode-map and to `nrepl-warn-when-not-connected' in
-;;   clojure-mode-map.  Both are unbound in setup-cider.el to free the
-;;   key for the pi toggle.
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (use-package pi-coding-agent
@@ -493,24 +699,16 @@ Without a region, reads a message from the minibuffer and sends that."
         (unless (string-empty-p text)
           (my/pi-send-to-input (concat text "\n"))))))
 
-  :hook
-  (pi-coding-agent-input-mode . my/pi--setup-image-yank)
+  :hook ((pi-coding-agent-input-mode . my/pi--setup-image-yank)
+         (pi-coding-agent-chat-mode  . agent-chat-mode)
+         (pi-coding-agent-input-mode . agent-chat-mode))
 
   :custom
   (pi-coding-agent-input-markdown-highlighting t)
 
   :init
   ;; Allow M-x pi as a shorthand
-  (defalias 'pi 'pi-coding-agent)
-
-  :bind (("C-c C-p" . my/pi-coding-agent-toggle)
-         ("C-c TAB" . my/pi-send-dwim)
-         :map pi-coding-agent-input-mode-map
-         ("C-c C-m" . pi-coding-agent-menu)
-         ("C-c C-p" . my/pi-coding-agent-toggle)
-         :map pi-coding-agent-chat-mode-map
-         ("C-c C-m" . pi-coding-agent-menu)
-         ("C-c C-p" . my/pi-coding-agent-toggle)))
+  (defalias 'pi 'pi-coding-agent))
 
 (provide 'setup-ai)
 ;;; setup-ai.el ends here
