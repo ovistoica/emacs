@@ -155,8 +155,10 @@ ready to paste into any agent chat."
 (defun copy-current-buffer-dwim (beg end)
   "Copy file path of the current buffer or code block from BEG to END of region.
 If the region is selected, use `region-as-code-block' otherwise use
-`copy-current-file-path'"
-  (interactive "r")
+`copy-current-file-path'."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
   (if (use-region-p)
       (region-as-code-block beg end)
     (copy-current-file-path)))
