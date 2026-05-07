@@ -65,13 +65,7 @@
 
   :config
   ;; Rebind keys that clash with windmove / standard navigation to super equivalents
-  (dolist (entry '(("M-s"         "s-s"         paredit-splice-sexp)
-                   ("M-<up>"      "s-<up>"      paredit-splice-sexp-killing-backward)
-                   ("M-<down>"    "s-<down>"    paredit-splice-sexp-killing-forward)
-                   ("C-<right>"   "s-<right>"   paredit-forward-slurp-sexp)
-                   ("C-<left>"    "s-<left>"    paredit-forward-barf-sexp)
-                   ("C-M-<left>"  "s-S-<left>"  paredit-backward-slurp-sexp)
-                   ("C-M-<right>" "s-S-<right>" paredit-backward-barf-sexp)))
+  (dolist (entry '(("M-s"         "s-s"         paredit-splice-sexp)))
     (let ((original    (nth 0 entry))
           (replacement (nth 1 entry))
           (command     (nth 2 entry)))
@@ -83,6 +77,11 @@
   (put 'paredit-backward-delete 'delete-selection 'supersede)
   (put 'paredit-newline          'delete-selection t)
 
+  ;; M-[ clashes with the CSI escape prefix in terminals; bind only in GUI.
+  (when (display-graphic-p)
+    (define-key paredit-mode-map (kbd "M-[") #'paredit-wrap-square)
+    (define-key paredit-mode-map (kbd "M-]") #'paredit-wrap-square-from-behind))
+
   ;; Enable `paredit-mode' in the minibuffer during `eval-expression'.
   (add-hook 'minibuffer-setup-hook #'conditionally-enable-paredit-mode)
 
@@ -92,11 +91,6 @@
               ("C-d"            . paredit-forward-delete)
               ("M-("            . paredit-wrap-round)
               ("M-)"            . paredit-wrap-round-from-behind)
-              ;; M-[ is the CSI escape prefix in terminals — Shift-Left sends
-              ;; ESC [ which Emacs reads as M-[, stealing windmove-left.
-              ;; Use C-c [ / C-c ] instead, which work in both GUI and terminal.
-              ("M-["            . nil)
-              ("M-]"            . nil)
               ("C-c ["          . paredit-wrap-square)
               ("C-c ]"          . paredit-wrap-square-from-behind)
               ("M-{"            . paredit-wrap-curly)
