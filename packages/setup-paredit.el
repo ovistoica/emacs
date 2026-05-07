@@ -90,11 +90,15 @@
               ("M-C-<backspace>" . backward-kill-sexp)
               ("C-d"            . paredit-forward-delete)
               ("M-("            . paredit-wrap-round)
+              ("C-c ("            . paredit-wrap-round)
               ("M-)"            . paredit-wrap-round-from-behind)
+              ("C-c )"            . paredit-wrap-round-from-behind)
               ("C-c ["          . paredit-wrap-square)
               ("C-c ]"          . paredit-wrap-square-from-behind)
               ("M-{"            . paredit-wrap-curly)
-              ("M-}"            . paredit-wrap-curly-from-behind)))
+              ("C-c {"            . paredit-wrap-curly)
+              ("M-}"            . paredit-wrap-curly-from-behind)
+              ("C-c }"            . paredit-wrap-curly-from-behind)))
 
 (provide 'setup-paredit)
 ;;; setup-paredit.el ends here
