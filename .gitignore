@@ -28,3 +28,5 @@
 /.dap-breakpoints
 /ielm-history.eld
 /.agent-shell/
+/.my-saved-places
+/agent/

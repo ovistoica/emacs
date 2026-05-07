@@ -4,7 +4,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("7fd4499ff9c34cc3952eb586e352a65cfc9355ca3289ec2bdd4510a6e925d113"
+   '("e9835d67c171416877752f0aa0293b1f2070e5e011fb76419bae0adead7cbd45"
+     "7fd4499ff9c34cc3952eb586e352a65cfc9355ca3289ec2bdd4510a6e925d113"
      "21c4c4b7d3ab161aaa28b15ca846854d395c33cfb7c6863ab601adfe10d70ce0"
      "1b7e575c6681e66d8d83634c2c160b40af12f3756360a4dd81b8032f4495cb5e"
      "dde7fb0b1ed1bb5b61e62bf1a00696cf099a2b290718aee9b377365b3ed992f0"
@@ -43,9 +44,9 @@
    '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
          catppuccin-theme chezmoi claude-code-ide clj-refactor consult-flycheck
          dashboard datomic-snippets deadgrep denote diff-hl diminish
-         dired-quick-sort dired-subtree dired-toggle-sudo dockerfile-mode
-         doom-themes doric-themes dts-mode eca edit-indirect envrc
-         exec-path-from-shell expand-region fontaine forge frame-fns
+         dired-preview dired-quick-sort dired-subtree dired-toggle-sudo
+         dockerfile-mode doom-themes doric-themes dts-mode eca edit-indirect
+         envrc exec-path-from-shell expand-region fontaine forge frame-fns
          git-timemachine groovy-mode helpful hide-mode-line hl-todo
          html-to-hiccup kaocha-runner keycast lin logos lsp-java lsp-pyright
          lsp-tailwindcss lsp-ui magit marginalia mise modus-themes move-text
