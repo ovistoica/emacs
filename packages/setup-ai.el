@@ -83,7 +83,7 @@
 (defconst agent-backends '(eca agent-shell pi claude-code-ide)
   "Known agent backends, in display order.")
 
-(defcustom agent-current 'agent-shell
+(defcustom agent-current 'eca
   "Which agent harness the standard keys target by default.
 Override per-project via `.dir-locals.el':
   ((nil . ((agent-current . eca))))"
