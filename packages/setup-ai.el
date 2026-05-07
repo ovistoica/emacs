@@ -124,7 +124,7 @@ mode; elsewhere the value of `agent-current' is used."
   "Toggle the chat window of the current agent backend and focus it."
   (interactive)
   (pcase (agent--active-backend)
-    ('eca             (call-interactively #'eca-chat-toggle-window))
+    ('eca             (call-interactively #'my/eca-toggle))
     ('agent-shell     (call-interactively #'my/agent-shell-toggle))
     ('pi              (call-interactively #'my/pi-coding-agent-toggle))
     ('claude-code-ide (call-interactively #'claude-code-ide-toggle))
@@ -310,13 +310,48 @@ and returns the original propertized string."
       (when (and prompt (not (string-empty-p prompt)))
         (eca-chat-send-prompt prompt))))
 
+  (defun my/eca--display-buffer (buffer &optional focus)
+    "Display ECA chat BUFFER as a dismissible right side window.
+Unlike `eca-chat--display-buffer', the window does NOT carry the
+`no-delete-other-windows' parameter, so `C-x 1' and full-screen
+commands (magit, etc.) can close it normally.
+When FOCUS is non-nil, select the window after displaying it."
+    (let* ((action '((display-buffer-in-side-window)
+                     (side . right)
+                     (slot . 0)
+                     (window-width . 0.40)))
+           (win (display-buffer buffer action)))
+      (when (and win focus)
+        (select-window win))
+      win))
+
+  (defun my/eca-toggle ()
+    "Toggle the ECA chat window as a dismissible right side window.
+Mirrors the behaviour of `my/agent-shell-toggle': visible window is
+closed with `delete-window', invisible buffer is shown via
+`my/eca--display-buffer' (no `no-delete-other-windows' guard)."
+    (interactive)
+    (when-let* ((session (eca-session)))
+      (let ((buffer (eca-chat--get-last-buffer session)))
+        (if (buffer-live-p buffer)
+            (if-let ((win (get-buffer-window buffer)))
+                ;; Window is visible — close it (just like agent-shell-toggle)
+                (if (> (count-windows) 1)
+                    (delete-window win)
+                  (switch-to-prev-buffer))
+              ;; Window is hidden — show it and focus it
+              (my/eca--display-buffer buffer t)
+              (with-current-buffer buffer
+                (goto-char (point-max))))
+          ;; No buffer yet — fall back to the standard open command
+          (eca-chat-toggle-window)))))
+
   (defun my/eca-ensure-chat-window-visible (&rest _)
     "Ensure the ECA chat window is visible before interacting with it."
     (when-let* ((session (eca-session))
                 (buffer (eca-chat--get-last-buffer session)))
       (unless (get-buffer-window buffer t)
-        (let ((eca-chat-focus-on-open nil))
-          (eca-chat--display-buffer buffer)))))
+        (my/eca--display-buffer buffer nil))))
 
   (defvar-local my/eca-auto-expand-blocks nil
     "When non-nil, auto-expand new expandable blocks as they are added.")
@@ -383,7 +418,12 @@ this buffer."
   (eca-chat-auto-add-repomap t)
   (eca-worktree-mode 'isolated)
   ;; Keep tool call blocks open after they complete — no manual tabbing needed.
-  (eca-chat-shrink-called-tools nil))
+  (eca-chat-shrink-called-tools nil)
+  ;; Disable ECA's built-in side-window logic so it never attaches
+  ;; `no-delete-other-windows' to the chat window.  All display is
+  ;; handled by `my/eca--display-buffer' / `my/eca-toggle', which
+  ;; mirrors agent-shell's dismissible-side-window behaviour.
+  (eca-chat-use-side-window nil))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; 2. claude-code-ide
