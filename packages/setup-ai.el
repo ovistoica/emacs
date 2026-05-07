@@ -252,41 +252,20 @@ pi-coding-agent, and claude-code-ide buffers."
 
 (defun my/eca-fix-autoloads ()
   "Regenerate ECA autoloads if broken by package-vc.
-package-vc sometimes generates a stub autoloads file that loads itself
-recursively instead of containing actual autoload definitions.  This
-detects and fixes that by regenerating autoloads properly."
+package-vc sometimes produces an empty autoloads file with no actual
+autoload forms — just the load-path boilerplate.  Detect by absence of
+any `(autoload' form and regenerate if needed."
   (when-let* ((pkg-dir (and (package-installed-p 'eca)
                             (package-desc-dir (cadr (assq 'eca package-alist)))))
               (autoloads-file (expand-file-name "eca-autoloads.el" pkg-dir)))
     (when (and (file-exists-p autoloads-file)
                (with-temp-buffer
                  (insert-file-contents autoloads-file)
-                 ;; Broken if it only has the self-referencing stub
-                 (and (search-forward "Autoload indirection" nil t)
-                      (not (search-forward ";;; Generated autoloads" nil t)))))
-      (message "ECA: Regenerating broken autoloads...")
+                 (not (search-forward "(autoload " nil t))))
+      (message "ECA: Regenerating missing autoloads...")
       (package-generate-autoloads "eca" pkg-dir)
-      ;; Remove the self-referencing stub and add proper header
-      (with-temp-buffer
-        (insert-file-contents autoloads-file)
-        (goto-char (point-min))
-        (when (search-forward "Autoload indirection" nil t)
-          (let ((stub-end (search-forward "\n\n" nil t)))
-            (when stub-end
-              (delete-region (point-min) stub-end)
-              (goto-char (point-min))
-              ;; Proper header with load-path setup (critical for package-vc)
-              (insert ";;; eca-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-\n"
-                      ";;\n;;; Code:\n\n"
-                      "(add-to-list 'load-path (or (and load-file-name (directory-file-name (file-name-directory load-file-name))) (car load-path)))\n\n")
-              ;; Add provide/footer if missing
-              (goto-char (point-max))
-              (unless (search-backward "(provide 'eca-autoloads)" nil t)
-                (goto-char (point-max))
-                (insert "\n(provide 'eca-autoloads)\n;;; eca-autoloads.el ends here\n"))
-              (write-region (point-min) (point-max) autoloads-file))))
-        (load autoloads-file nil t)
-        (message "ECA: Autoloads regenerated successfully.")))))
+      (load autoloads-file nil t)
+      (message "ECA: Autoloads regenerated successfully."))))
 
 (defun my/eca-recover-completion-item (item)
   "Return ITEM with `eca-chat-completion-item' text property restored if missing.
@@ -312,6 +291,8 @@ and returns the original propertized string."
 (defun my/eca-chat-mode-hook ()
   "Disable various minor modes in ECA chat buffers for cleaner experience."
   (when (fboundp 'denote-rename-buffer-mode) (denote-rename-buffer-mode -1)))
+
+(my/eca-fix-autoloads)
 
 (use-package eca
   :defines (eca-chat-focus-on-open)
@@ -476,7 +457,7 @@ this buffer."
   :hook (agent-shell-mode . agent-chat-mode)
   :config
   (setq agent-shell-thought-process-expand-by-default t
-        agent-shell-tool-use-expand-by-default t)
+        agent-shell-tool-use-expand-by-default nil)
   :custom
   ;; Window configuration
   (agent-shell-display-action
@@ -496,6 +477,7 @@ this buffer."
      [("a" "Open shell" agent-shell)
       ("t" "Toggle shell" agent-shell-toggle)
       ("n" "New shell" agent-shell-new-shell)
+      ("S" "Resume session" agent-shell-resume-session)
       ("c" "Compose prompt" agent-shell-prompt-compose)
       ("o" "Other buffer" agent-shell-other-buffer)]
      [("i" "Interrupt" agent-shell-interrupt)
