@@ -73,3 +73,6 @@
 
 (defun snippet--function-name ()
   (if (js-function-declaration-p) "name" ""))
+
+(provide 'setup-yasnippet)
+;;; setup-yasnippet.el ends here

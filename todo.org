@@ -13,3 +13,5 @@
 CLOSED: [2026-04-19 Sun 14:57]
 
 * TODO Change yasnipper =pro= snipper to also include =;;; file.el ends here=
+
+* TODO Take any resources you need from this blog [[https://www.jamescherti.com/essential-emacs-packages/][Essential Emacs packages]]

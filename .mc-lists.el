@@ -17,6 +17,7 @@
         down-list
         end-of-buffer
         fixup-whitespace
+        fontaine-set-preset
         forward-sexp
         indent-for-tab-command
         kill-region-or-backward-word
@@ -30,6 +31,7 @@
         my/convert-classes-to-vector
         my/copy-buffer-as-prompt
         my/insert-lambda-symbol
+        my/org-linkify-jira-ticket-at-point
         org-delete-char
         org-end-of-line
         org-kill-line
@@ -64,10 +66,12 @@
         cider-load-buffer
         consult-recent-file
         dired-jump
+        fontaine-set-preset
         handle-switch-frame
         ignore
         ignore-preserving-kill-region
         isearch-forward-use-region
+        keycast-header-line-mode
         lsp-ui-doc--handle-mouse-movement
         mouse-set-region
         my/format-buffer

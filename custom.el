@@ -4,7 +4,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("e9835d67c171416877752f0aa0293b1f2070e5e011fb76419bae0adead7cbd45"
+   '("8a95e584305d4738adc30c886aad967a240eb5c277b197ad37ae60b1deee7f4b"
+     "6e8a05fb04263e01db44146fb3f549b2abea6b5ce432d9c755fd40cff5384f60"
+     "e9835d67c171416877752f0aa0293b1f2070e5e011fb76419bae0adead7cbd45"
      "7fd4499ff9c34cc3952eb586e352a65cfc9355ca3289ec2bdd4510a6e925d113"
      "21c4c4b7d3ab161aaa28b15ca846854d395c33cfb7c6863ab601adfe10d70ce0"
      "1b7e575c6681e66d8d83634c2c160b40af12f3756360a4dd81b8032f4495cb5e"
@@ -42,9 +44,9 @@
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
  '(package-selected-packages
    '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
-         catppuccin-theme chezmoi claude-code-ide clj-refactor consult-flycheck
-         dashboard datomic-snippets deadgrep denote diff-hl diminish
-         dired-preview dired-quick-sort dired-subtree dired-toggle-sudo
+         casual catppuccin-theme chezmoi claude-code-ide clj-refactor
+         consult-flycheck dashboard datomic-snippets deadgrep denote diff-hl
+         diminish dired-preview dired-quick-sort dired-subtree dired-toggle-sudo
          dockerfile-mode doom-themes doric-themes dts-mode eca edit-indirect
          envrc exec-path-from-shell expand-region fontaine forge frame-fns
          git-timemachine groovy-mode helpful hide-mode-line hl-todo

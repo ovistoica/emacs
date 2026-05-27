@@ -28,6 +28,6 @@ Uses `op read` which requires 1Password CLI to be available and unlocked."
         (setenv "ANTHROPIC_API_KEY" key)))))
 
 ;; Run on an idle timer to ensure 1Password agent is available
-(run-with-idle-timer 2 nil #'my/ensure-1password-api-keys)
+;;; (run-with-idle-timer 2 nil #'my/ensure-1password-api-keys)
 
 (provide 'linux-setup)
