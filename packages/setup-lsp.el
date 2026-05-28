@@ -19,6 +19,7 @@
   :hook ((clojure-mode . lsp)
          (clojurescript-mode . lsp)
          (clojurec-mode . lsp)
+         (edn-mode . lsp)
          (python-mode . lsp)
          ;; TypeScript modes
          (typescript-mode . lsp)
@@ -39,6 +40,9 @@
   :custom
   (lsp-completion-provider :none)  ;; Skip company-mode
   :init
+  ;; Teach lsp-mode that edn-mode buffers speak the "clojure" language understood
+  ;; by clojure-lsp.  Must be set before lsp starts in any edn buffer.
+  (add-to-list 'lsp-language-id-configuration '(edn-mode . "clojure"))
   (setq lsp-headerline-breadcrumb-enable nil) ;; Don't need file path in my buffer
   (setq lsp-lens-enable t) ;; Show reference and test counts
   (setq lsp-enable-indentation nil) ;; use clojure-mode indentation
@@ -66,6 +70,12 @@
   ;; (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
 
   :config
+  ;; clojure-lsp registers itself only for clojure-mode and friends.
+  ;; Patch edn-mode into its :major-modes list so it activates for deps.edn etc.
+  (with-eval-after-load 'lsp-clojure
+    (let ((client (gethash 'clojure-lsp lsp-clients)))
+      (when client
+        (cl-pushnew 'edn-mode (lsp--client-major-modes client)))))
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
   (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback)
   ;; (setq lsp-use-plists t) - disabled as currently getting errors
