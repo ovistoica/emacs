@@ -151,6 +151,11 @@ http://iqbalansari.github.io/blog/2014/12/07/automatically-create-parent-directo
   :defer 1
   :config (auto-sudoedit-mode 1))
 
+;; Save bookmarks immediately after each change, not only on clean exit.
+;; Without this, bookmarks are lost when the Emacs daemon is killed instead
+;; of exiting cleanly via C-x C-c.
+(setq bookmark-save-flag 1)
+
 ;; Make calendars start on Monday
 (setq calendar-week-start-day 1)
 
