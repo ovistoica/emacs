@@ -12,6 +12,8 @@
 (global-set-key (kbd "S-<up>") 'windmove-up)
 (global-set-key (kbd "S-<down>") 'windmove-down)
 (global-set-key (kbd "M-o") 'other-window)
+;; Prevent repeat-mode from letting bare `o` repeat other-window after M-o
+(put 'other-window 'repeat-map nil)
 
 ;: Keep them windows nice and balanced
 (global-set-key (kbd "C-x 0") 'my/delete-window)
