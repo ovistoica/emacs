@@ -35,6 +35,7 @@
 ;;; Code:
 
 (require 'transient)
+(require 'package)
 (require 'buffers)
 
 ;; Forward declarations — the underlying packages are loaded lazily via
@@ -42,6 +43,7 @@
 (declare-function eca-chat-toggle-window "eca-chat")
 (declare-function eca-chat-add-context-to-user-prompt "eca-chat")
 (declare-function eca-chat-send-prompt "eca-chat")
+(declare-function eca-chat-add-filepath-to-user-prompt "eca-chat")
 (declare-function eca-transient-menu "eca")
 (declare-function eca-chat-stop-prompt "eca-chat")
 (declare-function eca-chat-new "eca-chat")
@@ -53,11 +55,15 @@
 (declare-function agent-shell-new-shell "agent-shell")
 (declare-function agent-shell-other-buffer "agent-shell")
 (declare-function agent-shell-send-region "agent-shell" (&optional pick-shell))
+(declare-function agent-shell-send-file "agent-shell" (&optional prompt-for-file pick-shell))
 (declare-function agent-shell-queue-request "agent-shell")
 (declare-function pi-coding-agent-queue-steering "pi-coding-agent")
 (declare-function agent-shell-project-buffers "agent-shell")
+(declare-function agent-shell-buffers "agent-shell")
+(declare-function agent-shell--display-buffer "agent-shell")
 
 (declare-function claude-code-ide "claude-code-ide")
+(declare-function claude-code-ide-emacs-tools-setup "claude-code-ide-emacs-tools")
 (declare-function claude-code-ide-toggle "claude-code-ide")
 (declare-function claude-code-ide-menu "claude-code-ide")
 (declare-function claude-code-ide-send-escape "claude-code-ide")
@@ -70,6 +76,11 @@
 (declare-function pi-coding-agent-abort "pi-coding-agent")
 (declare-function pi-coding-agent-new-session "pi-coding-agent")
 (declare-function pi-coding-agent-resume-session "pi-coding-agent")
+
+;; Variables referenced before their defining package loads (silence the
+;; byte-compiler's free-variable warnings; the real definitions live in eca).
+(defvar eca-chat--context-completion-cache)
+(defvar eca-chat--file-completion-cache)
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; 0. Agent protocol
@@ -130,20 +141,43 @@ mode; elsewhere the value of `agent-current' is used."
     ('claude-code-ide (call-interactively #'claude-code-ide-toggle))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
-(defun agent-send-region-or-prompt (beg end)
-  "Send the region BEG..END to the current agent, or prompt for text.
-With an active region, delegates to the backend's region-sender (which is
-expected to toggle/focus its chat window).  Without a region, reads free-form
-text from the minibuffer and sends it as a prompt."
-  (interactive "r")
+(defun agent-send-chat-context-dwim (beg end)
+  "Send context to the current agent in a DWIM manner.
+BEG and END bound the active region, or are nil when no region is active.
+They are resolved in the `interactive' form rather than via the \"r\" spec so
+the command never errors with \"The mark is not set\" in buffers that have
+never had a mark.
+Resolution order:
+  1. With an active region BEG..END, delegate to the backend's region-sender
+     (which is expected to toggle/focus its chat window).
+  2. With no region but visiting a file, send a reference to that file.
+     Most harnesses accept an @path/to/file mention; each backend's native
+     file-sender handles the current buffer's file.
+  3. Otherwise (a non-file buffer), read free-form text from the minibuffer
+     and send it as a prompt."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
   (let ((backend (agent--active-backend)))
-    (if (use-region-p)
-        (pcase backend
-          ('eca             (call-interactively #'eca-chat-add-context-to-user-prompt))
-          ('agent-shell     (call-interactively #'agent-shell-send-region))
-          ('pi              (my/pi-send-dwim beg end))
-          ('claude-code-ide (call-interactively #'claude-code-ide-insert-at-mentioned))
-          (_ (user-error "Unknown agent backend: %s" backend)))
+    (cond
+     ;; 1. Region selected → send the region.
+     ((use-region-p)
+      (pcase backend
+        ('eca             (call-interactively #'eca-chat-add-context-to-user-prompt))
+        ('agent-shell     (call-interactively #'agent-shell-send-region))
+        ('pi              (my/pi-send-dwim beg end))
+        ('claude-code-ide (call-interactively #'claude-code-ide-insert-at-mentioned))
+        (_ (user-error "Unknown agent backend: %s" backend))))
+     ;; 2. No region, but visiting a file → send the file itself.
+     ((buffer-file-name)
+      (pcase backend
+        ('eca             (call-interactively #'eca-chat-add-filepath-to-user-prompt))
+        ('agent-shell     (call-interactively #'agent-shell-send-file))
+        ('pi              (my/pi-send-file))
+        ('claude-code-ide (call-interactively #'claude-code-ide-insert-at-mentioned))
+        (_ (user-error "Unknown agent backend: %s" backend))))
+     ;; 3. Non-file buffer → prompt for free-form text.
+     (t
       (let ((text (read-string (format "Send to %s: " (agent--label backend)))))
         (unless (string-empty-p text)
           (pcase backend
@@ -152,7 +186,7 @@ text from the minibuffer and sends it as a prompt."
                                      (insert text)))
             ('pi              (my/pi-send-to-input (concat text "\n")))
             ('claude-code-ide (claude-code-ide-send-prompt text))
-            (_ (user-error "Unknown agent backend: %s" backend))))))))
+            (_ (user-error "Unknown agent backend: %s" backend)))))))))
 
 (defun agent-open-menu ()
   "Open the transient menu of the current agent backend."
@@ -195,12 +229,16 @@ text from the minibuffer and sends it as a prompt."
     (backend (user-error "Unknown agent backend: %s" backend))))
 
 (defun agent-queue-message ()
-  "Queue a message to the current agent backend (send now if idle)."
+  "Queue a message to the current agent backend (send now if idle).
+Queueing is only supported by agent-shell and pi; ECA and claude-code-ide
+do not expose a queue API."
   (interactive)
   (pcase (agent--active-backend)
     ('agent-shell     (call-interactively #'agent-shell-queue-request))
     ('pi              (call-interactively #'pi-coding-agent-queue-steering))
-    (backend (user-error "Queue not supported for backend: %s" backend))))
+    ('eca             (user-error "Queue not supported for ECA"))
+    ('claude-code-ide (user-error "Queue not supported for Claude Code IDE"))
+    (backend          (user-error "Queue not supported for backend: %s" backend))))
 
 (defun agent-switch-backend ()
   "Interactively set `agent-current' for this Emacs session."
@@ -232,7 +270,7 @@ pi-coding-agent, and claude-code-ide buffers."
 (defvar agent-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c e") #'agent-toggle-window)
-    (define-key map (kbd "C-c i") #'agent-send-region-or-prompt)
+    (define-key map (kbd "C-c i") #'agent-send-chat-context-dwim)
     (define-key map (kbd "C-c .") #'agent-open-menu)
     (define-key map (kbd "C-c ,") #'agent-switch-backend)
     map)
@@ -253,7 +291,7 @@ pi-coding-agent, and claude-code-ide buffers."
 (defun my/eca-fix-autoloads ()
   "Regenerate ECA autoloads if broken by package-vc.
 package-vc sometimes produces an empty autoloads file with no actual
-autoload forms — just the load-path boilerplate.  Detect by absence of
+autoload forms — just the `load-path' boilerplate.  Detect by absence of
 any `(autoload' form and regenerate if needed."
   (when-let* ((pkg-dir (and (package-installed-p 'eca)
                             (package-desc-dir (cadr (assq 'eca package-alist)))))
@@ -295,7 +333,8 @@ and returns the original propertized string."
 (my/eca-fix-autoloads)
 
 (use-package eca
-  :defines (eca-chat-focus-on-open)
+  :defines (eca-chat-focus-on-open
+            eca-chat-mode-map)
   :functions (eca-session
               eca-chat--get-last-buffer
               eca-chat--display-buffer
@@ -393,8 +432,11 @@ this buffer."
                ("C-c C-c" . my/eca-chat-collapse-all-blocks)))
   :ensure t
   :config
-  ;; Ensure chat window is visible before adding context
+  ;; Ensure chat window is visible before adding context.  Both senders end by
+  ;; calling `eca-chat--select-window', which errors when the window is hidden,
+  ;; so display it first.
   (advice-add 'eca-chat-add-context-to-user-prompt :before #'my/eca-ensure-chat-window-visible)
+  (advice-add 'eca-chat-add-filepath-to-user-prompt :before #'my/eca-ensure-chat-window-visible)
 
   ;; Register the auto-expand advice once globally — it is a no-op in buffers
   ;; where my/eca-auto-expand-blocks is nil (the default).
@@ -415,8 +457,8 @@ this buffer."
                              (cons (my/eca-recover-completion-item (car args)) (cdr args))))
 
   :custom
-  (eca-chat-auto-add-repomap t)
-  (eca-worktree-mode 'isolated)
+  (eca-chat-auto-add-repomap nil)
+  ;; (eca-worktree-mode 'isolated)
   ;; Keep tool call blocks open after they complete — no manual tabbing needed.
   (eca-chat-shrink-called-tools nil)
   ;; Disable ECA's built-in side-window logic so it never attaches
@@ -495,9 +537,6 @@ this buffer."
   :init
   (require 'diff)
   :hook (agent-shell-mode . agent-chat-mode)
-  :config
-  (setq agent-shell-thought-process-expand-by-default t
-        agent-shell-tool-use-expand-by-default nil)
   :custom
   ;; Window configuration
   (agent-shell-display-action
@@ -506,7 +545,8 @@ this buffer."
      (window-width . 90)))
   ;; Show icons for different agent configs
   (agent-shell-show-config-icons t)
-  ;; Expand tool use blocks by default
+  ;; Expand the thought-process blocks but collapse tool-use blocks by default
+  (agent-shell-thought-process-expand-by-default t)
   (agent-shell-tool-use-expand-by-default nil)
   ;; Context sources for prompts
   (agent-shell-context-sources '(files region error line))
@@ -715,14 +755,30 @@ Opens the side panel if not currently visible."
 
   (defun my/pi-send-dwim (beg end)
     "Send to pi: region as a fenced code block, or prompt for free-form text.
+BEG and END bound the active region, or are nil when no region is active.
 With an active region, formats it with file path and line range and sends it.
 Without a region, reads a message from the minibuffer and sends that."
-    (interactive "r")
+    (interactive (if (use-region-p)
+                     (list (region-beginning) (region-end))
+                   (list nil nil)))
     (if (use-region-p)
         (my/pi-send-to-input (region-to-string beg end))
       (let ((text (read-string "Send to pi: ")))
         (unless (string-empty-p text)
           (my/pi-send-to-input (concat text "\n"))))))
+
+  (defun my/pi-send-file ()
+    "Send a reference to the current buffer's file to the pi session.
+Unlike the other harnesses, pi exposes no one-shot send-file command — only
+interactive `@' completion in its input buffer.  This inserts pi's native
+@path file reference (project-relative when possible) so pi resolves it as a
+file, mirroring what `@' completion produces."
+    (let* ((file (buffer-file-name))
+           (dir  (ignore-errors (pi-coding-agent--session-directory)))
+           (rel  (if (and dir (file-in-directory-p file dir))
+                     (file-relative-name file dir)
+                   file)))
+      (my/pi-send-to-input (concat "@" rel " "))))
 
   :hook ((pi-coding-agent-input-mode . my/pi--setup-image-yank)
          (pi-coding-agent-chat-mode  . agent-chat-mode)
@@ -733,7 +789,7 @@ Without a region, reads a message from the minibuffer and sends that."
 
   :init
   ;; Allow M-x pi as a shorthand
-  (defalias 'pi 'pi-coding-agent))
+  (defalias 'pi #'pi-coding-agent))
 
 (provide 'setup-ai)
 ;;; setup-ai.el ends here
