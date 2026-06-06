@@ -1,9 +1,28 @@
-;; Projectile
-;;
-;; A project interaction library. It provides a nice set of features operating
-;; on a project level without introducing external dependencies
+;;; setup-projectile.el --- Projectile project interaction setup -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Projectile is a project interaction library.  It provides a nice set of
+;; features operating on a project level without introducing external
+;; dependencies.  This module wires Projectile up with perspectives so that
+;; switching projects also switches workspaces.
+
+;;; Code:
+
+(declare-function projectile-switch-project-by-name "projectile")
+(declare-function projectile-project-root "projectile")
+(declare-function projectile-mode "projectile")
+(declare-function projectile-find-file "projectile")
+(declare-function with-perspective "setup-perspective")
+(declare-function s-contains? "s")
+
+(defvar projectile-command-map)
+(defvar projectile-ignored-project-function)
+(defvar projectile-switch-project-action)
 
 (defun my/projectile-switch-project-to-emacs ()
+  "Switch to the Emacs configuration project.
+Prefer \"~/.config/emacs\" when it exists, otherwise fall back to
+the classic \"~/.emacs.d\" location."
   (interactive)
   (let ((emacs-dir (if (file-directory-p "~/.config/emacs")
                        "~/.config/emacs/"
@@ -42,58 +61,34 @@ Attaches to an existing session if one already exists."
 
   (require 'setup-perspective)
   (require 'project-processes)
-  (setq projectile-switch-project-action 'my/projectile-switch-project-action)
 
-  ;; Commander methods — keys chosen to avoid conflicts with projectile defaults
-  (def-projectile-commander-method ?f
-    "Find file in project."
-    (projectile-find-file))
-
-  (def-projectile-commander-method ?d
-    "Open project root in Dired."
-    (projectile-dired))
-
-  (def-projectile-commander-method ?v
-    "Open vterm in project root."
-    (projectile-run-vterm))
-
-  (def-projectile-commander-method ?e
-    "Open eshell in project root."
-    (projectile-run-eshell))
-
-  (def-projectile-commander-method ?c
-    "Start an ECA session in project root."
-    (let ((default-directory (projectile-project-root)))
-      (if (fboundp 'eca)
-          (eca)
-        (message "ECA is not available"))))
-
-  (def-projectile-commander-method ?m
-    "Open Ghostty with tmux in project root."
-    (my/projectile-run-tmux)))
+  ;; Post-switch action:
+  ;;   - first visit to a project -> new perspective + `projectile-find-file'
+  ;;   - returning to a project    -> restore its perspective, landing you in
+  ;;                                  the most recently visited file
+  (setq projectile-switch-project-action #'switch-perspective+find-file))
 
 (use-package project-processes
   :ensure nil
   :defer t
-  :after (projectile prodigy)
-  )
+  :after (projectile prodigy))
 
 (defun current-project-name ()
+  "Return the name of the current Projectile project.
+This is the final directory component of the project root."
   (cadr (reverse (split-string (projectile-project-root) "/"))))
 
 (defun switch-perspective+find-file ()
+  "Switch to the current project's perspective, finding a file on first visit.
+On the first visit a perspective is created and `projectile-find-file'
+prompts for a file.  On subsequent visits the existing perspective is
+restored, landing point in the most recently visited file."
   (with-perspective (current-project-name)
     (projectile-find-file)))
 
-;; Project switch action: switch perspective first, then offer commander menu
-(defun my/projectile-switch-project-action ()
-  "Switch to the project's perspective, then offer a commander menu.
-On first visit the perspective is initialized and the menu is shown.
-On subsequent visits the perspective is simply restored and the menu shown."
-  (with-perspective (current-project-name)
-    (projectile-commander)))
-
 (defun my/ignore-project? (file-name)
+  "Return non-nil when FILE-NAME belongs to a project that should be ignored.
+Currently ignores Clojure's \".gitlibs\" dependency checkouts."
   (s-contains? ".gitlibs" file-name))
 
 (provide 'setup-projectile)
