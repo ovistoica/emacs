@@ -4,6 +4,20 @@
 ;; multiple desktops in window managers like Awesome and XMonad, and Spaces on
 ;; the Mac.
 
+(defun my/persp-sort-buffer-names-by-recency (names)
+  "Sort NAMES (buffer names) by recency of selection.
+Most recently visited buffers come first, following `buffer-list' order.
+Names not present in `buffer-list' are kept at the end in their original order."
+  (let ((recency (make-hash-table :test 'equal))
+        (i 0))
+    (dolist (buf (buffer-list))
+      (puthash (buffer-name buf) i recency)
+      (setq i (1+ i)))
+    (sort (copy-sequence names)
+          (lambda (a b)
+            (< (gethash a recency most-positive-fixnum)
+               (gethash b recency most-positive-fixnum))))))
+
 (use-package perspective
   :vc (:url "https://github.com/nex3/perspective-el")
   :bind (("C-x k" . persp-kill-buffer*)
@@ -15,7 +29,17 @@
   (setq persp-modestring-short t)
   (persp-add-buffer-to-frame-global "*Messages*")
   (persp-add-buffer-to-frame-global "*Warnings*")
-  (persp-add-buffer-to-frame-global "*lsp-log*"))
+  (persp-add-buffer-to-frame-global "*lsp-log*")
+
+  ;; Order `persp-switch-to-buffer*' candidates by recency (most recently
+  ;; visited first).  persp feeds candidates to `completing-read' without a
+  ;; `display-sort-function', so Vertico would otherwise re-sort them with
+  ;; `vertico-sort-history-length-alpha' and discard recency.  Register a
+  ;; command-specific Vertico sort instead; it is honoured only here.
+  (with-eval-after-load 'vertico-multiform
+    (add-to-list 'vertico-multiform-commands
+                 '(persp-switch-to-buffer*
+                   (vertico-sort-function . my/persp-sort-buffer-names-by-recency)))))
 
 ;; Avoid popping ediff up in separate window, it breaks perspective
 (setq ediff-window-setup-function #'ediff-setup-windows-plain)

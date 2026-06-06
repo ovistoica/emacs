@@ -24,6 +24,14 @@
   ;; cleans ~/foo/bar/// to /, and ~/foo/bar/~/ to ~/.
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
+(use-package vertico-multiform
+  :after vertico
+  :ensure nil ;; comes with vertico
+  ;; Enables per-command/per-category Vertico tweaks.  Used, for example, by
+  ;; `setup-perspective' to order `persp-switch-to-buffer*' by recency.
+  :init
+  (vertico-multiform-mode))
+
 ;; Camel Case
 
 (defun orderless-camel-case (component)
