@@ -16,6 +16,9 @@
 ;; Declare org functions used outside of org-mode context
 (declare-function org-back-to-heading "org")
 (declare-function org-update-parent-todo-statistics "org")
+(declare-function org-sort-entries "org")
+(declare-function org-get-todo-state "org")
+(declare-function org-up-heading-safe "org")
 
 ;; Load macOS-specific configuration if on macOS
 (when (eq system-type 'darwin)
@@ -130,6 +133,39 @@ installed."
 ;; Add Romanian diacritics hook on macOS
 (when (eq system-type 'darwin)
   (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
+
+;;; Auto-sort subtree by TODO state after state changes
+
+(defcustom my/org-todo-sort-order
+  '("INPROGRESS" "TODO" "WAIT" "EVENT" "REVIEW" "DONE" "NOTABUG")
+  "Sort priority for TODO keywords; earlier entries sort first.
+Keywords absent from this list sink to the bottom."
+  :type '(repeat string)
+  :group 'org)
+;; Ensure the order is always applied, even if defcustom skipped the init value
+(setq my/org-todo-sort-order '("INPROGRESS" "TODO" "WAIT" "EVENT" "REVIEW" "DONE" "NOTABUG"))
+
+(defun my/org-todo-sort-key ()
+  "Return a numeric sort key for the current heading's TODO state."
+  (let* ((state (org-get-todo-state))
+         (pos (and state (cl-position state my/org-todo-sort-order :test #'equal))))
+    (or pos (length my/org-todo-sort-order))))
+
+(defun my/org-sort-parent-subtree ()
+  "Sort direct children of the parent heading by `my/org-todo-sort-order'.
+Narrows to the parent subtree first so only siblings of the changed
+entry are reordered, leaving other top-level headings untouched."
+  (when (and (derived-mode-p 'org-mode)
+             (org-get-todo-state))
+    (save-excursion
+      (condition-case nil
+          (when (org-up-heading-safe)
+            (save-restriction
+              (org-narrow-to-subtree)
+              (org-sort-entries nil ?f #'my/org-todo-sort-key #'<)))
+        (error nil)))))
+
+(add-hook 'org-after-todo-state-change-hook #'my/org-sort-parent-subtree)
 
 (require 'org-slack-export)
 
