@@ -81,7 +81,6 @@
                   "^\\*Matlab Help.*\\*$"
                   ;; "^\\*Messages\\*$"
                   "^\\*Backtrace\\*"
-                  "^\\*evil-registers\\*"
                   "^\\*Apropos"
                   "^Calc:"
                   "^\\*eldoc\\*"

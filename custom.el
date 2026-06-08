@@ -47,19 +47,21 @@
          casual catppuccin-theme chezmoi claude-code-ide clj-refactor
          consult-flycheck dashboard datomic-snippets deadgrep denote diff-hl
          diminish dired-preview dired-quick-sort dired-subtree dired-toggle-sudo
-         dockerfile-mode doom-themes doric-themes dts-mode eca edit-indirect
-         envrc exec-path-from-shell expand-region fontaine forge frame-fns
-         git-timemachine groovy-mode helpful hide-mode-line hl-todo
+         dockerfile-mode doom-themes doric-themes dotenv-mode dts-mode eca
+         edit-indirect envrc exec-path-from-shell expand-region fontaine forge
+         frame-fns git-timemachine groovy-mode helpful hide-mode-line hl-todo
          html-to-hiccup kaocha-runner keycast lin logos lsp-java lsp-pyright
-         lsp-tailwindcss lsp-ui magit marginalia mise modus-themes move-text
-         neil nerd-icons-completion nerd-icons-dired notmuch-indicator
-         ol-notmuch olivetti orderless org-present ox-gfm ox-slack perspective
-         pi-coding-agent popper prodigy projectile pulsar rainbow-mode
-         significant-other smartparens smtpmail-multi terraform-mode time-zones
-         undo-fu vertico visual-fill-column vterm vundo wgrep-deadgrep
-         whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
+         lsp-tailwindcss lsp-ui magit magit-difftastic marginalia mise
+         modus-themes move-text neil nerd-icons-completion nerd-icons-dired
+         notmuch-indicator ol-notmuch olivetti orderless org-present ox-gfm
+         ox-slack perspective pi-coding-agent popper prodigy projectile pulsar
+         rainbow-mode significant-other smartparens smtpmail-multi
+         terraform-mode time-zones undo-fu vertico visual-fill-column vterm
+         vundo wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
+         zprint-mode))
  '(package-vc-selected-packages
-   '((claude-code-ide :vc-backend Git :url
+   '((magit-difftastic :url "https://github.com/rschmukler/magit-difftastic")
+     (claude-code-ide :vc-backend Git :url
                       "https://github.com/parsnips/claude-code-ide.el")
      (eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
           "master" :lisp-dir "." :main-file "eca.el")
