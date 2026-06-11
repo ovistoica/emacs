@@ -80,7 +80,9 @@
  '(safe-local-variable-directories
    '("/home/ovistoica/Work/tries/2025-12-14-lambdaisland-launchpad/"))
  '(safe-local-variable-values
-   '((kaocha-runner-extra-configuration . "{:config-file \"tests.local.edn\"}")
+   '((lisp-indent-local-overrides (cond . 0) (interactive . 0))
+     (checkdoc-allow-quoting-nil-and-t . t)
+     (kaocha-runner-extra-configuration . "{:config-file \"tests.local.edn\"}")
      (cider-clojure-cli-global-options . "-A:dev:test")
      (apheleia-formatter . cljfmt) (preferred-task-runner . makefile)
      (eval progn (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)

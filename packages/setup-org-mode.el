@@ -24,18 +24,56 @@
 (when (eq system-type 'darwin)
   (require 'romanian-mac))
 
+
 (use-package org
   :ensure nil
   :defer t
 
+  :functions (modus-themes-get-color-value)
+
+  :preface
+  (defface my/org-todo-todo '((t :weight bold))
+    "Face for the TODO Org keyword.")
+  (defface my/org-todo-inprogress '((t :weight bold))
+    "Face for the INPROGRESS Org keyword.")
+  (defface my/org-todo-review '((t :weight bold))
+    "Face for the REVIEW Org keyword.")
+  (defface my/org-todo-pending-qa '((t :weight bold))
+    "Face for the PENDING_QA Org keyword.")
+  (defface my/org-todo-wait '((t :weight bold))
+    "Face for the WAIT Org keyword.")
+  (defface my/org-todo-event '((t :weight bold))
+    "Face for the EVENT Org keyword.")
+  (defface my/org-todo-done '((t :weight bold))
+    "Face for the DONE Org keyword.")
+
+  (defun my/org-sync-todo-faces (&rest _)
+    "Color the Org TODO keyword faces from the active Modus theme palette."
+    (when (fboundp 'modus-themes-get-color-value)
+      (dolist (spec '((my/org-todo-todo       . red)
+                      (my/org-todo-inprogress . yellow-warmer)
+                      (my/org-todo-review     . blue)
+                      (my/org-todo-pending-qa . cyan)
+                      (my/org-todo-wait       . yellow)
+                      (my/org-todo-event      . blue-warmer)
+                      (my/org-todo-done       . bg-added-fringe)))
+        (set-face-attribute (car spec) nil
+                            :foreground (modus-themes-get-color-value (cdr spec))))))
+
   :custom
   (org-todo-keywords
-   '((sequence "TODO(t)" "WAIT(w)" "EVENT(e)" "|" "DONE(d)")))
+   '((sequence "TODO(t)" "INPROGRESS(i)" "REVIEW(r)" "PENDING_QA(p)"
+               "WAIT(w)" "EVENT(e)" "|" "DONE(d)" "NOTABUG(n)")))
+
 
   (org-todo-keyword-faces
-   '(("DONE" . (:foreground "green" :weight bold))
-     ("WAIT" . (:foreground "orange" :weight bold))
-     ("EVENT" . (:foreground "blue" :weight bold))))
+   '(("TODO" . my/org-todo-todo)
+     ("INPROGRESS" . my/org-todo-inprogress)
+     ("REVIEW" . my/org-todo-review)
+     ("PENDING_QA" . my/org-todo-pending-qa)
+     ("WAIT" . my/org-todo-wait)
+     ("EVENT" . my/org-todo-event)
+     ("DONE" . my/org-todo-done)))
 
   (org-use-fast-todo-selection t)
 
@@ -46,9 +84,14 @@
               ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
 
-  :hook (org-mode . auto-fill-mode)
+  :hook ((org-mode . auto-fill-mode)
+         (enable-theme-functions . my/org-sync-todo-faces))
 
   :config
+
+  ;; Color the TODO keyword faces from the current theme now (the hook keeps
+  ;; them in sync on later theme switches).
+  (my/org-sync-todo-faces)
 
   ;; Disable to support integration of window-mode with org schedule
   (unbind-key "S-<up>" org-mode-map)

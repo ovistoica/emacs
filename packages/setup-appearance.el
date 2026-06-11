@@ -61,7 +61,23 @@
 (use-package rainbow-mode
   :ensure t
   :hook (prog-mode . rainbow-mode)
-  :diminish "")
+  :diminish ""
+  :defines (rainbow-mode rainbow-html-rgb-colors-font-lock-keywords)
+  :preface
+  ;; Turning HTML names off also drops the numeric rgb()/hsl() matchers; re-add
+  ;; just those so numeric colors still colorize (hex is always on).
+  (defun my/rainbow-keep-numeric-rgb ()
+    "Keep rgb()/hsl() colorization while color names stay disabled."
+    (when rainbow-mode
+      (font-lock-add-keywords nil rainbow-html-rgb-colors-font-lock-keywords t)
+      (font-lock-flush)))
+  :custom
+  ;; Colorize only numeric color values, never color *names* like "yellow".
+  (rainbow-x-colors nil)
+  (rainbow-html-colors nil)
+  (rainbow-r-colors nil)
+  :config
+  (add-hook 'rainbow-mode-hook #'my/rainbow-keep-numeric-rgb))
 
 (provide 'setup-appearance)
 ;;; setup-appearance.el ends here

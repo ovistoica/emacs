@@ -80,11 +80,6 @@
     (message "Difftastic rendering %s"
              (if magit-difftastic-mode "enabled" "disabled")))
 
-  (defun my/magit-difftastic-clear-cache-on-theme (&rest _)
-    "Drop difftastic's render cache so a theme switch re-colors cached diffs."
-    (when (fboundp 'magit-difftastic-clear-cache)
-      (magit-difftastic-clear-cache)))
-
   (defun my/magit-difftastic-section-highlight (orig section &rest args)
     "Highlight only a difftastic chunk's heading, keeping its body readable."
     (if (and (eq (slot-value section 'type) 'magit-difftastic-hunk)
@@ -109,7 +104,6 @@
     "Visit the line at point in a difftastic chunk, not just its first change."
     (or (ignore-errors (my/magit-difftastic--visit-line-at-point section))
         (funcall orig section)))
-  :hook (enable-theme-functions . my/magit-difftastic-clear-cache-on-theme)
   :bind (:map magit-mode-map
               ("C-c d" . my/magit-difftastic-toggle))
   :init
@@ -121,6 +115,7 @@
   (set-keymap-parent magit-difftastic-hunk-section-map magit-hunk-section-map)
   (require 'difftastic)
   (require 'ansi-color)
+  ;; Setup theme aware difftastic colors for diffs
   (dolist (v '(difftastic-normal-colors-vector difftastic-bright-colors-vector))
     (let ((base (if (eq v 'difftastic-normal-colors-vector)
                     ansi-color-normal-colors-vector
