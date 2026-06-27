@@ -2,16 +2,17 @@
 ;;; Commentary:
 ;;
 ;; Glue: configures defaults and runs `omarchy-init' to sync Emacs with
-;; the current Omarchy system theme and font.  The package lives at
-;; `~/Work/omarchy.el' (local checkout) and is on the load-path via
-;; `init.el'.  `omarchy-themes' is required so the bundled themes
-;; (rose-pine, osaka-jade, flexoki-light, catppuccin-mocha, etc.)
-;; register their directory on `custom-theme-load-path'.
+;; the current Omarchy system theme and font.  Installed from GitHub via
+;; package-vc (`https://github.com/ovistoica/omarchy.el') so it works the
+;; same on Linux and macOS — on non-Omarchy systems the package loads
+;; cleanly and its interactive commands simply no-op with a message.
+;; `omarchy-themes' is required so the bundled themes register their
+;; directory on `custom-theme-load-path'.
 
 ;;; Code:
 
 (use-package omarchy
-  :ensure nil
+  :vc (:url "https://github.com/ovistoica/omarchy.el" :rev :newest)
   :demand t
   :commands (omarchy-theme-pick omarchy-font-pick
              omarchy-apply-theme omarchy-apply-font

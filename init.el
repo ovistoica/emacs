@@ -14,7 +14,6 @@
 
 ;; Add settings to load-path
 (add-to-list 'load-path (expand-file-name "settings" user-emacs-directory))
-(add-to-list 'load-path (expand-file-name "~/Work/omarchy.el"))
 
 ;; Optimize startup of emacs
 (require 'fast-startup)

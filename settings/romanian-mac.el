@@ -1,6 +1,7 @@
 ;; change command to meta, and ignore option to use weird Norwegian keyboard
-(setq mac-option-modifier 'super)
-(setq mac-command-modifier 'meta)
+;; Each SYMBOL is control, meta, alt, super, hyper or none.
+(setq mac-option-modifier 'meta)
+(setq mac-command-modifier 'super)
 (setq ns-function-modifier 'hyper)
 (setq mac-right-option-modifier nil)
 

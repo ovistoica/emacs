@@ -22,10 +22,17 @@
 (use-package ghostel
   :ensure t
   :config
-  (unbind-key "S-<up>"    ghostel-mode-map)
-  (unbind-key "S-<down>"  ghostel-mode-map)
-  (unbind-key "S-<left>"  ghostel-mode-map)
-  (unbind-key "S-<right>" ghostel-mode-map))
+  ;; S-<arrows> (windmove) and M-o (other-window) are NOT in
+  ;; `ghostel-mode-map' — `ghostel--define-terminal-keys' binds nearly
+  ;; every modified key to `ghostel--send-event' in the semi-char/char
+  ;; input maps, forwarding them to the terminal.  So `unbind-key' on
+  ;; `ghostel-mode-map' is a no-op.  The supported way to let keys pass
+  ;; through to Emacs is `ghostel-keymap-exceptions'; its setter rebuilds
+  ;; the semi-char keymap.  Append our window-management keys to the
+  ;; package defaults.
+  (setopt ghostel-keymap-exceptions
+          (append ghostel-keymap-exceptions
+                  '("M-o" "S-<up>" "S-<down>" "S-<left>" "S-<right>"))))
 
 
 (provide 'setup-terminal)
