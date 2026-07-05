@@ -480,7 +480,7 @@ this buffer."
   (agent-chat-mode 1))
 
 (use-package claude-code-ide
-  :vc (:url "https://github.com/parsnips/claude-code-ide.el" :branch "codex/ghostel-backend-support")
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
   :custom
   ;; Window configuration
   (claude-code-ide-window-side 'right)
