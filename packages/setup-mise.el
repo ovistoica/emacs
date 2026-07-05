@@ -6,3 +6,4 @@
   :hook (after-init . global-mise-mode))
 
 (provide 'setup-mise)
+;;; setup-mise.el ends here
