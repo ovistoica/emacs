@@ -5,6 +5,18 @@
 (setq ns-function-modifier 'hyper)
 (setq mac-right-option-modifier nil)
 
+(defun my/toggle-macbook-laptop ()
+  "Toggle between command being meta & command being super.
+Useful when using kinesis kbd or mac keyboard"
+  (interactive)
+  (if (eq 'meta mac-command-modifier)
+      (progn
+        (setq mac-command-modifier 'super)
+        (setq mac-option-modifier 'meta))
+    (progn
+      (setq mac-option-modifier 'super)
+      (setq mac-command-modifier 'meta))))
+
 ;; Fix for emacs password prompt for gpg:
 ;; https://bpanthi977.com/braindump/configuring_gpg_for_emacs_in_macos.html
 (setq epa-pinentry-mode 'loopback)
