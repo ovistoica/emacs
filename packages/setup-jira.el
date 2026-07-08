@@ -54,6 +54,41 @@ pay no overhead."
   (advice-remove 'jira-issues #'my/jira--ensure-token-then-call)
   (apply orig-fn args))
 
+;;; Saved queries -------------------------------------------------------
+;;
+;; `jira-filters' is an alist of (NAME . JQL) used by the built-in
+;; `F  Apply named filter' action in the issues list.
+;;
+;; Defined before `use-package jira' below so the `:config' block can call
+;; `my/jira-merge-saved-queries' during package initialisation.
+
+(defvar jira-filters)
+
+(defvar my/jira-saved-queries
+  '(("My open issues"
+     . "assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC")
+    ("Current sprint — mine"
+     . "assignee = currentUser() AND sprint in openSprints() ORDER BY priority ASC")
+    ("In progress"
+     . "assignee = currentUser() AND status = \"In Progress\" ORDER BY updated DESC")
+    ("Current sprint — unassigned"
+     . "assignee is EMPTY AND sprint in openSprints() AND statusCategory != Done ORDER BY priority ASC")
+    ("Reported by me — open"
+     . "reporter = currentUser() AND statusCategory != Done ORDER BY created DESC")
+    ("Completed last 2 weeks"
+     . "assignee = currentUser() AND statusCategory = Done AND updated >= -2w ORDER BY updated DESC"))
+  "Alist of (NAME . JQL) saved Jira queries.
+Merged into `jira-filters' on startup so they appear under the
+`F  Apply named filter' action in the Jira issues list.")
+
+(defun my/jira-merge-saved-queries ()
+  "Merge `my/jira-saved-queries' into `jira-filters'.
+Entries already present in `jira-filters' (fetched from the API)
+take precedence; local queries fill in anything missing."
+  (dolist (entry my/jira-saved-queries)
+    (unless (assoc (car entry) jira-filters)
+      (push entry jira-filters))))
+
 (use-package jira
   :config
   (setq jira-base-url "https://teamohana.atlassian.net")
@@ -82,39 +117,6 @@ pay no overhead."
   ;; later; duplicates are keyed by name so API filters with the same
   ;; name will naturally shadow these.
   (my/jira-merge-saved-queries))
-
-;;; Saved queries -------------------------------------------------------
-;;
-;; `jira-filters' is an alist of (NAME . JQL) used by the built-in
-;; `F  Apply named filter' action in the issues list.
-;;
-;; Define your queries here; `my/jira-merge-saved-queries' merges them
-;; in without clobbering any entries already fetched from the API.
-
-(defvar my/jira-saved-queries
-  '(("My open issues"
-     . "assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC")
-    ("Current sprint — mine"
-     . "assignee = currentUser() AND sprint in openSprints() ORDER BY priority ASC")
-    ("In progress"
-     . "assignee = currentUser() AND status = \"In Progress\" ORDER BY updated DESC")
-    ("Current sprint — unassigned"
-     . "assignee is EMPTY AND sprint in openSprints() AND statusCategory != Done ORDER BY priority ASC")
-    ("Reported by me — open"
-     . "reporter = currentUser() AND statusCategory != Done ORDER BY created DESC")
-    ("Completed last 2 weeks"
-     . "assignee = currentUser() AND statusCategory = Done AND updated >= -2w ORDER BY updated DESC"))
-  "Alist of (NAME . JQL) saved Jira queries.
-Merged into `jira-filters' on startup so they appear under the
-`F  Apply named filter' action in the Jira issues list.")
-
-(defun my/jira-merge-saved-queries ()
-  "Merge `my/jira-saved-queries' into `jira-filters'.
-Entries already present in `jira-filters' (fetched from the API)
-take precedence; local queries fill in anything missing."
-  (dolist (entry my/jira-saved-queries)
-    (unless (assoc (car entry) jira-filters)
-      (push entry jira-filters))))
 
 ;; Re-merge after jira-api-get-basic-data runs (it resets jira-filters
 ;; with the API response, which would wipe local entries).

@@ -47,7 +47,7 @@ Useful when using kinesis kbd or mac keyboard"
    ; Explicitly set shell
   (setq exec-path-from-shell-variables
         '(
-          "ANTHROPIC_API_KEY"
+          ;;"ANTHROPIC_API_KEY"
           "OPENAI_API_KEY"
           "MANPATH"
           "NVM_DIR"
