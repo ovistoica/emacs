@@ -456,6 +456,8 @@ this buffer."
               :filter-args (lambda (args)
                              (cons (my/eca-recover-completion-item (car args)) (cdr args))))
 
+  (setq eca-chat-hide-markdown-markup nil)
+
   :custom
   (eca-chat-auto-add-repomap nil)
   ;; (eca-worktree-mode 'isolated)
