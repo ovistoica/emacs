@@ -209,8 +209,6 @@ entry are reordered, leaving other top-level headings untouched."
               (org-sort-entries nil ?f #'my/org-todo-sort-key #'<)))
         (error nil)))))
 
-(add-hook 'org-after-todo-state-change-hook #'my/org-sort-parent-subtree)
-
 (require 'org-slack-export)
 
 (provide 'setup-org-mode)
