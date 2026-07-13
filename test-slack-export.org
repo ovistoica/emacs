@@ -1,5 +1,8 @@
 #+title: Slack Export Test
 #+author: Ovi
+# Enable indented hierarchy for this file by uncommenting the next line,
+# or use the C-c C-e k B / k C menu entries instead.
+# #+OPTIONS: slack-indent:t
 
 * Project Update
 
@@ -29,6 +32,35 @@ The fix was straightforward:
 - Jira ticket: [[https://teamohana.atlassian.net/browse/OH-1234][OH-1234 Fix date range]]
 - PR: [[https://bitbucket.org/teamohana/kapital/pull-requests/42][PR #42]]
 - Docs: [[https://clojure.org/reference/deps_and_cli][Clojure CLI reference]]
+
+* Deploy Status
+
+A table with a header row (note the separator rule below the header):
+
+| Service   | Environment | Status  | Owner |
+|-----------+-------------+---------+-------|
+| payments  | production  | healthy | Ana   |
+| reporting | staging     | degraded | Bob  |
+| auth      | production  | healthy | Cléo  |
+
+** Table with inline markup in cells
+
+Markup inside cells is flattened to plain text (Slack code blocks render
+everything literally), and links collapse to their label:
+
+| Feature                       | Done | Reference                                |
+|-------------------------------+------+------------------------------------------|
+| Login and signup flow         | yes  | [[https://example.com/login][login docs]]                |
+| A *very* long feature name    | no   | see ~config.edn~                         |
+| Reports dashboard             | wip  | [[https://example.com]]                       |
+
+** Table without a header rule
+
+Without a separator rule, every row is treated as data (no divider):
+
+| January  | $250 |
+| February | $80  |
+| March    | $420 |
 
 * Next Steps
 
