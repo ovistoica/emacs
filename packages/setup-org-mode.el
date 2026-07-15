@@ -32,56 +32,58 @@
   :functions (modus-themes-get-color-value)
 
   :preface
-  (defface my/org-todo-todo '((t :weight bold))
-    "Face for the TODO Org keyword.")
-  (defface my/org-todo-inprogress '((t :weight bold))
-    "Face for the INPROGRESS Org keyword.")
-  (defface my/org-todo-review '((t :weight bold))
-    "Face for the REVIEW Org keyword.")
-  (defface my/org-todo-pending-qa '((t :weight bold))
-    "Face for the PENDING_QA Org keyword.")
-  (defface my/org-todo-next '((t :weight bold))
-    "Face for the NEXT Org keyword.")
-  (defface my/org-todo-proj '((t :weight bold))
-    "Face for the PROJ Org keyword.")
-  (defface my/org-todo-wait '((t :weight bold))
-    "Face for the WAIT Org keyword.")
-  (defface my/org-todo-event '((t :weight bold))
-    "Face for the EVENT Org keyword.")
-  (defface my/org-todo-done '((t :weight bold))
-    "Face for the DONE Org keyword.")
+  (defvar my/org-todo-face-colors nil
+    "Alist of (FACE . MODUS-COLOR-SYMBOL) pairs.
+Populated by `set-todo-face' and consumed by `my/org-sync-todo-faces'
+to color Org TODO keyword faces from the active Modus theme palette.")
+
+  (defvar my/org-todo-keyword-faces nil
+    "Alist of (KEYWORD . FACE) pairs, in `org-todo-keyword-faces' format.
+Populated by `set-todo-face' and assigned to `org-todo-keyword-faces'.")
+
+  (defmacro set-todo-face (keyword color)
+    "Define and register a face for the Org TODO KEYWORD.
+KEYWORD is a string such as \"PENDING_QA\".  COLOR is a Modus theme
+color symbol, looked up later via `modus-themes-get-color-value'.
+
+Derives a face name from KEYWORD (lower-cased, underscores turned
+into hyphens, prefixed with `my/org-todo-'), defines it via
+`defface' with an auto-generated docstring, and registers it in
+`my/org-todo-face-colors' and `my/org-todo-keyword-faces'."
+    (declare (indent defun))
+    (let ((face (intern (concat "my/org-todo-"
+                                 (downcase (replace-regexp-in-string
+                                            "_" "-" keyword))))))
+      `(progn
+         (defface ,face '((t :weight bold))
+           ,(format "Face for the %s Org keyword." keyword))
+         (setf (alist-get ',face my/org-todo-face-colors) ',color)
+         (setf (alist-get ,keyword my/org-todo-keyword-faces nil nil #'equal)
+               ',face))))
+
+  (set-todo-face "TODO" red-faint)
+  (set-todo-face "INPROGRESS" yellow-warmer)
+  (set-todo-face "REVIEW" blue)
+  (set-todo-face "PENDING_QA" cyan)
+  (set-todo-face "NEXT" red-intense)
+  (set-todo-face "PROJ" magenta)
+  (set-todo-face "WAIT" yellow)
+  (set-todo-face "SOMEDAY" fg-alt)
+  (set-todo-face "DONE" bg-added-fringe)
 
   (defun my/org-sync-todo-faces (&rest _)
     "Color the Org TODO keyword faces from the active Modus theme palette."
     (when (fboundp 'modus-themes-get-color-value)
-      (dolist (spec '((my/org-todo-todo       . red)
-                      (my/org-todo-inprogress . yellow-warmer)
-                      (my/org-todo-review     . blue)
-                      (my/org-todo-pending-qa . cyan)
-                      (my/org-todo-next       . red-warmer)
-                      (my/org-todo-proj       . magenta)
-                      (my/org-todo-wait       . yellow)
-                      (my/org-todo-event      . blue-warmer)
-                      (my/org-todo-done       . bg-added-fringe)))
+      (dolist (spec my/org-todo-face-colors)
         (set-face-attribute (car spec) nil
                             :foreground (modus-themes-get-color-value (cdr spec))))))
 
   :custom
   (org-todo-keywords
    '((sequence "TODO(t)" "INPROGRESS(i)" "REVIEW(r)" "PENDING_QA(q)" "NEXT(n)"
-               "PROJ(p)" "WAIT(w)" "EVENT(e)" "|" "DONE(d)" "CANCELED(c)")))
+               "PROJ(p)" "WAIT(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELED(c)")))
 
-
-  (org-todo-keyword-faces
-   '(("TODO" . my/org-todo-todo)
-     ("INPROGRESS" . my/org-todo-inprogress)
-     ("REVIEW" . my/org-todo-review)
-     ("PENDING_QA" . my/org-todo-pending-qa)
-     ("NEXT" . my/org-todo-next)
-     ("PROJ" . my/org-todo-proj)
-     ("WAIT" . my/org-todo-wait)
-     ("EVENT" . my/org-todo-event)
-     ("DONE" . my/org-todo-done)))
+  (org-todo-keyword-faces my/org-todo-keyword-faces)
 
   (org-use-fast-todo-selection t)
 
