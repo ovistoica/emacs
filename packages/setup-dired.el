@@ -42,7 +42,31 @@
   (define-key dired-mode-map (kbd "k") 'dired-do-delete)
   
   ;; Easier up directory
-  (define-key dired-mode-map (kbd "-") 'dired-up-directory))
+  (define-key dired-mode-map (kbd "-") 'dired-up-directory)
+
+  ;; Open a directory in Nautilus (GNOME Files)
+  (defun dired-open-in-nautilus (&optional dir)
+    "Open DIR (or the current Dired directory) in Nautilus (GNOME Files)."
+    (interactive)
+    (start-process "nautilus" nil "nautilus" (or dir (dired-current-directory))))
+
+  ;; E opens the file at point externally, unless point is on a
+  ;; directory or on empty space, in which case it opens that
+  ;; directory (or the current one) in Nautilus instead.
+  (defun dired-do-open-or-nautilus ()
+    "Open file at point externally, or open a directory in Nautilus.
+
+If point is on a regular file, behave like `dired-do-open'.  If
+point is on a directory, open that directory in Nautilus.  If
+point is on empty space (no file at point), open the current
+Dired directory in Nautilus."
+    (interactive)
+    (let ((file (dired-get-filename nil t)))
+      (cond
+       ((null file) (dired-open-in-nautilus (dired-current-directory)))
+       ((file-directory-p file) (dired-open-in-nautilus file))
+       (t (dired-do-open)))))
+  (define-key dired-mode-map (kbd "E") 'dired-do-open-or-nautilus))
 
 ;; Nicer navigation also in writeable dired
 (with-eval-after-load 'wdired
