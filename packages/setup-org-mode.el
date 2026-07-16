@@ -52,8 +52,8 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
 `my/org-todo-face-colors' and `my/org-todo-keyword-faces'."
     (declare (indent defun))
     (let ((face (intern (concat "my/org-todo-"
-                                 (downcase (replace-regexp-in-string
-                                            "_" "-" keyword))))))
+                                (downcase (replace-regexp-in-string
+                                           "_" "-" keyword))))))
       `(progn
          (defface ,face '((t :weight bold))
            ,(format "Face for the %s Org keyword." keyword))
@@ -124,6 +124,8 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
            "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
           ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
            "* TODO %?\n  %i\n  %a")
+          ("s" "Shopping item" entry (file "~/Dropbox/org/inbox.org")
+           "* %? :SHOPPING:\n")
           ("w" "Work Todo" entry (file+headline "~/Dropbox/org/master-list.org" "INBOX")
            "* TODO %?\n  %i\n  %a")
           ;; ("j" "Journal" entry  (file+olp+datetree "~/Dropbox/org/journal.org")
@@ -136,7 +138,7 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
 
 
 
-  (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org"))
+  (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org" "reminders-beorg.org"))
 
   (setq org-feed-alist
         '(("Slashdot"
