@@ -43,7 +43,7 @@ to color Org TODO keyword faces from the active Modus theme palette.")
     "Alist of (KEYWORD . FACE) pairs, in `org-todo-keyword-faces' format.
 Populated by `set-todo-face' and assigned to `org-todo-keyword-faces'.")
 
-  (defmacro set-todo-face (keyword color)
+  (defmacro set-modus-todo-face (keyword color)
     "Define and register a face for the Org TODO KEYWORD.
 KEYWORD is a string such as \"PENDING_QA\".  COLOR is a Modus theme
 color symbol, looked up later via `modus-themes-get-color-value'.
@@ -63,15 +63,15 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
          (setf (alist-get ,keyword my/org-todo-keyword-faces nil nil #'equal)
                ',face))))
 
-  (set-todo-face "TODO" red-faint)
-  (set-todo-face "INPROGRESS" yellow-warmer)
-  (set-todo-face "REVIEW" blue)
-  (set-todo-face "PENDING_QA" cyan)
-  (set-todo-face "NEXT" red-intense)
-  (set-todo-face "PROJ" magenta)
-  (set-todo-face "WAIT" yellow)
-  (set-todo-face "SOMEDAY" fg-alt)
-  (set-todo-face "DONE" bg-added-fringe)
+  (set-modus-todo-face "TODO" red-faint)
+  (set-modus-todo-face "INPROGRESS" yellow-warmer)
+  (set-modus-todo-face "REVIEW" blue)
+  (set-modus-todo-face "PENDING_QA" cyan)
+  (set-modus-todo-face "NEXT" red-intense)
+  (set-modus-todo-face "PROJ" magenta)
+  (set-modus-todo-face "WAIT" yellow)
+  (set-modus-todo-face "SOMEDAY" fg-alt)
+  (set-modus-todo-face "DONE" bg-added-fringe)
 
   (defun my/org-sync-todo-faces (&rest _)
     "Color the Org TODO keyword faces from the active Modus theme palette."
@@ -212,52 +212,9 @@ refresh inline image display.  Otherwise behave like `org-yank'."
         (org-back-to-heading)
         (org-update-parent-todo-statistics)))))
 
-
-(defun my/markdown-to-org-region (start end)
-  "Convert Markdown formatted text in region (START, END) to Org.
-
-This command requires that pandoc (man page `pandoc(1)') be
-installed."
-  (interactive "r")
-  (shell-command-on-region
-   start end
-   "pandoc -f markdown -t org --wrap=preserve" t t))
-
-
 ;; Add Romanian diacritics hook on macOS
 (when (eq system-type 'darwin)
   (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
-
-;;; Auto-sort subtree by TODO state after state changes
-
-(defcustom my/org-todo-sort-order
-  '("NEXT" "INPROGRESS" "TODO" "WAIT" "EVENT" "REVIEW" "DONE" "CANCELED")
-  "Sort priority for TODO keywords; earlier entries sort first.
-Keywords absent from this list sink to the bottom."
-  :type '(repeat string)
-  :group 'org)
-;; Ensure the order is always applied, even if defcustom skipped the init value
-(setq my/org-todo-sort-order '("INPROGRESS" "TODO" "WAIT" "EVENT" "REVIEW" "DONE" "CANCELED"))
-
-(defun my/org-todo-sort-key ()
-  "Return a numeric sort key for the current heading's TODO state."
-  (let* ((state (org-get-todo-state))
-         (pos (and state (cl-position state my/org-todo-sort-order :test #'equal))))
-    (or pos (length my/org-todo-sort-order))))
-
-(defun my/org-sort-parent-subtree ()
-  "Sort direct children of the parent heading by `my/org-todo-sort-order'.
-Narrows to the parent subtree first so only siblings of the changed
-entry are reordered, leaving other top-level headings untouched."
-  (when (and (derived-mode-p 'org-mode)
-             (org-get-todo-state))
-    (save-excursion
-      (condition-case nil
-          (when (org-up-heading-safe)
-            (save-restriction
-              (org-narrow-to-subtree)
-              (org-sort-entries nil ?f #'my/org-todo-sort-key #'<)))
-        (error nil)))))
 
 (require 'org-slack-export)
 
