@@ -19,6 +19,8 @@
 (declare-function org-sort-entries "org")
 (declare-function org-get-todo-state "org")
 (declare-function org-up-heading-safe "org")
+(declare-function org-yank "org")
+(declare-function org-display-inline-images "org")
 
 ;; Load macOS-specific configuration if on macOS
 (when (eq system-type 'darwin)
@@ -78,6 +80,29 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
         (set-face-attribute (car spec) nil
                             :foreground (modus-themes-get-color-value (cdr spec))))))
 
+  (defun my/org-clipboard-has-image-p ()
+    "Return non-nil if the clipboard contains image data."
+    (when-let* ((targets (ignore-errors
+                           (gui-get-selection 'CLIPBOARD 'TARGETS))))
+      (seq-some (lambda (type)
+                  (and (symbolp type)
+                       (string-match-p "^image/" (symbol-name type))))
+                (if (vectorp targets) (append targets nil) targets))))
+
+  (defun my/org-yank-dwim ()
+    "Yank a clipboard image as a file link, or fall back to `org-yank'.
+When the clipboard holds an image, save it to disk via `yank-media'
+\(see `org-yank-image-save-method'), insert a link at point, and
+refresh inline image display.  Otherwise behave like `org-yank'."
+    (interactive)
+    (if (and (display-graphic-p)
+             (fboundp 'yank-media)
+             (my/org-clipboard-has-image-p))
+        (progn
+          (call-interactively #'yank-media)
+          (org-display-inline-images))
+      (call-interactively #'org-yank)))
+
   :custom
   (org-todo-keywords
    '((sequence "TODO(t)" "INPROGRESS(i)" "REVIEW(r)" "PENDING_QA(q)" "NEXT(n)"
@@ -89,7 +114,17 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
 
   (org-log-done 'time)
 
+  ;; Log a "State \"Y\" from \"X\"" timestamp line into a LOGBOOK drawer for
+  ;; every keyword transition (see the "!" flags above), not just on DONE.
+  (org-log-into-drawer t)
+
+  ;; Save clipboard-pasted images to an images/ dir next to the org file
+  ;; and insert a relative file: link.  Set to 'attach to use org-attach
+  ;; per-heading directories instead.
+  (org-yank-image-save-method "images/")
+
   :bind (:map org-mode-map
+              ("C-y" . my/org-yank-dwim)
               ("M-+" . org-shiftright)
               ("C-S-<down>" . org-metadown)
               ("C-S-<up>" . org-metaup))
@@ -135,8 +170,6 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
           ;; ("p" "Social Post" entry (file+headline "~/Dropbox/org/social-posts.org" "Posts")
           ;;  "* %?\n  %U" :empty-lines 1)
           ))
-
-
 
   (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org" "reminders-beorg.org"))
 
