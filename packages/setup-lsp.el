@@ -40,9 +40,6 @@
   :custom
   (lsp-completion-provider :none)  ;; Skip company-mode
   :init
-  ;; Teach lsp-mode that edn-mode buffers speak the "clojure" language understood
-  ;; by clojure-lsp.  Must be set before lsp starts in any edn buffer.
-  (add-to-list 'lsp-language-id-configuration '(edn-mode . "clojure"))
   (setq lsp-headerline-breadcrumb-enable nil) ;; Don't need file path in my buffer
   (setq lsp-lens-enable t) ;; Show reference and test counts
   (setq lsp-enable-indentation nil) ;; use clojure-mode indentation
@@ -61,7 +58,11 @@
   (setq lsp-signature-doc-lines 1)      ; Don't raise the echo area. It's distracting
 
   ;; semgrep-ls is not installed and not needed - silence the prompt
-  (setq lsp-disabled-clients '(semgrep-ls))
+  ;; ts-ls is installed as a fallback but disabled: we prefer tsgo, the
+  ;; Go-based TypeScript server (@typescript/native-preview).  To roll back
+  ;; to ts-ls, remove it from this list (typescript@5 + ts-ls live in
+  ;; `lsp-server-install-dir').
+  (setq lsp-disabled-clients '(semgrep-ls ts-ls))
 
 
   ;; To consider
@@ -70,12 +71,6 @@
   ;; (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)
 
   :config
-  ;; clojure-lsp registers itself only for clojure-mode and friends.
-  ;; Patch edn-mode into its :major-modes list so it activates for deps.edn etc.
-  (with-eval-after-load 'lsp-clojure
-    (let ((client (gethash 'clojure-lsp lsp-clients)))
-      (when client
-        (cl-pushnew 'edn-mode (lsp--client-major-modes client)))))
   (advice-add 'lsp--info :around #'my/silence-some-lsp-info-messages)
   (add-hook 'lsp-completion-mode-hook 'my/use-lsp-completion-only-as-fallback)
   ;; (setq lsp-use-plists t) - disabled as currently getting errors
@@ -114,7 +109,17 @@
 
 (use-package lsp-java
   :ensure t
-  :defer t)
+  :defer t
+  :custom
+  ;; jdt.ls 1.48 cannot run on the Arch system JDK 26: its OSGi weaving hook
+  ;; dies with "Unsupported class file major version 70" (m2e bundle fails,
+  ;; server exits with code 13).  Run it on the mise-managed Temurin 25 LTS
+  ;; instead; falls back to system `java' if no mise Temurin 25 is installed.
+  (lsp-java-java-path
+   (or (car (last (file-expand-wildcards
+                   (expand-file-name
+                    "~/.local/share/mise/installs/java/temurin-25*/bin/java"))))
+       "java")))
 
 (defun my/use-lsp-completion-only-as-fallback ()
   "Fallback on lsp completion."
