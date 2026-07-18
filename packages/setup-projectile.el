@@ -67,13 +67,13 @@ Attaches to an existing session if one already exists."
   (setq projectile-ignored-project-function 'my/ignore-project?)
 
   (require 'setup-perspective)
-  (require 'project-processes)
 
   ;; Post-switch action:
   ;;   - first visit to a project -> new perspective + `projectile-find-file'
   ;;   - returning to a project    -> restore its perspective, landing you in
   ;;                                  the most recently visited file
-  (setq projectile-switch-project-action #'switch-perspective+find-file))
+  (setq projectile-switch-project-action #'switch-perspective+find-file)
+  (setq projectile-shell-backend 'ghostel))
 
 (defun my/consult--split-filter-only (_str &optional _plist)
   "Async split style sending nothing to the process.
