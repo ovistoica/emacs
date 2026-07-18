@@ -19,6 +19,8 @@
 (defvar projectile-command-map)
 (defvar projectile-ignored-project-function)
 (defvar projectile-switch-project-action)
+(defvar consult-async-split-style)
+(defvar consult-async-split-styles-alist)
 
 (defun my/projectile-switch-project-to-emacs ()
   "Switch to the Emacs configuration project.
@@ -47,16 +49,17 @@ Attaches to an existing session if one already exists."
   :commands (projectile-switch-project-by-name)
 
   :bind-keymap
-  (("s-p" . projectile-command-map))
-
-  :bind
-  ("C-x p p" . projectile-switch-project)
-  ("C-x p e" . my/projectile-switch-project-to-emacs)
+  ;; `C-x p' mirrors `s-p' 1:1 — both prefixes share `projectile-command-map'.
+  ;; This intentionally replaces the built-in project.el prefix on `C-x p'.
+  (("s-p" . projectile-command-map)
+   ("C-x p" . projectile-command-map))
 
   :config
   (projectile-mode +1)
   (define-key projectile-command-map (kbd "s-p") #'projectile-switch-project)
   (define-key projectile-command-map (kbd "x m") #'my/projectile-run-tmux)
+  ;; Shadows `projectile-recentf' — jump to the Emacs config project instead.
+  (define-key projectile-command-map (kbd "e") #'my/projectile-switch-project-to-emacs)
 
   (setq projectile-ignored-project-function 'my/ignore-project?)
 
@@ -69,18 +72,33 @@ Attaches to an existing session if one already exists."
   ;;                                  the most recently visited file
   (setq projectile-switch-project-action #'switch-perspective+find-file))
 
+(defun my/consult--split-filter-only (_str &optional _plist)
+  "Async split style sending nothing to the process.
+The whole minibuffer input is used for client-side narrowing by the
+completion style (async string empty, filter starts at position 0)."
+  '("" 0))
+
+(defun my/projectile-consult-filter-only (orig-fn &rest args)
+  "Call ORIG-FN with a filter-only async split style.
+`projectile-consult-find-file' runs Projectile's indexing command once
+and ignores the async input, so with the default perl split style plain
+typing is swallowed by the process instead of narrowing.  Route the
+whole input to the completion style instead."
+  (let ((consult-async-split-style 'filter-only))
+    (apply orig-fn args)))
+
 (use-package projectile-consult
   ;; Ships inside the projectile package (3.0+); consult-powered
   ;; streaming/previewing variants of the projectile commands.
   :ensure nil
   :after (projectile consult)
   :bind
-  (([remap projectile-find-file] . projectile-consult-find-file)))
-
-(use-package project-processes
-  :ensure nil
-  :defer t
-  :after (projectile prodigy))
+  (([remap projectile-find-file] . projectile-consult-find-file))
+  :config
+  (add-to-list 'consult-async-split-styles-alist
+               (list 'filter-only :function #'my/consult--split-filter-only))
+  (advice-add 'projectile-consult-find-file
+              :around #'my/projectile-consult-filter-only))
 
 (defun current-project-name ()
   "Return the name of the current Projectile project.
