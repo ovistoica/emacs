@@ -195,6 +195,9 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 (use-package ox-gfm
   :ensure t)
 
+(use-package org-pomodoro
+  :defer t)
+
 (defun my/org-update-parent-cookie (&rest _)
   "Update parent TODO statistics cookie after certain operations."
   (when (equal major-mode 'org-mode)
