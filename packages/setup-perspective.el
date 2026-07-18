@@ -19,7 +19,6 @@ Names not present in `buffer-list' are kept at the end in their original order."
                (gethash b recency most-positive-fixnum))))))
 
 (use-package perspective
-  :vc (:url "https://github.com/nex3/perspective-el")
   :bind (("C-x k" . persp-kill-buffer*)
          ("C-x b" . persp-switch-to-buffer*))
   :init

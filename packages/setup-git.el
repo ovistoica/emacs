@@ -44,7 +44,6 @@
   :bind (("C-x v w" . browse-at-remote-kill)))
 
 (use-package blamer
-  :vc (:url "https://github.com/artawower/blamer.el")
   :bind (("s-i" . blamer-show-posframe-commit-info))
   :custom
   (blamer-idle-time 0.5)
@@ -63,56 +62,11 @@
   :after magit
   :commands (magit-difftastic-mode magit-difftastic-toggle-file-rendering)
   :defines (magit-difftastic-mode
-            magit-difftastic-hunk-section-map
             ansi-color-normal-colors-vector
             ansi-color-bright-colors-vector)
-  :functions (magit-difftastic-clear-cache
-              magit-refresh
-              magit-section-highlight-range
-              magit-difftastic--parse-chunk-lines)
-  :preface
-  (defun my/magit-difftastic-toggle ()
-    "Toggle difftastic rendering in Magit and refresh the current buffer."
-    (interactive)
-    (magit-difftastic-mode 'toggle)
-    (when (derived-mode-p 'magit-mode)
-      (magit-refresh))
-    (message "Difftastic rendering %s"
-             (if magit-difftastic-mode "enabled" "disabled")))
-
-  (defun my/magit-difftastic-section-highlight (orig section &rest args)
-    "Highlight only a difftastic chunk's heading, keeping its body readable."
-    (if (and (eq (slot-value section 'type) 'magit-difftastic-hunk)
-             (slot-value section 'heading-highlight-face))
-        (magit-section-highlight-range
-         (slot-value section 'start)
-         (or (slot-value section 'content) (slot-value section 'end))
-         (slot-value section 'heading-highlight-face))
-      (apply orig section args)))
-
-  (defun my/magit-difftastic--visit-line-at-point (section)
-    "Return the worktree line for the difftastic display row at point in SECTION."
-    (let ((pt (point)))
-      (seq-some
-       (lambda (row)
-         (pcase-let ((`((,bol ,eol) ,left ,right) row))
-           (when (and (integerp bol) (integerp eol) (<= bol pt) (<= pt eol))
-             (or (car right) (car left)))))
-       (magit-difftastic--parse-chunk-lines section))))
-
-  (defun my/magit-difftastic-chunk-visit-line-at-point (orig section)
-    "Visit the line at point in a difftastic chunk, not just its first change."
-    (or (ignore-errors (my/magit-difftastic--visit-line-at-point section))
-        (funcall orig section)))
-  :bind (:map magit-mode-map
-              ("C-c d" . my/magit-difftastic-toggle))
-  :init
-  (transient-append-suffix 'magit-diff "t"
-    '("M-d" "Difftastic rendering (toggle)" my/magit-difftastic-toggle))
+  :functions (magit-refresh)
 
   :config
-  ;; Inherit Magit's hunk keymap so C-j, staging, etc. work on difftastic chunks.
-  (set-keymap-parent magit-difftastic-hunk-section-map magit-hunk-section-map)
   (require 'difftastic)
   (require 'ansi-color)
   ;; Setup theme aware difftastic colors for diffs
@@ -127,11 +81,7 @@
                      'font-lock-comment-face
                      'font-lock-string-face
                      'font-lock-warning-face
-                     (aref base 7)))))
-  (advice-add 'magit-section-highlight :around
-              #'my/magit-difftastic-section-highlight)
-  (advice-add 'magit-difftastic--chunk-visit-line :around
-              #'my/magit-difftastic-chunk-visit-line-at-point))
+                     (aref base 7))))))
 
 (defun kill-magit-buffers ()
   (let ((current (current-buffer)))
