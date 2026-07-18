@@ -105,8 +105,8 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 
   :custom
   (org-todo-keywords
-   '((sequence "TODO(t)" "INPROGRESS(i)" "REVIEW(r)" "PENDING_QA(q)" "NEXT(n)"
-               "PROJ(p)" "WAIT(w)" "SOMEDAY(s)" "|" "DONE(d)" "CANCELED(c)")))
+   '((sequence "NEXT(n)"  "INPROGRESS(i)" "TODO(t)" "REVIEW(r)" "PROJ(p)" "WAIT(w)" "SOMEDAY(s)"
+               "|" "DONE(d)" "CANCELED(c)")))
 
   (org-todo-keyword-faces my/org-todo-keyword-faces)
 
