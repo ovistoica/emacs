@@ -24,6 +24,7 @@
         kill-sexp
         kill-visual-line
         mark-sexp
+        markdown-beginning-of-line
         markdown-end-of-line
         markdown-outdent-or-delete
         mc/mark-next-lines
@@ -73,6 +74,7 @@
         isearch-forward-use-region
         keycast-header-line-mode
         lsp-ui-doc--handle-mouse-movement
+        mark-whole-buffer
         mouse-set-region
         my/format-buffer
         my/split-window-right
