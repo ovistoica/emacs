@@ -58,6 +58,9 @@ Attaches to an existing session if one already exists."
   (projectile-mode +1)
   (define-key projectile-command-map (kbd "s-p") #'projectile-switch-project)
   (define-key projectile-command-map (kbd "x m") #'my/projectile-run-tmux)
+  ;; Shadows the default `projectile-run-vterm' binding — ghostel is the
+  ;; preferred terminal (vterm stays available via M-x / `x r' backends).
+  (define-key projectile-command-map (kbd "x v") #'projectile-run-ghostel)
   ;; Shadows `projectile-recentf' — jump to the Emacs config project instead.
   (define-key projectile-command-map (kbd "e") #'my/projectile-switch-project-to-emacs)
 
@@ -79,7 +82,7 @@ completion style (async string empty, filter starts at position 0)."
   '("" 0))
 
 (defun my/projectile-consult-filter-only (orig-fn &rest args)
-  "Call ORIG-FN with a filter-only async split style.
+  "Call ORIG-FN with ARGS under a filter-only async split style.
 `projectile-consult-find-file' runs Projectile's indexing command once
 and ignores the async input, so with the default perl split style plain
 typing is swallowed by the process instead of narrowing.  Route the
