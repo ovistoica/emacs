@@ -94,6 +94,17 @@ Dired directory in Nautilus."
   :init
   (dired-quick-sort-setup))
 
+(defun my/dired-insert-directory-dotfiles-first (orig &rest args)
+  "Call ORIG (`dired-insert-directory') with ARGS under C collation.
+In the C locale, `.' sorts before letters, so dotfiles and dot-directories
+appear first within their respective groups.  Only name sorting is
+affected; time/size sorts and `--group-directories-first' behave as usual."
+  (let ((process-environment (cons "LC_COLLATE=C" process-environment)))
+    (apply orig args)))
+
+(advice-add 'dired-insert-directory :around
+            #'my/dired-insert-directory-dotfiles-first)
+
 ;; Diminish dired in modeline
 (with-eval-after-load 'dired
   (when (fboundp 'diminish)
@@ -111,3 +122,4 @@ Dired directory in Nautilus."
                  '(".*" "\\`.+\\'" "/ssh:%h:"))))
 
 (provide 'setup-dired)
+;;; setup-dired.el ends here
