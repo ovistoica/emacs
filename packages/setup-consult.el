@@ -1,7 +1,12 @@
-;; Consult 
-;; Provides search and navigation commands based on the Emacs completion
-;; function completion-read. Completion allows you to quickly select an item
-;; from a list of candidates.
+;;; setup-consult.el --- Consult search and navigation config -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;;; Consult provides search and navigation commands based on the Emacs
+;;; completion function `completing-read'.  Completion allows you to quickly
+;;; select an item from a list of candidates.
+
+;;; Code:
 
 (use-package consult
   :bind (("C-x f" . consult-recent-file)
@@ -30,7 +35,7 @@
          ("M-s k" . consult-keep-lines)
          ;; C-x bindings in `ctl-x-map'
          ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ;;("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
          ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
          ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
          ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
@@ -48,37 +53,23 @@
          ("M-r" . consult-history)                 ;; orig. previous-matching-history-element
          )
   :after (perspective)
+  :defines (persp-consult-source
+            xref-show-xrefs-function
+            xref-show-definitions-function)
+  :functions (consult--customize-put)
 
-  :config 
-  ;; Show only perspective-buffers with consult-buffer
-  
+  :config
+  ;; Perspective-aware `consult-buffer': perspective's own source (narrow: s)
+  ;; is the default; the global buffer source is hidden but reachable via
+  ;; narrow `b'.  Safe since perspective 2.22 -- consult preview no longer
+  ;; imports previewed buffers into the current perspective.
+  ;; NOTE: consult renamed its sources consult--source-* -> consult-source-*.
+  (consult-customize consult-source-buffer :hidden t :default nil)
+  (add-to-list 'consult-buffer-sources persp-consult-source)
+
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; (when (featurep 'perspective)
-  ;;     ;; Remove any existing perspective sources
-  ;;     (setq consult-buffer-sources
-  ;;           (cl-remove-if (lambda (source)
-  ;;                           (string= (plist-get source :name) "Perspective"))
-  ;;                         consult-buffer-sources))
-  ;;     ;; Add single fast perspective source
-  ;;     (push `(:name "Perspective"
-  ;;             :narrow ?s
-  ;;             :category buffer
-  ;;             :state ,#'consult--buffer-state
-  ;;             :history buffer-name-history
-  ;;             :default t
-  ;;             :items ,(lambda ()
-  ;;                       (let ((buffers (persp-current-buffer-names t)))
-  ;;                         (sort buffers
-  ;;                               (lambda (a b)
-  ;;                                 (< (or (cl-position (get-buffer a) (buffer-list))
-  ;; 999)
-  ;;                                    (or (cl-position (get-buffer b) (buffer-list))
-  ;; 999)))))))
-  ;;           consult-buffer-sources))
-  )
+        xref-show-definitions-function #'consult-xref))
 
 (use-package consult-flycheck
   :bind (("M-g f" . consult-flycheck)))
@@ -91,3 +82,4 @@
                args)))
 
 (provide 'setup-consult)
+;;; setup-consult.el ends here

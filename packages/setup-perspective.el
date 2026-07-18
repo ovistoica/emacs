@@ -19,8 +19,9 @@ Names not present in `buffer-list' are kept at the end in their original order."
                (gethash b recency most-positive-fixnum))))))
 
 (use-package perspective
-  :bind (("C-x k" . persp-kill-buffer*)
-         ("C-x b" . persp-switch-to-buffer*))
+  ;; C-x b is `consult-buffer' (setup-consult.el) with the perspective source
+  ;; as default; `persp-switch-to-buffer*' remains on C-x x b.
+  :bind (("C-x k" . persp-kill-buffer*))
   :init
   (setq persp-mode-prefix-key (kbd "C-x x"))
   (persp-mode)
