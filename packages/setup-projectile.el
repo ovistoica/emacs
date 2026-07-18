@@ -12,6 +12,7 @@
 (declare-function projectile-project-root "projectile")
 (declare-function projectile-mode "projectile")
 (declare-function projectile-find-file "projectile")
+(declare-function projectile-consult-find-file "projectile-consult")
 (declare-function with-perspective "setup-perspective")
 (declare-function s-contains? "s")
 
@@ -68,6 +69,14 @@ Attaches to an existing session if one already exists."
   ;;                                  the most recently visited file
   (setq projectile-switch-project-action #'switch-perspective+find-file))
 
+(use-package projectile-consult
+  ;; Ships inside the projectile package (3.0+); consult-powered
+  ;; streaming/previewing variants of the projectile commands.
+  :ensure nil
+  :after (projectile consult)
+  :bind
+  (([remap projectile-find-file] . projectile-consult-find-file)))
+
 (use-package project-processes
   :ensure nil
   :defer t
@@ -84,7 +93,9 @@ On the first visit a perspective is created and `projectile-find-file'
 prompts for a file.  On subsequent visits the existing perspective is
 restored, landing point in the most recently visited file."
   (with-perspective (current-project-name)
-    (projectile-find-file)))
+    (if (fboundp 'projectile-consult-find-file)
+        (projectile-consult-find-file)
+      (projectile-find-file))))
 
 (defun my/ignore-project? (file-name)
   "Return non-nil when FILE-NAME belongs to a project that should be ignored.

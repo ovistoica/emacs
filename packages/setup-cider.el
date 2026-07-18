@@ -19,7 +19,7 @@
 (declare-function cider-last-sexp "cider")
 (declare-function cider-defun-at-point "cider")
 (declare-function cider-current-ns "cider")
-(declare-function cider-nrepl-request:eval "cider")
+(declare-function cider-nrepl-send-eval-request "cider-client")
 (declare-function nrepl-dict-get "nrepl-dict")
 (declare-function sesman-current-session "sesman")
 (declare-function sesman-current-sessions "sesman")
@@ -64,9 +64,6 @@ in `clojure-mode-map'."
   :config
   ;; Warn about missing nREPL instead of doing stupid things
   (my/shadow-cider-keys-with-warning)
-  ;; Free up C-c C-p for pi-coding-agent toggle
-  (define-key cider-mode-map (kbd "C-c C-p") nil)
-  (define-key clojure-mode-map (kbd "C-c C-p") nil)
 
   ;; Show the port number when figwheel comes online
   (add-to-list 'cider--repl-stderr-functions #'my/cider-maybe-log-figwheel-main-port)
@@ -90,11 +87,6 @@ in `clojure-mode-map'."
   :custom
   ;; save files when evaluating them
   (cider-save-file-on-load t)
-
-  ;; try working around a bug where sesman is way too friendly when selecting
-  ;; repl-s from adjacent projects
-  ;; https://clojurians.slack.com/archives/C0617A8PQ/p1718608002044069
-  (sesman-use-friendly-sessions nil)
 
   ;; don't pop up repl when connecting
   (cider-repl-pop-to-buffer-on-connect nil)
@@ -152,26 +144,26 @@ in `clojure-mode-map'."
   "Evaluate the Clojure form at point and put the result on the clipboard."
   (interactive)
   (let ((form (cider-last-sexp)))
-    (cider-nrepl-request:eval
+    (cider-nrepl-send-eval-request
      form
      (lambda (response)
        (when (nrepl-dict-get response "value")
          (let ((result (nrepl-dict-get response "value")))
            (kill-new result)
            (message "Result copied to clipboard: %s" result))))
-     (cider-current-ns))))
+     :ns (cider-current-ns))))
 
 (defun my/cider-eval-defun-to-clipboard ()
   "Evaluate the current top-level form and copy the result to the clipboard."
   (interactive)
-  (cider-nrepl-request:eval
+  (cider-nrepl-send-eval-request
    (cider-defun-at-point)
    (lambda (response)
      (when (nrepl-dict-get response "value")
        (let ((result (nrepl-dict-get response "value")))
          (kill-new result)
          (message "Result copied to clipboard: %s" result))))
-   (cider-current-ns)))
+   :ns (cider-current-ns)))
 
 (provide 'setup-cider)
 

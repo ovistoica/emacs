@@ -45,7 +45,7 @@
   (interactive)
   (kaocha-runner--clear-buffer cider-run--out-buffer)
   (let ((buffer (cider-current-repl 'clj 'ensure)))
-    (cider-nrepl-request:eval
+    (cider-nrepl-send-eval-request
      invocation
      (let ((original-buffer (current-buffer))
            (any-errors? nil)
@@ -61,12 +61,12 @@
                                            'cider-repl-stdout-face
                                          'cider-repl-stderr-face))))
                  (kaocha-runner--with-window cider-run--out-buffer original-buffer
-                   (window-resize nil (- (max 6
-                                              (min 15 (1+ (line-number-at-pos (point-max)))))
-                                         (window-height)))
-                   (goto-char (point-max))
-                   (recenter (- -1 (min (max 0 scroll-margin)
-                                        (truncate (/ (window-body-height) 4.0)))) t)))
+                                             (window-resize nil (- (max 6
+                                                                        (min 15 (1+ (line-number-at-pos (point-max)))))
+                                                                   (window-height)))
+                                             (goto-char (point-max))
+                                             (recenter (- -1 (min (max 0 scroll-margin)
+                                                                  (truncate (/ (window-body-height) 4.0)))) t)))
                (when out
                  (ignore-errors
                    (cider-repl-emit-stdout buffer out)))
@@ -80,7 +80,7 @@
                  (setq done? t)
                  (when (and (not any-errors?) showing?)
                    (run-with-timer 1 nil 'cider-run--kill-out-buffer))))))))
-     ns nil nil nil buffer)))
+     :ns ns :connection buffer)))
 
 (defun cider-run--kill-out-buffer ()
   (kaocha-runner--hide-window cider-run--out-buffer)
