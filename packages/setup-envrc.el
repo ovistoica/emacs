@@ -1,6 +1,5 @@
 (use-package envrc
   :diminish nil
-  :vc (:url "https://github.com/purcell/envrc")
   :init (envrc-global-mode))
 
 (defun my/project-file-exists-p (filename)
