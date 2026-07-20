@@ -78,8 +78,7 @@ SPEC may be a face symbol, a `face-attribute' plist, or a list of either."
   :defines (magit-difftastic-mode
             ansi-color-normal-colors-vector
             ansi-color-bright-colors-vector)
-  :functions (magit-refresh magit-section-highlight-range
-              magit-difftastic--parse-chunk-lines)
+  :functions (magit-refresh magit-section-highlight-range)
   :preface
   (defun my/magit-difftastic--next-face-change (pos limit)
     "Return the next position after POS where face properties change.
@@ -112,40 +111,11 @@ section selection.  For other sections, call ORIG with SECTION and ARGS."
                   (setq pos next))))))
       (apply orig section args)))
 
-  (defun my/magit-difftastic-visit-line-at-point (orig section)
-    "Return the worktree line for the chunk row at point in SECTION.
-Upstream's ORIG always returns the chunk's first new-side line, so
-visiting from the middle of a chunk misses the cursor's row.  Resolve
-the parsed row containing point instead: prefer its new-side (rhs)
-line, then the next row with a new-side line (for deletion-only rows),
-then the row's old-side line.  Fall back to ORIG when point is on the
-chunk heading or outside any parsed row."
-    (or (when-let* ((rows (magit-difftastic--parse-chunk-lines section))
-                    (tail (seq-drop-while
-                           (lambda (row) (< (cadr (car row)) (point)))
-                           rows))
-                    (row (car tail)))
-          (pcase-let ((`((,bol ,_eol) ,left ,right) row))
-            (when (<= bol (point))
-              (or (car right)
-                  (seq-some (lambda (r) (car (caddr r))) (cdr tail))
-                  (car left)))))
-        (funcall orig section)))
-
   :config
   ;; The default `magit-section-highlight' lays a flat overlay over the chunk
   ;; body, painting over the added/removed line colors.
   (advice-add 'magit-section-highlight :around
               #'my/magit-difftastic-section-highlight)
-  ;; Upstream's sparse chunk map replaces magit's hunk section map, so
-  ;; section-map-only keys (C-j, ...) fall through to the global map.  Parent
-  ;; it; upstream advises `magit-diff-visit-*', so parented keys visit the
-  ;; correct line.
-  (set-keymap-parent magit-difftastic-hunk-section-map magit-hunk-section-map)
-  ;; Upstream visits the chunk's FIRST change regardless of point; make
-  ;; C-j/RET land on the row under the cursor instead.
-  (advice-add 'magit-difftastic--chunk-visit-line :around
-              #'my/magit-difftastic-visit-line-at-point)
   (require 'difftastic)
   (require 'ansi-color)
   ;; Setup theme aware difftastic colors for diffs

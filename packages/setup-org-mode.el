@@ -65,7 +65,7 @@ into hyphens, prefixed with `my/org-todo-'), defines it via
 
   (set-modus-todo-face "TODO" red-faint)
   (set-modus-todo-face "INPROGRESS" yellow-warmer)
-  (set-modus-todo-face "REVIEW" blue)
+  (set-modus-todo-face "REPEAT" blue)
   (set-modus-todo-face "PENDING_QA" cyan)
   (set-modus-todo-face "NEXT" red-intense)
   (set-modus-todo-face "PROJ" magenta)
@@ -105,7 +105,7 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 
   :custom
   (org-todo-keywords
-   '((sequence "NEXT(n)"  "INPROGRESS(i)" "TODO(t)" "REVIEW(r)" "PROJ(p)" "WAIT(w)" "SOMEDAY(s)"
+   '((sequence "NEXT(n)"  "INPROGRESS(i)" "TODO(t)" "REPEAT(r)" "PROJ(p)" "WAIT(w)" "SOMEDAY(s)"
                "|" "DONE(d)" "CANCELED(c)")))
 
   (org-todo-keyword-faces my/org-todo-keyword-faces)
@@ -153,23 +153,17 @@ refresh inline image display.  Otherwise behave like `org-yank'."
   (setq org-directory "~/Dropbox/org")
 
   (setq org-capture-templates
-        '(;; ("a" "Affirmation" entry (file+olp+datetree "~/Dropbox/org/affirmations.org")
-          ;;  "* I am %?\n  %U\n\nCurrent affirmations:\n- I am a clojure startup owner of 1M ARR\n- I own a medium house in the country-side \n- I am a man of 70kgs\n- I am a husband of a happy family" :empty-lines 1)
-          ("b" "Bookmark" entry (file+headline "~/Dropbox/org/bookmarks.org" "Bookmarks")
-           "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
-          ("t" "Todo" entry (file+headline "~/Dropbox/org/working-memory.org" "INBOX")
-           "* TODO %?\n  %i\n  %a")
-          ("s" "Shopping item" entry (file "~/Dropbox/org/inbox.org")
+        '(("p" "Private templates")
+                    ("ps" "Shopping item" entry
+           (file+headline "~/Dropbox/org/inbox.org" "Shopping list")
            "* %? :SHOPPING:\n")
-          ("w" "Work Todo" entry (file+headline "~/Dropbox/org/master-list.org" "INBOX")
-           "* TODO %?\n  %i\n  %a")
-          ;; ("j" "Journal" entry  (file+olp+datetree "~/Dropbox/org/journal.org")
-          ;;  "* %?\nEntered on %U\n  %i\n ")
-          ("u" "Eng Update" entry  (file+olp+datetree "~/Dropbox/org/engineering-update.org")
-           "* %(let* ((day-num (string-to-number (format-time-string \"%w\"))) (days '(\"Sun\" \"Mon\" \"Tue\" \"Wed\" \"Thu\" \"Fri\" \"Sat\"))) (concat (nth day-num days) (format-time-string \" %b %d\"))) Update:\n\n%?")
-          ;; ("p" "Social Post" entry (file+headline "~/Dropbox/org/social-posts.org" "Posts")
-          ;;  "* %?\n  %U" :empty-lines 1)
-          ))
+          ("pt" "TODO entry" entry
+           (file+headline "~/Dropbox/org/private.org" "Capture")
+           (file "~/Dropbox/org/tpl-todo.txt"))
+         ("w" "Work templates")
+         ("wt" "TODO entry" entry
+           (file+headline "~/Dropbox/org/work.org" "Capture")
+           (file "~/Dropbox/org/tpl-todo.txt"))))
 
   (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org" "reminders-beorg.org"))
 
