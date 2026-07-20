@@ -1,12 +1,13 @@
 ;;; setup-org-mode.el --- Org mode configuration -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Configuration for Org mode including TODO keywords, capture templates,
-;; agenda files, and RSS feeds.
+;;; Configuration for Org mode including TODO keywords, capture templates,
+;;; agenda files, and RSS feeds.
 
 ;;; Code:
 
 (require 'dash)
+(require 'org-slack-export)
 
 ;; Silence byte-compiler warnings for org variables set in :config
 (defvar org-indent-mode-turns-on-hiding-stars)
@@ -213,7 +214,7 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 (when (eq system-type 'darwin)
   (add-hook 'org-mode-hook 'my/setup-romanian-diacritics))
 
-(require 'org-slack-export)
+
 
 (provide 'setup-org-mode)
 ;;; setup-org-mode.el ends here
