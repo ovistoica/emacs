@@ -112,7 +112,7 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 
   (org-use-fast-todo-selection t)
 
-  (org-log-done 'time)
+  (org-log-done 'note)
 
   ;; Log a "State \"Y\" from \"X\"" timestamp line into a LOGBOOK drawer for
   ;; every keyword transition (see the "!" flags above), not just on DONE.
@@ -154,16 +154,19 @@ refresh inline image display.  Otherwise behave like `org-yank'."
 
   (setq org-capture-templates
         '(("p" "Private templates")
-                    ("ps" "Shopping item" entry
+          ("ps" "Shopping item" entry
            (file+headline "~/Dropbox/org/inbox.org" "Shopping list")
            "* %? :SHOPPING:\n")
           ("pt" "TODO entry" entry
            (file+headline "~/Dropbox/org/private.org" "Capture")
            (file "~/Dropbox/org/tpl-todo.txt"))
-         ("w" "Work templates")
-         ("wt" "TODO entry" entry
+          ("w" "Work templates")
+          ("wt" "TODO entry" entry
            (file+headline "~/Dropbox/org/work.org" "Capture")
-           (file "~/Dropbox/org/tpl-todo.txt"))))
+           (file "~/Dropbox/org/tpl-todo.txt"))
+          ("wm" "Meeting notes" entry
+           (file+headline "~/Dropbox/org/work.org" "Meetings")
+           (file "~/Dropbox/org/tpl-meeting.txt"))))
 
   (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org" "reminders-beorg.org"))
 
