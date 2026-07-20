@@ -105,32 +105,19 @@ refresh inline image display.  Otherwise behave like `org-yank'."
           (org-display-inline-images))
       (call-interactively #'org-yank)))
 
-  (defun filter-out-agenda-file (agenda-file)
-    "Filter agenda file AGENDA-FILE from the list.
-Uses `org-original-agenda-files' to prevent scoped filtering of already
-filtered agenda files."
-    (--remove  (equal it agenda-file) org-original-agenda-files))
+  (defvar my/org-shared-agenda-files
+    '("inbox.org" "calendar-beorg.org" "reminders-beorg.org")
+    "Agenda files included in every focus context.")
 
-  (defun my/org-focus-private()
-    "Set focus on private things, this means kick out work.org from the agenda files"
-    (interactive)
-    (setq org-agenda-files (filter-out-agenda-file "work.org"))
+  (defun my/org-focus (label &rest area-files)
+    "Restrict the agenda to AREA-FILES plus `my/org-shared-agenda-files'.
+When AREA-FILES is nil, reset to `org-original-agenda-files'.
+LABEL is used in the echo-area message."
+    (setq org-agenda-files (if area-files
+                               (append area-files my/org-shared-agenda-files)
+                             org-original-agenda-files))
     (org-agenda-redo-all)
-    (message "Org agenda focused on private tasks"))
-
-  (defun my/org-focus-work()
-    "Set focus on work things, this means kick out private.org from the agenda files"
-    (interactive)
-    (setq org-agenda-files (filter-out-agenda-file "private.org"))
-    (org-agenda-redo-all)
-    (message "Org agenda focused on work tasks"))
-
-  (defun my/org-focus-all()
-    "Set focus on all things."
-    (interactive)
-    (setq org-agenda-files org-original-agenda-files)
-    (org-agenda-redo-all)
-    (message "Org agenda focused on all tasks"))
+    (message "Org agenda focused on %s tasks" label))
 
   :custom
   (org-todo-keywords
@@ -155,21 +142,34 @@ filtered agenda files."
   ;; per-heading directories instead.
   (org-yank-image-save-method "images/")
 
-  :bind ((:map org-mode-map
-               ("C-y" . my/org-yank-dwim)
-               ("M-+" . org-shiftright)
-               ("C-S-<down>" . org-metadown)
-               ("C-S-<up>" . org-metaup))
-         (:map org-agenda-mode-map
-               ("C-c w" . my/org-focus-work)
-               ("C-c p" . my/org-focus-private)
-               ("C-c a" . my/org-focus-all)))
+  :bind (:map org-mode-map
+              ("C-y" . my/org-yank-dwim)
+              ("M-+" . org-shiftright)
+              ("C-S-<down>" . org-metadown)
+              ("C-S-<up>" . org-metaup))
 
 
   :hook ((org-mode . auto-fill-mode)
          (enable-theme-functions . my/org-sync-todo-faces))
 
   :config
+
+  ;; Agenda focus keybindings.  Bound here instead of :bind because
+  ;; use-package's binder doesn't recognize the λ macro as a command, and
+  ;; `org-agenda-mode-map' only exists once org-agenda is loaded.
+  (with-eval-after-load 'org-agenda
+    (define-key org-agenda-mode-map (kbd "C-c w")
+                (λ (my/org-focus "work" "work.org")))
+    (define-key org-agenda-mode-map (kbd "C-c p")
+                (λ (my/org-focus "private" "private.org")))
+    (define-key org-agenda-mode-map (kbd "C-c l")
+                (λ (my/org-focus "life" "private.org" "cafenea.org" "shipclojure.org")))
+    (define-key org-agenda-mode-map (kbd "C-c f")
+                (λ (my/org-focus "cafenea" "cafenea.org")))
+    (define-key org-agenda-mode-map (kbd "C-c s")
+                (λ (my/org-focus "ShipClojure" "shipclojure.org")))
+    (define-key org-agenda-mode-map (kbd "C-c a")
+                (λ (my/org-focus "all"))))
 
   ;; Color the TODO keyword faces from the current theme now (the hook keeps
   ;; them in sync on later theme switches).
@@ -203,10 +203,19 @@ filtered agenda files."
            (file "~/Dropbox/org/tpl-todo.txt"))
           ("wm" "Meeting notes" entry
            (file+headline "~/Dropbox/org/work.org" "Meetings")
-           (file "~/Dropbox/org/tpl-meeting.txt"))))
+           (file "~/Dropbox/org/tpl-meeting.txt"))
+          ("c" "Cafenea templates")
+          ("ct" "TODO entry" entry
+           (file+headline "~/Dropbox/org/cafenea.org" "Capture")
+           (file "~/Dropbox/org/tpl-todo.txt"))
+          ("s" "ShipClojure templates")
+          ("st" "TODO entry" entry
+           (file+headline "~/Dropbox/org/shipclojure.org" "Capture")
+           (file "~/Dropbox/org/tpl-todo.txt"))))
 
 
-  (setq org-agenda-files '("working-memory.org" "work.org" "private.org" "inbox.org" "calendar-beorg.org" "reminders-beorg.org"))
+  (setq org-agenda-files '("work.org" "private.org" "cafenea.org" "shipclojure.org"
+                           "inbox.org" "calendar-beorg.org" "reminders-beorg.org"))
   (setq org-original-agenda-files org-agenda-files)
 
   (setq org-feed-alist
