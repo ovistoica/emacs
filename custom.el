@@ -42,6 +42,9 @@
      "1ad12cda71588cc82e74f1cabeed99705c6a60d23ee1bb355c293ba9c000d4ac"
      "b9c002dc827fb75b825da3311935c9f505d48d7ee48f470f0aa7ac5d2a595ab2"
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
+ '(org-refile-allow-creating-parent-nodes t)
+ '(org-refile-targets '((org-agenda-files :maxlevel . 2)))
+ '(org-refile-use-outline-path 'file)
  '(package-selected-packages
    '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
          casual catppuccin-theme chezmoi claude-code-ide clj-refactor

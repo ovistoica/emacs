@@ -13,6 +13,7 @@
 (defvar org-indent-mode-turns-on-hiding-stars)
 (defvar org-capture-templates)
 (defvar org-feed-alist)
+(defvar org-original-agenda-files)
 
 ;; Declare org functions used outside of org-mode context
 (declare-function org-back-to-heading "org")
@@ -104,16 +105,46 @@ refresh inline image display.  Otherwise behave like `org-yank'."
           (org-display-inline-images))
       (call-interactively #'org-yank)))
 
+  (defun filter-out-agenda-file (agenda-file)
+    "Filter agenda file AGENDA-FILE from the list.
+Uses `org-original-agenda-files' to prevent scoped filtering of already
+filtered agenda files."
+    (--remove  (equal it agenda-file) org-original-agenda-files))
+
+  (defun my/org-focus-private()
+    "Set focus on private things, this means kick out work.org from the agenda files"
+    (interactive)
+    (setq org-agenda-files (filter-out-agenda-file "work.org"))
+    (org-agenda-redo-all)
+    (message "Org agenda focused on private tasks"))
+
+  (defun my/org-focus-work()
+    "Set focus on work things, this means kick out private.org from the agenda files"
+    (interactive)
+    (setq org-agenda-files (filter-out-agenda-file "private.org"))
+    (org-agenda-redo-all)
+    (message "Org agenda focused on work tasks"))
+
+  (defun my/org-focus-all()
+    "Set focus on all things."
+    (interactive)
+    (setq org-agenda-files org-original-agenda-files)
+    (org-agenda-redo-all)
+    (message "Org agenda focused on all tasks"))
+
   :custom
   (org-todo-keywords
-   '((sequence "NEXT(n)"  "INPROGRESS(i)" "TODO(t)" "REPEAT(r)" "PROJ(p)" "WAIT(w)" "SOMEDAY(s)"
-               "|" "DONE(d)" "CANCELED(c)")))
+   '((sequence "NEXT(n@/!)"  "INPROGRESS(i@/!)" "TODO(t@/!)" "REPEAT(r)" "PROJ(p)" "WAIT(w@/!)" "SOMEDAY(s@/!)"
+               "|" "DONE(d@)" "CANCELED(c@)")))
 
   (org-todo-keyword-faces my/org-todo-keyword-faces)
 
   (org-use-fast-todo-selection t)
 
   (org-log-done 'note)
+  (org-log-reschedule 'time)
+
+
 
   ;; Log a "State \"Y\" from \"X\"" timestamp line into a LOGBOOK drawer for
   ;; every keyword transition (see the "!" flags above), not just on DONE.
@@ -124,11 +155,16 @@ refresh inline image display.  Otherwise behave like `org-yank'."
   ;; per-heading directories instead.
   (org-yank-image-save-method "images/")
 
-  :bind (:map org-mode-map
-              ("C-y" . my/org-yank-dwim)
-              ("M-+" . org-shiftright)
-              ("C-S-<down>" . org-metadown)
-              ("C-S-<up>" . org-metaup))
+  :bind ((:map org-mode-map
+               ("C-y" . my/org-yank-dwim)
+               ("M-+" . org-shiftright)
+               ("C-S-<down>" . org-metadown)
+               ("C-S-<up>" . org-metaup))
+         (:map org-agenda-mode-map
+               ("C-c w" . my/org-focus-work)
+               ("C-c p" . my/org-focus-private)
+               ("C-c a" . my/org-focus-all)))
+
 
   :hook ((org-mode . auto-fill-mode)
          (enable-theme-functions . my/org-sync-todo-faces))
@@ -169,7 +205,9 @@ refresh inline image display.  Otherwise behave like `org-yank'."
            (file+headline "~/Dropbox/org/work.org" "Meetings")
            (file "~/Dropbox/org/tpl-meeting.txt"))))
 
-  (setq org-agenda-files '("working-memory.org" "journal.org" "inbox.org" "calendar-beorg.org" "master-list.org" "reminders-beorg.org"))
+
+  (setq org-agenda-files '("working-memory.org" "work.org" "private.org" "inbox.org" "calendar-beorg.org" "reminders-beorg.org"))
+  (setq org-original-agenda-files org-agenda-files)
 
   (setq org-feed-alist
         '(("Slashdot"
