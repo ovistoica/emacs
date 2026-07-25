@@ -131,6 +131,11 @@ LABEL is used in the echo-area message."
   (org-log-done 'note)
   (org-log-reschedule 'time)
 
+  (org-enforce-todo-dependencies t)
+  (org-enforce-todo-checkbox-dependencies t)
+  (org-track-ordered-property-with-tag t) ;; Add a tag to ordered Projects
+  (org-agenda-dim-blocked-tasks t) ;; Tasks that have a dependency
+
 
 
   ;; Log a "State \"Y\" from \"X\"" timestamp line into a LOGBOOK drawer for
@@ -190,7 +195,10 @@ LABEL is used in the echo-area message."
   (setq org-directory "~/Dropbox/org")
 
   (setq org-capture-templates
-        '(("p" "Private templates")
+        '(("b" "Add book to read" entry
+           (file+headline "~/Dropbox/org/private.org" "Books to read")
+           (file "~/Dropbox/org/tpl-book.txt"))
+          ("p" "Private templates")
           ("ps" "Shopping item" entry
            (file+headline "~/Dropbox/org/inbox.org" "Shopping list")
            "* %? :SHOPPING:\n")
