@@ -20,6 +20,8 @@
 (declare-function org-update-parent-todo-statistics "org")
 (declare-function org-sort-entries "org")
 (declare-function org-get-todo-state "org")
+(declare-function org-get-tags "org")
+(declare-function org-toggle-tag "org")
 (declare-function org-up-heading-safe "org")
 (declare-function org-yank "org")
 (declare-function org-display-inline-images "org")
@@ -105,6 +107,33 @@ refresh inline image display.  Otherwise behave like `org-yank'."
           (org-display-inline-images))
       (call-interactively #'org-yank)))
 
+  (defcustom my/org-unprocessed-tag "NEW"
+    "Tag that capture templates put on entries that still need triage.
+Dropped automatically on refile by
+`my/org-refile-drop-unprocessed-tag'.  Set to nil to disable that
+behaviour."
+    :type '(choice (string :tag "Tag") (const :tag "Disabled" nil))
+    :group 'org)
+
+  (defun my/org-refile-drop-unprocessed-tag ()
+    "Remove `my/org-unprocessed-tag' from the entry a refile just inserted.
+Meant for `org-after-refile-insert-hook', which runs in the target
+buffer with point inside the freshly pasted subtree: filing an entry
+means it has been processed, so the capture-time tag no longer holds.
+
+Only a tag set on the entry itself is removed; inherited tags are left
+alone.  Errors are reported but never signalled, so a failure here
+cannot abort the refile halfway through."
+    (when (and my/org-unprocessed-tag (derived-mode-p 'org-mode))
+      (condition-case err
+          (save-excursion
+            (org-back-to-heading t)
+            (when (member my/org-unprocessed-tag (org-get-tags nil t))
+              (org-toggle-tag my/org-unprocessed-tag 'off)))
+        (error (message "Could not drop :%s: tag: %s"
+                        my/org-unprocessed-tag
+                        (error-message-string err))))))
+
   (defvar my/org-shared-agenda-files
     '("inbox.org" "calendar-beorg.org" "reminders-beorg.org")
     "Agenda files included in every focus context.")
@@ -155,7 +184,8 @@ LABEL is used in the echo-area message."
 
 
   :hook ((org-mode . auto-fill-mode)
-         (enable-theme-functions . my/org-sync-todo-faces))
+         (enable-theme-functions . my/org-sync-todo-faces)
+         (org-after-refile-insert . my/org-refile-drop-unprocessed-tag))
 
   :config
 
