@@ -40,6 +40,49 @@
       (kill-region (region-beginning) (region-end))
     (paredit-backward-kill-word)))
 
+(defun my/drag-sexp--bounds ()
+  "Return the (BEG . END) bounds of the form to drag.
+When point sits on an opening delimiter, that form is used; otherwise
+the innermost form containing point is used.  Signal a `user-error'
+when point is inside a string or comment, or not inside a form."
+  (let ((state (syntax-ppss)))
+    (when (or (nth 3 state) (nth 4 state))
+      (user-error "Point is inside a string or comment")))
+  (save-excursion
+    (unless (looking-at-p "\\s(")
+      (condition-case nil
+          (backward-up-list)
+        (scan-error (user-error "Point is not inside a form"))))
+    (cons (point) (save-excursion (forward-sexp) (point)))))
+
+(defun my/drag-sexp--move (n)
+  "Swap the form at point with the sibling N positions away.
+Point keeps its offset inside the form, so the command can be repeated
+to drag a form across several slots.  On failure, restore point and
+signal a `user-error' instead of leaving a half-done edit."
+  (let* ((bounds (my/drag-sexp--bounds))
+         (offset (- (point) (car bounds))))
+    (goto-char (cdr bounds))
+    (condition-case nil
+        (transpose-sexps n)
+      (scan-error
+       (goto-char (+ (car bounds) offset))
+       (user-error "No sibling form to swap with")))
+    (backward-sexp)
+    (forward-char offset)))
+
+(defun my/drag-sexp-forward (&optional n)
+  "Drag the form at point N siblings forward, keeping point on it.
+Handy for reordering steps in a `->' thread or clauses in a `let'."
+  (interactive "p")
+  (my/drag-sexp--move (or n 1)))
+
+(defun my/drag-sexp-backward (&optional n)
+  "Drag the form at point N siblings backward, keeping point on it.
+See `my/drag-sexp-forward'."
+  (interactive "p")
+  (my/drag-sexp--move (- (or n 1))))
+
 (defun conditionally-enable-paredit-mode ()
   "Enable paredit in the minibuffer for `eval-expression' and friends."
   (when (or (eq this-command 'eval-expression)
@@ -86,6 +129,10 @@
   (add-hook 'minibuffer-setup-hook #'conditionally-enable-paredit-mode)
 
   :bind (:map paredit-mode-map
+              ;; M-<up>/M-<down> are paredit's splice-killing commands; the
+              ;; shifted variants are free, both globally and in paredit.
+              ("M-S-<up>"       . my/drag-sexp-backward)
+              ("M-S-<down>"     . my/drag-sexp-forward)
               ("C-w"            . paredit-kill-region-or-backward-word)
               ("M-C-<backspace>" . backward-kill-sexp)
               ("C-d"            . paredit-forward-delete)
