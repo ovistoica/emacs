@@ -249,11 +249,25 @@ LABEL is used in the echo-area message."
           ("s" "ShipClojure templates")
           ("st" "TODO entry" entry
            (file+headline "~/Dropbox/org/shipclojure.org" "Capture")
-           (file "~/Dropbox/org/tpl-todo.txt"))))
+           (file "~/Dropbox/org/tpl-todo.txt"))
+          ("h" "Health / nutrition")
+          ("hw" "Log weight" plain
+           (function nutrition-capture-target)
+           "%(nutrition-capture-weight)"
+           :immediate-finish t)
+          ("hc" "Log calories" plain
+           (function nutrition-capture-target)
+           "%(nutrition-capture-calories)"
+           :immediate-finish t)
+          ("hm" "Log measurements" plain
+           (function nutrition-capture-target)
+           "%(nutrition-capture-measurements)"
+           :immediate-finish t)))
 
 
   (setq org-agenda-files '("work.org" "private.org" "cafenea.org" "shipclojure.org"
-                           "inbox.org" "calendar-beorg.org" "reminders-beorg.org"))
+                           "inbox.org" "calendar-beorg.org" "reminders-beorg.org"
+                           "nutrition/log-2026.org" "nutrition/habits.org"))
   (setq org-original-agenda-files org-agenda-files)
 
   (setq org-feed-alist
