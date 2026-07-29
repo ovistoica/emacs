@@ -15,6 +15,7 @@
 ;;   C-c i   send region (or prompted text) to the current harness
 ;;   C-c .   open the current harness's menu
 ;;   C-c ,   switch the global harness default
+;;   C-c m   open the multi-eca dashboard (global session/chat list)
 ;;
 ;; Standard in-buffer keys (active in every harness's chat/input buffer):
 ;;   C-c .     open menu
@@ -48,6 +49,11 @@
 (declare-function eca-chat-stop-prompt "eca-chat")
 (declare-function eca-chat-new "eca-chat")
 (declare-function eca-chat-select "eca-chat")
+
+;; multi-eca — global "AI ibuffer" dashboard (packages/multi-eca.el).  Loaded
+;; lazily on first use; loading it pulls in the eca libraries it renders from.
+(autoload 'multi-eca "multi-eca"
+  "Display a global dashboard of all ECA sessions and chats." t)
 
 (declare-function agent-shell "agent-shell")
 (declare-function agent-shell-menu "agent-shell")
@@ -115,7 +121,7 @@ define its own major mode — the buffer inherits from vterm/eat/ghostel.")
 Inside a harness chat/input buffer the backend is inferred from the major
 mode; elsewhere the value of `agent-current' is used."
   (cond
-   ((derived-mode-p 'eca-chat-mode) 'eca)
+   ((derived-mode-p 'eca-chat-mode 'multi-eca-list-mode) 'eca)
    ((derived-mode-p 'agent-shell-mode) 'agent-shell)
    ((derived-mode-p 'pi-coding-agent-chat-mode
                     'pi-coding-agent-input-mode) 'pi)
@@ -273,6 +279,7 @@ pi-coding-agent, and claude-code-ide buffers."
     (define-key map (kbd "C-c i") #'agent-send-chat-context-dwim)
     (define-key map (kbd "C-c .") #'agent-open-menu)
     (define-key map (kbd "C-c ,") #'agent-switch-backend)
+    (define-key map (kbd "C-c m") #'multi-eca)
     map)
   "Global keymap for `agent-mode'.")
 
@@ -349,16 +356,36 @@ and returns the original propertized string."
       (when (and prompt (not (string-empty-p prompt)))
         (eca-chat-send-prompt prompt))))
 
+  (defun my/agent--balance-window-width (window)
+    "Resize side WINDOW to an equal share of the frame columns.
+Matches the `balance-windows' behavior used by `my/split-window-right'
+and `my/delete-window', which never resizes side windows: WINDOW gets
+the width of a balanced main window, and the remaining main windows
+are re-balanced afterwards."
+    (let* ((frame (window-frame window))
+           (total (window-total-width (frame-root-window frame)))
+           (mains (seq-remove
+                   (lambda (w)
+                     (or (eq w window)
+                         (window-parameter w 'window-side)))
+                   (window-list frame 'no-minibuffer)))
+           (share (/ total (1+ (length mains))))
+           (delta (- share (window-total-width window))))
+      (unless (zerop delta)
+        (ignore-errors (window-resize window delta t t)))
+      (balance-windows (window-main-window frame))))
+
   (defun my/eca--display-buffer (buffer &optional focus)
     "Display ECA chat BUFFER as a dismissible right side window.
 Unlike `eca-chat--display-buffer', the window does NOT carry the
 `no-delete-other-windows' parameter, so `C-x 1' and full-screen
-commands (magit, etc.) can close it normally.
+commands (magit, etc.) can close it normally.  The window takes a
+balanced, equal share of the frame width.
 When FOCUS is non-nil, select the window after displaying it."
     (let* ((action '((display-buffer-in-side-window)
                      (side . right)
                      (slot . 0)
-                     (window-width . 0.40)))
+                     (window-width . my/agent--balance-window-width)))
            (win (display-buffer buffer action)))
       (when (and win focus)
         (select-window win))
@@ -459,6 +486,11 @@ this buffer."
   (setq eca-chat-hide-markdown-markup nil)
 
   :custom
+  ;; eca splices this into its display-buffer action as
+  ;; (window-width . VALUE); a function value makes every chat window
+  ;; eca creates take a balanced, equal share of the frame instead of
+  ;; a fixed 0.40 fraction.
+  (eca-chat-window-width #'my/agent--balance-window-width)
   (eca-chat-auto-add-repomap nil)
   ;; (eca-worktree-mode 'isolated)
   ;; Keep tool call blocks open after they complete — no manual tabbing needed.
