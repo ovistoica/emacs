@@ -641,17 +641,19 @@ chat permanently."
          (buf (plist-get entry :buffer))
          (session (plist-get entry :session))
          (chat-id (buffer-local-value 'eca-chat--id buf)))
-    (when session
-      (eca-chat--switch-windows-to-sibling session buf)
-      (when chat-id
-        (setf (eca--session-chats session)
-              (eca-dissoc (eca--session-chats session) chat-id))))
-    ;; Mark the chat closed so eca's `kill-buffer' hook neither prompts
-    ;; about server-side deletion nor re-runs the cleanup done above.
-    (with-current-buffer buf
-      (setq-local eca-chat--closed t))
-    (kill-buffer buf)
-    (multi-eca--schedule-refresh)))
+    (when (y-or-n-p (format "Close chat %S (history kept, resumable)? "
+                            (plist-get entry :title)))
+      (when session
+        (eca-chat--switch-windows-to-sibling session buf)
+        (when chat-id
+          (setf (eca--session-chats session)
+                (eca-dissoc (eca--session-chats session) chat-id))))
+      ;; Mark the chat closed so eca's `kill-buffer' hook neither prompts
+      ;; about server-side deletion nor re-runs the cleanup done above.
+      (with-current-buffer buf
+        (setq-local eca-chat--closed t))
+      (kill-buffer buf)
+      (multi-eca--schedule-refresh))))
 
 (defun multi-eca-delete-chat ()
   "Permanently delete the chat at point from the server, then refresh.
