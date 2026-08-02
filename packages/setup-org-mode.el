@@ -274,7 +274,7 @@ LABEL is used in the echo-area message."
   (setq org-agenda-files '("work.org" "private.org" "cafenea.org" "shipclojure.org"
                            "inbox.org" "calendar-beorg.org" "reminders-beorg.org"
                            "birthdays.org"
-                           "nutrition/log-2026.org" "nutrition/habits.org"))
+                           "nutrition-log-2026.org" "habits.org"))
   (setq org-original-agenda-files org-agenda-files)
 
   (setq org-feed-alist
