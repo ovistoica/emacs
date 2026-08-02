@@ -265,11 +265,15 @@ LABEL is used in the echo-area message."
           ("hm" "Log measurements" plain
            (function nutrition-capture-target)
            "%(nutrition-capture-measurements)"
-           :immediate-finish t)))
+           :immediate-finish t)
+          ("a" "Add birthday/anniversary" plain
+           (file+headline "~/Dropbox/org/birthdays.org" "Birthdays")
+           "%\\%(org-anniversary %^{Year} %^{Month} %^{Day}) %^{Person} is %d years old\n")))
 
 
   (setq org-agenda-files '("work.org" "private.org" "cafenea.org" "shipclojure.org"
                            "inbox.org" "calendar-beorg.org" "reminders-beorg.org"
+                           "birthdays.org"
                            "nutrition/log-2026.org" "nutrition/habits.org"))
   (setq org-original-agenda-files org-agenda-files)
 
