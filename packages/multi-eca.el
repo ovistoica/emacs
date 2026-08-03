@@ -26,6 +26,7 @@
 (require 'subr-x)
 
 (require 'markdown-mode)
+(require 'transient)
 
 (require 'eca-util)
 (require 'eca-chat)
@@ -218,14 +219,62 @@ via `register-val-jump-to'.")
   "Return the live chat buffers of SESSION."
   (seq-filter #'buffer-live-p (eca-vals (eca--session-chats session))))
 
+(defvar multi-eca--custom-groups nil
+  "Alist of user-defined chat groups: (NAME . CHAT-IDS).
+NAME is a string and CHAT-IDS a list of `eca-chat--id' values.  A
+chat belongs to at most one custom group; member chats render
+under their group instead of their project session.  Ids whose
+chat buffer is not currently open are retained so membership
+survives closing and resuming a chat.")
+
+(defun multi-eca--chat-custom-group (chat-id)
+  "Return the name of the custom group containing CHAT-ID, or nil."
+  (car (seq-find (lambda (group) (member chat-id (cdr group)))
+                 multi-eca--custom-groups)))
+
+(defun multi-eca--buffer-chat-id (buf)
+  "Return the eca chat id of chat buffer BUF."
+  (buffer-local-value 'eca-chat--id buf))
+
 (defun multi-eca--eca-entries ()
-  "Collect group and chat entries from all ECA sessions."
-  (seq-mapcat
-   (lambda (session)
-     (cons (multi-eca--group-entry session)
-           (mapcar (lambda (buf) (multi-eca--chat-entry session buf))
-                   (multi-eca--session-live-chats session))))
-   (eca-vals eca--sessions)))
+  "Collect group and chat entries from all ECA sessions.
+Custom groups from `multi-eca--custom-groups' come first, each
+followed by its member chats; the remaining chats render under
+their project (session) group.  Every entry carries a `:group-key'
+identifying its group for fold bookkeeping."
+  (let ((pairs (seq-mapcat
+                (lambda (session)
+                  (mapcar (lambda (buf) (cons session buf))
+                          (multi-eca--session-live-chats session)))
+                (eca-vals eca--sessions)))
+        (entries nil))
+    ;; Custom groups first, in creation order.
+    (dolist (group multi-eca--custom-groups)
+      (let* ((name (car group))
+             (members (seq-filter
+                       (lambda (pair)
+                         (member (multi-eca--buffer-chat-id (cdr pair))
+                                 (cdr group)))
+                       pairs)))
+        (push (list :type 'group :custom t :name name
+                    :detail (format "(%d chat%s)" (length members)
+                                    (if (= 1 (length members)) "" "s"))
+                    :group-key name)
+              entries)
+        (dolist (pair members)
+          (push (plist-put (multi-eca--chat-entry (car pair) (cdr pair))
+                           :group-key name)
+                entries))))
+    ;; Project groups with the chats not claimed by a custom group.
+    (dolist (session (eca-vals eca--sessions))
+      (let ((key (eca--session-id session)))
+        (push (plist-put (multi-eca--group-entry session) :group-key key)
+              entries)
+        (dolist (buf (multi-eca--session-live-chats session))
+          (unless (multi-eca--chat-custom-group (multi-eca--buffer-chat-id buf))
+            (push (plist-put (multi-eca--chat-entry session buf) :group-key key)
+                  entries)))))
+    (nreverse entries)))
 
 (defun multi-eca--collect-entries ()
   "Return dashboard entries from all functions in `multi-eca-backends'."
@@ -239,11 +288,11 @@ via `register-val-jump-to'.")
 
 (defun multi-eca--entry-key (entry)
   "Return a stable relocation key for ENTRY, or nil.
-Chat entries use their buffer; group entries use their session id."
+Chat entries use their buffer; group entries use their group key
+\(the session id, or the custom group name)."
   (pcase (plist-get entry :type)
     ('chat (plist-get entry :buffer))
-    ('group (when-let* ((session (plist-get entry :session)))
-              (eca--session-id session)))
+    ('group (plist-get entry :group-key))
     (_ nil)))
 
 (defun multi-eca--chat-entry-at-point ()
@@ -271,7 +320,9 @@ When ENTRY is nil the line carries no entry property."
 (defun multi-eca--summary-string (entries)
   "Return the dim summary line text for ENTRIES."
   (let* ((chats (seq-filter (lambda (e) (eq (plist-get e :type) 'chat)) entries))
-         (sessions (seq-count (lambda (e) (eq (plist-get e :type) 'group)) entries))
+         (sessions (seq-count (lambda (e) (and (eq (plist-get e :type) 'group)
+                                               (not (plist-get e :custom))))
+                              entries))
          (attention (seq-count (lambda (e) (eq (plist-get e :status) 'attention))
                                chats)))
     (propertize (format "%d sessions · %d chats · %d need attention"
@@ -320,9 +371,8 @@ When ENTRY is nil the line carries no entry property."
 (defun multi-eca--render-group (group chats)
   "Insert the header for GROUP followed by its CHATS entries.
 Collapsed groups render only the header line."
-  (let* ((session (plist-get group :session))
-         (id (and session (eca--session-id session)))
-         (collapsed (and id (gethash id multi-eca--collapsed))))
+  (let* ((key (plist-get group :group-key))
+         (collapsed (and key (gethash key multi-eca--collapsed))))
     (multi-eca--insert-line
      (concat (propertize (format "%s %s"
                                  (if collapsed "▶" "▼")
@@ -557,15 +607,14 @@ Point ends up on the group's header line, also when the fold was
 toggled from one of the group's chat lines."
   (interactive)
   (let* ((entry (multi-eca--entry-at-point))
-         (session (and entry (plist-get entry :session)))
-         (id (and session (eca--session-id session))))
-    (unless id
-      (user-error "No session at point"))
-    (if (gethash id multi-eca--collapsed)
-        (remhash id multi-eca--collapsed)
-      (puthash id t multi-eca--collapsed))
+         (key (and entry (plist-get entry :group-key))))
+    (unless key
+      (user-error "No group at point"))
+    (if (gethash key multi-eca--collapsed)
+        (remhash key multi-eca--collapsed)
+      (puthash key t multi-eca--collapsed))
     (multi-eca--refresh)
-    (multi-eca--goto-group id)))
+    (multi-eca--goto-group key)))
 
 (defun multi-eca-tab ()
   "Toggle folding on a project line, otherwise jump to the next chat.
@@ -796,6 +845,115 @@ a fresh session for the same workspace."
       (eca-restart)
       (multi-eca--schedule-refresh))))
 
+;;;; Custom groups
+
+(defun multi-eca-group-new (name)
+  "Create an empty custom chat group called NAME."
+  (interactive (list (read-string "New group name: ")))
+  (let ((name (string-trim name)))
+    (when (string-empty-p name)
+      (user-error "Group name cannot be empty"))
+    (when (assoc name multi-eca--custom-groups)
+      (user-error "Group %S already exists" name))
+    (setq multi-eca--custom-groups
+          (append multi-eca--custom-groups (list (cons name nil))))
+    (multi-eca--schedule-refresh)
+    (message "Created group %S" name)))
+
+(defun multi-eca--group-remove-chat (chat-id)
+  "Remove CHAT-ID from every custom group."
+  (setq multi-eca--custom-groups
+        (mapcar (lambda (group)
+                  (cons (car group) (delete chat-id (cdr group))))
+                multi-eca--custom-groups)))
+
+(defun multi-eca-group-add ()
+  "Add the chat at point to a custom group.
+Prompts with completion over the existing groups; entering a new
+name creates that group.  A chat belongs to at most one group, so
+it is moved when already grouped."
+  (interactive)
+  (let* ((entry (multi-eca--chat-entry-at-point))
+         (chat-id (multi-eca--buffer-chat-id (plist-get entry :buffer)))
+         (name (string-trim
+                (completing-read "Add chat to group: "
+                                 (mapcar #'car multi-eca--custom-groups)))))
+    (when (string-empty-p name)
+      (user-error "Group name cannot be empty"))
+    (multi-eca--group-remove-chat chat-id)
+    (unless (assoc name multi-eca--custom-groups)
+      (setq multi-eca--custom-groups
+            (append multi-eca--custom-groups (list (cons name nil)))))
+    (let ((group (assoc name multi-eca--custom-groups)))
+      (setcdr group (append (cdr group) (list chat-id))))
+    (multi-eca--schedule-refresh)
+    (message "Added %S to group %S" (plist-get entry :title) name)))
+
+(defun multi-eca-group-remove ()
+  "Remove the chat at point from its custom group after confirmation.
+The chat returns to its project (session) group."
+  (interactive)
+  (let* ((entry (multi-eca--chat-entry-at-point))
+         (chat-id (multi-eca--buffer-chat-id (plist-get entry :buffer)))
+         (group (multi-eca--chat-custom-group chat-id)))
+    (unless group
+      (user-error "Chat is not in a custom group"))
+    (when (y-or-n-p (format "Remove %S from group %S? "
+                            (plist-get entry :title) group))
+      (multi-eca--group-remove-chat chat-id)
+      (multi-eca--schedule-refresh))))
+
+(defun multi-eca-group-rename ()
+  "Rename the custom group at point.
+Fold state follows the group to its new name."
+  (interactive)
+  (let ((entry (multi-eca--entry-at-point)))
+    (unless (and entry
+                 (eq (plist-get entry :type) 'group)
+                 (plist-get entry :custom))
+      (user-error "No custom group at point"))
+    (let* ((old (plist-get entry :name))
+           (new (string-trim
+                 (read-string (format "Rename group %S to: " old) old))))
+      (when (string-empty-p new)
+        (user-error "Group name cannot be empty"))
+      (when (and (not (equal new old))
+                 (assoc new multi-eca--custom-groups))
+        (user-error "Group %S already exists" new))
+      (setcar (assoc old multi-eca--custom-groups) new)
+      (when (gethash old multi-eca--collapsed)
+        (remhash old multi-eca--collapsed)
+        (puthash new t multi-eca--collapsed))
+      (multi-eca--refresh)
+      (multi-eca--goto-group new)
+      (message "Renamed group %S to %S" old new))))
+
+(defun multi-eca-group-delete ()
+  "Delete the custom group at point after confirmation.
+Its chats return to their project (session) groups."
+  (interactive)
+  (let ((entry (multi-eca--entry-at-point)))
+    (unless (and entry
+                 (eq (plist-get entry :type) 'group)
+                 (plist-get entry :custom))
+      (user-error "No custom group at point"))
+    (let ((name (plist-get entry :name)))
+      (when (y-or-n-p (format "Delete group %S (chats return to their projects)? "
+                              name))
+        (setq multi-eca--custom-groups
+              (assoc-delete-all name multi-eca--custom-groups))
+        (remhash name multi-eca--collapsed)
+        (multi-eca--refresh)))))
+
+(transient-define-prefix multi-eca-group-menu ()
+  "Manage custom chat groups in the multi-eca dashboard."
+  ["Chat groups"
+   ("n" "New group" multi-eca-group-new)
+   ("a" "Add chat at point to a group" multi-eca-group-add)
+   ("r" "Remove chat at point from its group" multi-eca-group-remove)
+   ("R" "Rename group at point" multi-eca-group-rename)
+   ("d" "Delete group at point" multi-eca-group-delete)])
+
 ;;;; Compose
 
 (defvar-local multi-eca-compose--target-buffer nil
@@ -977,6 +1135,8 @@ Kills the compose buffer afterwards."
     (define-key map (kbd "+") #'multi-eca-new-chat)
     (define-key map (kbd "k") #'multi-eca-close-chat)
     (define-key map (kbd "D") #'multi-eca-delete-chat)
+    (define-key map (kbd "G") #'multi-eca-group-menu)
+    (define-key map (kbd "d") #'multi-eca-group-delete)
     (define-key map (kbd "M") #'multi-eca-select-model)
     (define-key map (kbd "V") #'multi-eca-select-agent)
     (define-key map (kbd "c") #'multi-eca-compose)
