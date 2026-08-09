@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hey-notmuch — Execution Plan (public package)</title>
+<style>
+  :root {
+    --bg: #101014;
+    --panel: #17171d;
+    --panel2: #1e1e26;
+    --ink: #e8e6e1;
+    --muted: #9a97a0;
+    --accent: #b48ead;     /* HEY-ish purple */
+    --accent2: #88c0d0;    /* notmuch teal */
+    --ok: #a3be8c;
+    --warn: #ebcb8b;
+    --bad: #bf616a;
+    --border: #2c2c36;
+    --code-bg: #14141a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: "iA Writer Quattro", "Inter", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  header { border-bottom: 2px solid var(--accent); padding-bottom: 1.5rem; margin-bottom: 2.5rem; }
+  h1 { font-size: 2.4rem; margin: 0 0 .3rem; letter-spacing: -0.02em; }
+  h1 .hey { color: var(--accent); }
+  h1 .nm { color: var(--accent2); }
+  .tagline { color: var(--muted); font-size: 1.05rem; font-style: italic; }
+  h2 {
+    font-size: 1.5rem; margin: 3rem 0 1rem; padding-top: 1rem;
+    color: var(--accent2); border-top: 1px solid var(--border);
+  }
+  h3 { font-size: 1.15rem; margin: 1.8rem 0 .6rem; color: var(--accent); }
+  p, li { color: var(--ink); }
+  .muted { color: var(--muted); }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: .88em; background: var(--panel2);
+    padding: .12em .4em; border-radius: 4px; color: var(--accent2);
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: .82rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; color: #d8dee9; }
+  pre .cm { color: #616e7c; font-style: italic; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 1rem 0;
+    font-size: .92rem;
+  }
+  th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--accent2); font-weight: 600; border-bottom: 2px solid var(--border); }
+  tr:hover td { background: var(--panel); }
+  .pill {
+    display: inline-block; padding: .1em .6em; border-radius: 999px;
+    font-size: .75rem; font-weight: 600; letter-spacing: .03em;
+  }
+  .pill.ok { background: rgba(163,190,140,.15); color: var(--ok); }
+  .pill.warn { background: rgba(235,203,139,.15); color: var(--warn); }
+  .pill.bad { background: rgba(191,97,106,.15); color: var(--bad); }
+  .pill.info { background: rgba(136,192,208,.15); color: var(--accent2); }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.2rem 1.4rem; margin: 1.2rem 0;
+  }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.ok { border-left: 4px solid var(--ok); }
+  .arch {
+    font-family: "JetBrains Mono", monospace; font-size: .78rem;
+    color: var(--accent2); background: var(--code-bg);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.2rem; overflow-x: auto; white-space: pre;
+  }
+  .phase {
+    border-left: 3px solid var(--accent); margin: 1.5rem 0;
+    padding: .2rem 0 .2rem 1.3rem;
+  }
+  .phase h3 { margin-top: .2rem; }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding-left: 1.7em; position: relative; margin: .35rem 0; }
+  ul.check li::before {
+    content: "☐"; position: absolute; left: 0; color: var(--accent2);
+  }
+  .filelabel {
+    display: block; font-family: "JetBrains Mono", monospace;
+    font-size: .78rem; color: var(--warn); margin: 1.2rem 0 .3rem;
+  }
+  footer { margin-top: 4rem; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+  a { color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1><span class="hey">hey</span>-<span class="nm">notmuch</span></h1>
+  <div class="tagline">“hey! not much” — read your HEY (hey.com) email through notmuch. A public Emacs package.</div>
+</header>
+
+<!-- ============================================================ -->
+<h2>1 · Goal</h2>
+<p>
+HEY has no IMAP. The official <a href="https://github.com/basecamp/hey-cli">hey CLI</a>
+exposes boxes, postings, threads, seen-state, and composition over JSON.
+<strong><code>hey-notmuch</code></strong> is a distributable Emacs package that
+<strong>synthesizes RFC822 mail from the CLI's JSON</strong> into a local maildir so notmuch
+can index it — plus reply/compose, read-state write-back, and saved-search integration.
+</p>
+<p>
+Deliverables: <strong>(a)</strong> a standalone GitHub repo (<code>ovistoica/hey-notmuch</code>)
+with README setup instructions, CI, and MELPA-ready packaging;
+<strong>(b)</strong> your personal config consuming it via <code>use-package :vc</code>.
+</p>
+
+<div class="arch">
+┌──────────────┐  hey box &lt;b&gt; --json      ┌──────────────────────────┐  notmuch new    ┌───────────────┐
+│   hey CLI    │  hey threads &lt;id&gt; --json │  hey-notmuch.el (sync)   │  + tagging      │    notmuch    │
+│  (HEY API)   │ ───────────────────────► │  pure elisp; runs in a   │ ──────────────► │  Emacs (MUA)  │
+│              │ ◄─────────────────────── │  batch-Emacs subprocess  │                 │               │
+└──────────────┘  hey seen &lt;posting-id&gt;   │  → ~/.mail/hey/…         │ ◄────────────── └───────────────┘
+                  hey reply &lt;topic&gt; -m    └──────────────────────────┘  read-state hook,
+                                            same entrypoint works       reply via hey CLI
+                                            from systemd / cron
+</div>
+
+<div class="card ok">
+<strong>Key architecture (rev 3):</strong> the sync engine is a
+<strong>bash + jq script</strong> (<code>bin/hey-notmuch-sync</code>) shipped inside the package
+repo — mirroring the owner's existing mbsync systemd pattern (oneshot service + timer), which
+it will eventually replace once all accounts are forwarded to HEY. Dependencies:
+<em>bash, jq, hey CLI, notmuch</em>. The Elisp side (<code>hey-notmuch.el</code>) provides the
+notmuch UX and runs the script asynchronously from <code>M-x hey-notmuch-sync</code>; systemd
+runs the same script directly, exactly like <code>ExecStart=mbsync -a</code> does today.
+</div>
+
+<!-- ============================================================ -->
+<h2>2 · Facts established (recon)</h2>
+<table>
+  <tr><th>Fact</th><th>Detail</th></tr>
+  <tr><td>Boxes available</td><td>Imbox (<code>imbox</code>), The Feed (<code>feedbox</code>), Set Aside (<code>asidebox</code>), Reply Later (<code>laterbox</code>), Paper Trail (<code>trailbox</code>), Bubble Up (<code>bubblebox</code>)</td></tr>
+  <tr><td>Posting JSON</td><td><code>id</code> (posting-id), <code>name</code> (subject), <code>summary</code>, <code>creator{name,email_address}</code>, <code>created_at</code>, <code>updated_at</code>, <code>observed_at</code> (≈ seen), <code>entry_kind</code>, <code>visible_entry_count</code>, <code>app_url</code></td></tr>
+  <tr><td>Topic ID</td><td>Not a direct field — parsed from <code>app_url</code> (<code>…/topics/&lt;id&gt;</code>), same strategy as the CLI's own <code>ResolveTopicID</code></td></tr>
+  <tr><td>Thread JSON</td><td><code>hey threads &lt;topic&gt; --json</code> → entries: <code>id</code>, <code>body</code> (plain text), <code>creator</code>, <code>created_at</code>, <code>kind</code>, <code>alternative_sender_name</code>. Scraped from HTML server-side (documented CLI gap: “SDK Entry lacks body”)</td></tr>
+  <tr><td>Read-state write</td><td><code>hey seen &lt;posting-id&gt;…</code> / <code>hey unseen &lt;posting-id&gt;…</code></td></tr>
+  <tr><td>Sending</td><td><code>hey reply &lt;topic-id&gt; -m</code>, <code>hey compose --to … --subject … -m</code> (stdin supported)</td></tr>
+  <tr><td>Incremental sync (v2)</td><td>Box JSON exposes <code>posting_changes_url</code> and <code>next_incremental_sync_url</code> — unused by CLI today</td></tr>
+  <tr><td>Local notmuch</td><td><code>new.tags = unread;inbox</code>, <code>maildir.synchronize_flags = true</code>, maildirs live in <code>~/.mail/</code></td></tr>
+</table>
+
+<div class="card warn">
+<strong>⚠ Pre-existing local bug:</strong> <code>notmuch config get database.path</code> returns
+<code>/Users/ovistoica/.mail</code> — a stale macOS path inside <code>~/.notmuch-config</code>
+on this Arch machine. Phase 0 fixes it to <code>/home/ovistoica/.mail</code> (checking whether
+the file is chezmoi-managed first, so the fix lands in the source of truth). This is a
+personal-machine fix, not part of the package.
+</div>
+
+<!-- ============================================================ -->
+<h2>3 · Decisions (defaults taken — veto anything)</h2>
+<table>
+  <tr><th>#</th><th>Question</th><th>Decision</th><th>Rationale</th></tr>
+  <tr><td>1</td><td>Distribution</td><td><span class="pill info">public GitHub repo</span></td><td><code>ovistoica/hey-notmuch</code>; single-file package, MELPA-ready conventions; MELPA submission itself is a later opt-in step</td></tr>
+  <tr><td>2</td><td>Sync language</td><td><span class="pill info">pure Elisp, batch subprocess</span></td><td>Zero extra runtime deps for users; one sync implementation shared by <code>M-x</code>, systemd, and cron; Babashka prototype dropped</td></tr>
+  <tr><td>3</td><td>Namespace</td><td><span class="pill info">hey-notmuch-</span></td><td>Public package conventions: <code>hey-notmuch-</code> prefix, <code>hey-notmuch--</code> for private, everything configurable via <code>defcustom</code>, no <code>my/</code></td></tr>
+  <tr><td>4</td><td>Boxes synced</td><td><span class="pill info">imbox · feedbox · trailbox (configurable)</span></td><td><code>hey-notmuch-boxes</code> defcustom; Set Aside / Reply Later / Bubble Up → v2 tag mapping</td></tr>
+  <tr><td>5</td><td>Read-state</td><td><span class="pill info">two-way</span></td><td>HEY→notmuch via maildir <code>S</code> flag; notmuch→HEY via debounced <code>hey seen</code> hook (opt-out defcustom)</td></tr>
+  <tr><td>6</td><td>Replying</td><td><span class="pill info">via hey CLI</span></td><td>Compose buffer → <code>hey reply</code> over stdin; “open in HEY” browser fallback</td></tr>
+  <tr><td>7</td><td>Trigger</td><td><span class="pill info">manual + systemd timer</span></td><td>Both documented in README; timer calls the same batch entrypoint</td></tr>
+  <tr><td>8</td><td>Accounts</td><td><span class="pill warn">default account only (v1)</span></td><td>Multi-account needs <code>hey auth</code> switching recon — v2</td></tr>
+  <tr><td>9</td><td>License / CI</td><td><span class="pill info">GPL-3.0-or-later · GitHub Actions</span></td><td>Standard for Emacs packages; CI = byte-compile + <code>package-lint</code> + ERT on Emacs 29/30</td></tr>
+  <tr><td>10</td><td>Local notmuch config fix</td><td><span class="pill ok">yes, Phase 0</span></td><td>Blocking local testing anyway</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>4 · Package design</h2>
+
+<h3>4.1 · Repo layout</h3>
+<pre><code>hey-notmuch/                        <span class="cm"># github.com/ovistoica/hey-notmuch</span>
+├── hey-notmuch.el                  <span class="cm"># the package (single file)</span>
+├── README.md                       <span class="cm"># setup instructions (§4.4 outline)</span>
+├── LICENSE                         <span class="cm"># GPL-3.0-or-later</span>
+├── CHANGELOG.md
+├── Makefile                        <span class="cm"># compile / lint / test targets</span>
+├── test/
+│   └── hey-notmuch-test.el         <span class="cm"># ERT: pure functions (no network)</span>
+├── contrib/
+│   ├── hey-notmuch-sync.service    <span class="cm"># systemd user unit (template)</span>
+│   └── hey-notmuch-sync.timer
+└── .github/workflows/ci.yml        <span class="cm"># byte-compile + package-lint + ERT, Emacs 29/30</span>
+</code></pre>
+
+<h3>4.2 · Public API surface</h3>
+<table>
+  <tr><th>Symbol</th><th>Kind</th><th>Purpose</th></tr>
+  <tr><td><code>hey-notmuch-sync</code></td><td>command</td><td>Async sync: spawns <code>emacs --batch … -f hey-notmuch-sync-batch</code>, refreshes notmuch buffers on success</td></tr>
+  <tr><td><code>hey-notmuch-sync-batch</code></td><td>function</td><td>Blocking sync engine; the batch/systemd/cron entrypoint</td></tr>
+  <tr><td><code>hey-notmuch-reply</code></td><td>command</td><td>Reply to HEY thread at point via compose buffer → <code>hey reply</code></td></tr>
+  <tr><td><code>hey-notmuch-compose</code></td><td>command</td><td>New message via <code>hey compose</code></td></tr>
+  <tr><td><code>hey-notmuch-open-in-browser</code></td><td>command</td><td>Jump to <code>X-Hey-App-Url</code></td></tr>
+  <tr><td><code>hey-notmuch-setup</code></td><td>function</td><td>One-call wiring: saved searches, seen-hook, keybindings, notmuch-indicator entry</td></tr>
+  <tr><td><code>hey-notmuch-maildir</code></td><td>defcustom</td><td>Default <code>~/.mail/hey</code></td></tr>
+  <tr><td><code>hey-notmuch-boxes</code></td><td>defcustom</td><td>Alist <code>(box-kind . subdir)</code>; default imbox/feedbox/trailbox</td></tr>
+  <tr><td><code>hey-notmuch-executable</code></td><td>defcustom</td><td>Path to <code>hey</code> (default: found on <code>exec-path</code>)</td></tr>
+  <tr><td><code>hey-notmuch-posting-limit</code></td><td>defcustom</td><td>Postings fetched per box per sync (default 25; <code>nil</code> = all)</td></tr>
+  <tr><td><code>hey-notmuch-mark-seen-in-hey</code></td><td>defcustom</td><td>Enable notmuch→HEY read write-back (default t)</td></tr>
+  <tr><td><code>hey-notmuch-saved-searches</code></td><td>defcustom</td><td>Searches added by <code>hey-notmuch-setup</code> (👋 Imbox / 📡 Feed / 🧾 Paper Trail)</td></tr>
+  <tr><td><code>hey-notmuch-after-sync-hook</code></td><td>hook</td><td>Run in the interactive session after a successful sync</td></tr>
+</table>
+
+<h3>4.3 · Sync engine (pure Elisp, mirrors the validated prototype)</h3>
+<p>Same synthesis spec as validated during recon — one RFC822 file per HEY thread entry:</p>
+<table>
+  <tr><th>Header</th><th>Value</th><th>Purpose</th></tr>
+  <tr><td><code>Message-ID</code></td><td><code>&lt;hey-entry-{entry-id}@hey-notmuch.local&gt;</code></td><td>Stable identity; dedup on re-sync</td></tr>
+  <tr><td><code>In-Reply-To</code> / <code>References</code></td><td>Message-ID chain of prior entries</td><td>Correct notmuch threading</td></tr>
+  <tr><td><code>From</code></td><td><code>"{name}" &lt;{email or hey-contact-{id}@hey-notmuch.local}&gt;</code></td><td>Feed senders often lack <code>email_address</code> — deterministic fallback</td></tr>
+  <tr><td><code>Subject</code></td><td>posting <code>name</code>, <code>Re:</code> for entries &gt; 1, RFC2047 when non-ASCII</td><td>—</td></tr>
+  <tr><td><code>Date</code></td><td>ISO8601 → RFC2822</td><td>—</td></tr>
+  <tr><td><code>X-Hey-Topic-Id</code> · <code>X-Hey-Posting-Id</code> · <code>X-Hey-Box</code> · <code>X-Hey-App-Url</code></td><td>from posting</td><td>Reply + seen write-back + browser jump</td></tr>
+  <tr><td>Body</td><td><code>text/plain; charset=utf-8</code></td><td>HTML → v2</td></tr>
+</table>
+<ul>
+  <li><strong>Maildir:</strong> <code>{maildir}/{box}/{new,cur,tmp}</code>; seen (<code>observed_at</code> set) → <code>cur/…:2,S</code>, unseen → <code>new/</code>. With <code>maildir.synchronize_flags=true</code>, <code>unread</code> is derived for free.</li>
+  <li><strong>Idempotency:</strong> state file <code>{maildir}/.hey-notmuch-state.eld</code> maps <code>posting-id → (updated-at . entry-ids)</code>; unchanged postings skip the thread fetch entirely; entries are written at most once.</li>
+  <li><strong>Tagging:</strong> after <code>notmuch new</code>: <code>+hey +hey/imbox</code> for <code>path:hey/imbox/**</code>; feed/papertrail additionally <code>-inbox</code>. Idempotent (guarded by <code>not tag:hey</code>).</li>
+  <li><strong>Errors:</strong> per-posting failures log to stderr and never abort the sync; missing <code>hey</code> binary or failed auth → clear <code>user-error</code> with remediation hint (<code>hey auth login</code>).</li>
+  <li><strong>Elisp structure:</strong> pure functions for parsing/synthesis (<code>hey-notmuch--topic-id</code>, <code>hey-notmuch--entry-rfc822</code>, <code>hey-notmuch--rfc2047</code>, <code>hey-notmuch--from-header</code>…) — all unit-testable without network; effectful shell layer isolated in <code>hey-notmuch--hey-json</code> / <code>hey-notmuch--notmuch</code>.</li>
+</ul>
+
+<h3>4.4 · README setup instructions (outline shipped with the repo)</h3>
+<pre><code><span class="cm"># hey-notmuch — “hey! not much”</span>
+
+Read your HEY email through notmuch, in Emacs.
+
+<span class="cm">## Requirements</span>
+- Emacs 29+ with notmuch.el
+- notmuch CLI
+- hey CLI: https://github.com/basecamp/hey-cli  (run `hey auth login` once)
+
+<span class="cm">## Install</span>
+;; use-package + vc (Emacs 30) — MELPA planned
+(use-package hey-notmuch
+  :vc (:url "https://github.com/ovistoica/hey-notmuch")
+  :after notmuch
+  :config (hey-notmuch-setup))
+
+<span class="cm">## Notmuch prerequisites</span>
+Your maildir root must contain the hey-notmuch maildir
+(default `~/.mail/hey` — customize `hey-notmuch-maildir`), and
+`maildir.synchronize_flags` should be `true` for read-state mapping.
+
+<span class="cm">## First sync</span>
+M-x hey-notmuch-sync          ; or from a shell / timer:
+emacs -Q --batch -l hey-notmuch.el -f hey-notmuch-sync-batch
+
+<span class="cm">## Automation (systemd user timer)</span>
+cp contrib/hey-notmuch-sync.{service,timer} ~/.config/systemd/user/
+systemctl --user enable --now hey-notmuch-sync.timer
+
+<span class="cm">## Keybindings (installed by hey-notmuch-setup)</span>
+notmuch-show:  C-c C-h r  reply via HEY     C-c C-h o  open in browser
+notmuch-hello: G          sync
+</code></pre>
+
+<!-- ============================================================ -->
+<h2>5 · Phases</h2>
+
+<div class="phase">
+<h3>Phase 0 — Repair local ground <span class="pill bad">blocking · personal</span></h3>
+<ul class="check">
+  <li>Check if <code>~/.notmuch-config</code> is chezmoi-managed; fix <code>database.path</code> → <code>/home/ovistoica/.mail</code> at the source</li>
+  <li><code>notmuch new</code> indexes existing gmail maildirs cleanly</li>
+  <li>Fix macOS-only <code>sync-email</code> path in <code>setup-email.el</code> (per-OS)</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 1 — Repo scaffolding <span class="pill info">package</span></h3>
+<ul class="check">
+  <li>Create <code>~/Work/hey-notmuch</code>: git init, LICENSE (GPL-3), README skeleton, Makefile (<code>compile</code> / <code>lint</code> / <code>test</code>), CI workflow, contrib/ systemd templates</li>
+  <li><code>hey-notmuch.el</code> skeleton with proper package headers (<code>Package-Requires: ((emacs "29.1") (notmuch "0.38"))</code>, Version 0.1.0, URL, keywords)</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 2 — Sync engine <span class="pill info">package · core</span></h3>
+<ul class="check">
+  <li>Pure functions: JSON envelope parsing, topic-id extraction, RFC2047, From-fallback, RFC822 synthesis, maildir filename/flags, state load/save</li>
+  <li>Effect layer: <code>hey-notmuch--hey-json</code> (call-process, envelope <code>ok</code> check), maildir writes, <code>notmuch new</code> + tagging</li>
+  <li><code>hey-notmuch-sync-batch</code> (blocking) + <code>hey-notmuch-sync</code> (async subprocess wrapper) + <code>--dry-run</code> support via <code>HEY_NOTMUCH_DRY_RUN</code> env</li>
+  <li>ERT tests for every pure function (fixture JSON captured from recon, anonymized)</li>
+  <li>Live test: dry-run → feedbox limit 5 → idempotency re-run → threading check</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 3 — notmuch UX <span class="pill info">package</span></h3>
+<ul class="check">
+  <li><code>hey-notmuch-setup</code>: saved searches (👋 HEY Imbox / 📡 The Feed / 🧾 Paper Trail), keybindings, notmuch-indicator entry (when available)</li>
+  <li>Read-state write-back: debounced queue → <code>hey seen id1 id2 …</code>, gated by <code>hey-notmuch-mark-seen-in-hey</code></li>
+  <li>Byte-compile clean, <code>package-lint</code> clean, checkdoc clean</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 4 — Reply &amp; compose <span class="pill info">package</span></h3>
+<ul class="check">
+  <li><code>hey-notmuch-reply</code>: compose buffer, <code>C-c C-c</code> pipes to <code>hey reply &lt;topic&gt;</code> stdin, <code>C-c C-k</code> aborts</li>
+  <li><code>hey-notmuch-compose</code>: To/Subject prompts → <code>hey compose</code></li>
+  <li><code>hey-notmuch-open-in-browser</code></li>
+  <li>Live test: reply to a self-addressed test thread, verify in HEY web UI</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 5 — Publish <span class="pill info">package</span></h3>
+<ul class="check">
+  <li>README finalized (install, setup, screenshots of notmuch-hello with HEY sections)</li>
+  <li>CHANGELOG 0.1.0; tag <code>v0.1.0</code>; push to GitHub; CI green</li>
+  <li>Suggested commit messages throughout (no auto-commit, per repo rules)</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>Phase 6 — Personal integration <span class="pill info">emacs config</span></h3>
+<ul class="check">
+  <li><code>packages/setup-hey-notmuch.el</code>: <code>use-package hey-notmuch :vc (:url …) :after notmuch :config (hey-notmuch-setup)</code> + personal tweaks</li>
+  <li>Install systemd timer from contrib/ on this machine</li>
+  <li>Live-load in running Emacs; verify saved searches, sync, indicator</li>
+</ul>
+</div>
+
+<div class="phase">
+<h3>v2 backlog <span class="pill warn">not now</span></h3>
+<ul class="check">
+  <li>MELPA submission (recipe + review feedback)</li>
+  <li>Incremental sync via <code>posting_changes_url</code> / <code>next_incremental_sync_url</code></li>
+  <li>Multi-account iteration (<code>hey auth</code> switching)</li>
+  <li>HTML bodies as <code>multipart/alternative</code></li>
+  <li>Set Aside / Reply Later / Bubble Up ↔ notmuch tag mapping</li>
+  <li>Attachment placeholders (<code>includes_attachments</code> → MIME part linking to app_url)</li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>6 · Reference implementation sketches</h2>
+<p class="muted">Validated against live CLI output during recon. Final code lands in the repo
+with the <code>fp-idiomatic-style</code> skill applied; the Babashka prototype from the earlier
+plan revision served as the design proof and is retired.</p>
+
+<h3>6.1 · Sync engine core (excerpt)</h3>
+<span class="filelabel">hey-notmuch.el (excerpt — pure functions + batch entrypoint)</span>
+<pre><code><span class="cm">;;; hey-notmuch.el --- Read HEY email through notmuch -*- lexical-binding: t; -*-
+
+;; Author: Ovidiu Stoica &lt;ovidiu.stoica1094@gmail.com&gt;
+;; URL: https://github.com/ovistoica/hey-notmuch
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "29.1") (notmuch "0.38"))
+;; Keywords: mail
+
+;;; Commentary:
+;; “hey! not much” — synthesizes RFC822 maildir messages from the HEY
+;; CLI's JSON output so notmuch can index your HEY mail.  Provides
+;; sync, reply/compose via the hey CLI, read-state write-back, and
+;; notmuch saved-search integration.  See README for setup.
+
+;;; Code:</span>
+
+(defun hey-notmuch--topic-id (posting)
+  "Extract the topic id from POSTING's app_url, or nil."
+  (when-let* ((url (gethash "app_url" posting)))
+    (and (string-match "/topics/\\([0-9]+\\)" url)
+         (string-to-number (match-string 1 url)))))
+
+(defun hey-notmuch--rfc2047 (s)
+  "RFC2047-encode S when it contains non-ASCII characters."
+  (if (string-match-p "[^[:ascii:]]" s)
+      (format "=?UTF-8?B?%s?=" (base64-encode-string (encode-coding-string s 'utf-8) t))
+    s))
+
+(defun hey-notmuch--from-header (entry)
+  "Build a From header for ENTRY with deterministic address fallback."
+  (let* ((creator (gethash "creator" entry))
+         (alt     (gethash "alternative_sender_name" entry))
+         (name    (or (and alt (not (string-empty-p alt)) alt)
+                      (gethash "name" creator "Unknown")))
+         (email   (let ((e (gethash "email_address" creator "")))
+                    (if (string-empty-p e)
+                        (format "hey-contact-%s@hey-notmuch.local"
+                                (gethash "id" creator 0))
+                      e))))
+    (format "%s &lt;%s&gt;" (hey-notmuch--rfc2047 name) email)))
+
+(defun hey-notmuch--hey-json (&amp;rest args)
+  "Run the hey CLI with ARGS --json; return parsed :data or signal."
+  (with-temp-buffer
+    (let ((status (apply #'call-process hey-notmuch-executable nil t nil
+                         (append args '("--json")))))
+      (unless (eq status 0)
+        (error "hey %s failed (%s) — try `hey auth login'?"
+               (string-join args " ") status))
+      (let* ((env (json-parse-string (buffer-string)))
+             (ok  (gethash "ok" env)))
+        (unless (eq ok t)
+          (error "hey %s returned not-ok" (string-join args " ")))
+        (gethash "data" env)))))
+
+<span class="cm">;; … entry→rfc822, maildir write, state, tagging: per spec §4.3 …</span>
+
+;;;###autoload
+(defun hey-notmuch-sync-batch ()
+  "Sync HEY mail into the notmuch maildir.  Blocking batch entrypoint."
+  (dolist (box hey-notmuch-boxes)
+    (hey-notmuch--sync-box box))
+  (hey-notmuch--index-and-tag))
+
+;;;###autoload
+(defun hey-notmuch-sync ()
+  "Sync HEY mail asynchronously via a batch Emacs subprocess."
+  (interactive)
+  (message "hey! syncing…")
+  (make-process
+   :name "hey-notmuch-sync"
+   :buffer " *hey-notmuch-sync*"
+   :command (list (expand-file-name invocation-name invocation-directory)
+                  "-Q" "--batch" "-l" (locate-library "hey-notmuch")
+                  "-f" "hey-notmuch-sync-batch")
+   :sentinel #'hey-notmuch--sync-sentinel))
+</code></pre>
+
+<h3>6.2 · Tagging model</h3>
+<table>
+  <tr><th>HEY box</th><th>Maildir</th><th>Tags after sync</th><th>unread source</th></tr>
+  <tr><td>Imbox</td><td><code>hey/imbox</code></td><td><code>hey hey/imbox inbox</code></td><td rowspan="3">maildir <code>S</code> flag ← <code>observed_at</code>, via <code>maildir.synchronize_flags</code></td></tr>
+  <tr><td>The Feed</td><td><code>hey/feed</code></td><td><code>hey hey/feed</code> (−inbox)</td></tr>
+  <tr><td>Paper Trail</td><td><code>hey/papertrail</code></td><td><code>hey hey/papertrail</code> (−inbox)</td></tr>
+</table>
+
+<h3>6.3 · Personal config consumer</h3>
+<span class="filelabel">packages/setup-hey-notmuch.el (emacs config — Phase 6)</span>
+<pre><code><span class="cm">;;; setup-hey-notmuch.el --- HEY through notmuch -*- lexical-binding: t; -*-</span>
+
+(use-package hey-notmuch
+  :vc (:url "https://github.com/ovistoica/hey-notmuch")
+  :after notmuch
+  :config
+  (hey-notmuch-setup))
+
+(provide 'setup-hey-notmuch)
+</code></pre>
+
+<h3>6.4 · systemd templates (shipped in contrib/)</h3>
+<span class="filelabel">contrib/hey-notmuch-sync.service</span>
+<pre><code>[Unit]
+Description=hey! not much — sync HEY email into notmuch
+
+[Service]
+Type=oneshot
+ExecStart=emacs -Q --batch -l %h/.config/emacs/elpa/hey-notmuch/hey-notmuch.el -f hey-notmuch-sync-batch
+<span class="cm"># README documents adjusting the -l path to the installed location</span>
+</code></pre>
+<span class="filelabel">contrib/hey-notmuch-sync.timer</span>
+<pre><code>[Unit]
+Description=Run hey-notmuch-sync every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+
+<!-- ============================================================ -->
+<h2>7 · Testing plan</h2>
+<table>
+  <tr><th>Layer</th><th>Test</th><th>Pass criteria</th></tr>
+  <tr><td>Phase 0</td><td><code>notmuch new</code> after config fix</td><td>Indexes <code>~/.mail</code> without path errors</td></tr>
+  <tr><td>Unit (ERT)</td><td>topic-id, rfc2047, from-fallback, rfc822 synthesis, filename/flags, state round-trip</td><td><code>make test</code> green, no network needed</td></tr>
+  <tr><td>Lint</td><td><code>make lint</code></td><td>byte-compile, checkdoc, package-lint all clean</td></tr>
+  <tr><td>Sync</td><td>Dry-run → feedbox limit 5 → re-run</td><td>Files land in <code>~/.mail/hey/feed/</code>; searchable via <code>tag:hey/feed</code>; second run writes 0 files</td></tr>
+  <tr><td>Threading</td><td>Multi-entry imbox thread</td><td><code>notmuch show --format=json</code>: one thread, chained entries</td></tr>
+  <tr><td>Seen mapping</td><td>Seen vs unseen postings</td><td>Seen → <code>cur/…:2,S</code> no <code>unread</code>; unseen → <code>new/</code> with <code>unread</code></td></tr>
+  <tr><td>Write-back</td><td>Read a HEY message in notmuch</td><td><code>observed_at</code> set in HEY within ~10s</td></tr>
+  <tr><td>Reply</td><td><code>C-c C-h r</code> on self-addressed test thread</td><td>Reply visible in HEY web UI</td></tr>
+  <tr><td>CI</td><td>GitHub Actions matrix</td><td>Green on Emacs 29 + 30</td></tr>
+  <tr><td>Timer</td><td><code>systemctl --user list-timers</code></td><td>Active; journal shows successful runs</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>8 · Risks &amp; mitigations</h2>
+<table>
+  <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td><code>hey threads</code> is HTML-scraping based (documented CLI gap)</td><td>Body extraction could break on HEY UI changes</td><td>Fallback to posting <code>summary</code>; per-posting errors never abort the sync</td></tr>
+  <tr><td>Public users' environments vary (paths, notmuch config)</td><td>Support burden</td><td>Everything behind defcustoms; <code>hey-notmuch-sync</code> validates prerequisites with actionable errors; README troubleshooting section</td></tr>
+  <tr><td>Empty <code>email_address</code> for Feed senders</td><td>Ugly/duplicate From addresses</td><td>Deterministic <code>hey-contact-{id}@hey-notmuch.local</code> fallback</td></tr>
+  <tr><td>API rate limiting on thread fetches</td><td>Slow/failed syncs</td><td>State file skips unchanged postings; default limit 25; sequential fetches</td></tr>
+  <tr><td>Read-state loops</td><td>Redundant <code>hey seen</code> calls</td><td>Hook fires only on unread display; <code>hey seen</code> is idempotent server-side</td></tr>
+  <tr><td>State-file corruption</td><td>Duplicates (not loss)</td><td>Message-ID dedup in notmuch; worst case re-download</td></tr>
+  <tr><td>hey CLI auth expiry in timer</td><td>Silent sync failure</td><td>Non-zero exit → journal; interactive command surfaces error with <code>hey auth login</code> hint</td></tr>
+  <tr><td>hey CLI surface changes upstream</td><td>Breakage</td><td>Pin minimum tested CLI version in README; envelope <code>ok</code> check fails loudly</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>9 · Execution order (once approved)</h2>
+<ol>
+  <li><strong>Phase 0</strong> — local notmuch config fix (2 min, unblocks testing)</li>
+  <li><strong>Phase 1</strong> — repo scaffolding at <code>~/Work/hey-notmuch</code></li>
+  <li><strong>Phase 2</strong> — sync engine + ERT + live feedbox test</li>
+  <li><strong>Phase 3</strong> — notmuch UX + seen write-back + lint-clean</li>
+  <li><strong>Phase 4</strong> — reply/compose</li>
+  <li><strong>Phase 5</strong> — README/CHANGELOG/CI, tag v0.1.0, push</li>
+  <li><strong>Phase 6</strong> — personal config consumes the package; systemd timer on this machine</li>
+</ol>
+<p class="muted">Implementation delegated to the <code>implement</code> subagent with
+<code>fp-idiomatic-style</code> and <code>emacs-lisp</code> skills loaded, per your orchestration
+rules. Nothing gets committed automatically — commit messages suggested per phase.</p>
+
+<footer>
+  hey-notmuch execution plan · rev 2 (public package) · 2026-08-09 ·
+  sources: <code>hey</code> CLI v1512c16 recon · <a href="https://github.com/basecamp/hey-cli">basecamp/hey-cli</a> @
+  <code>/home/ovistoica/Work/tries/2026-08-09-basecamp-hey-cli</code>
+</footer>
+
+</div>
+</body>
+</html>
