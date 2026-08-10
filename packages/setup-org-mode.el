@@ -302,6 +302,12 @@ LABEL is used in the echo-area message."
 (use-package org-pomodoro
   :defer t)
 
+(use-package org-upcoming-modeline
+  :after org
+
+  :config
+  (org-upcoming-modeline-mode))
+
 (defun my/org-update-parent-cookie (&rest _)
   "Update parent TODO statistics cookie after certain operations."
   (when (equal major-mode 'org-mode)
