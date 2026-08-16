@@ -16,7 +16,7 @@
   :demand t
   :commands (omarchy-theme-pick omarchy-font-pick
              omarchy-apply-theme omarchy-apply-font
-             omarchy-toggle-nightlight omarchy-toggle-waybar
+             omarchy-toggle-nightlight omarchy-toggle-bar
              omarchy-screenshot omarchy-lock-screen
              omarchy-terminal-at-cwd omarchy-install-hooks)
   :init
