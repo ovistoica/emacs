@@ -51,6 +51,8 @@
                (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src"))
                (yaml . ("https://github.com/tree-sitter-grammars/tree-sitter-yaml" "v0.7.1"))
                (rust . ("https://github.com/tree-sitter/tree-sitter-rust" "v0.24.0"))
+               ;; Only uben0's grammar works correctly with typst-ts-mode
+               (typst . ("https://github.com/uben0/tree-sitter-typst"))
 
 
                ))
@@ -85,6 +87,11 @@
     (add-to-list 'major-mode-remap-alist mapping))
   :config
   (os/setup-install-grammars))
+
+;; Typst tree-sitter major mode (from NonGNU ELPA).
+;; Grammar is installed by `os/setup-install-grammars' above.
+(use-package typst-ts-mode
+  :mode ("\\.typ\\'" . typst-ts-mode))
 
 (use-package combobulate
   :after (treesit)
