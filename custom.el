@@ -4,7 +4,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("8a95e584305d4738adc30c886aad967a240eb5c277b197ad37ae60b1deee7f4b"
+   '("2493d0ad0bb94bd2ad297a6d76288751a532fd6d8d6af694ac14008caa6b7fa2"
+     "138ed99a323c1b93c52f4b3726caf2bc634b79a76fa63a3d3aff76394db5f28f"
+     "8a95e584305d4738adc30c886aad967a240eb5c277b197ad37ae60b1deee7f4b"
      "6e8a05fb04263e01db44146fb3f549b2abea6b5ce432d9c755fd40cff5384f60"
      "e9835d67c171416877752f0aa0293b1f2070e5e011fb76419bae0adead7cbd45"
      "7fd4499ff9c34cc3952eb586e352a65cfc9355ca3289ec2bdd4510a6e925d113"
@@ -42,9 +44,9 @@
      "1ad12cda71588cc82e74f1cabeed99705c6a60d23ee1bb355c293ba9c000d4ac"
      "b9c002dc827fb75b825da3311935c9f505d48d7ee48f470f0aa7ac5d2a595ab2"
      "05692bda554c178fafe15cc3e6ab09539e7db4846eb9bb6272b97068c055a903" default))
- '(org-refile-allow-creating-parent-nodes t)
- '(org-refile-targets '((org-agenda-files :maxlevel . 2)))
- '(org-refile-use-outline-path 'file)
+ '(org-modules
+   '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus org-habit ol-info ol-irc
+             ol-mhe ol-rmail ol-w3m))
  '(package-selected-packages
    '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
          casual catppuccin-theme chezmoi claude-code-ide clj-refactor
@@ -59,9 +61,9 @@
          ol-notmuch olivetti orderless org-modern org-pomodoro org-present
          ox-gfm ox-slack perspective pi-coding-agent popper prodigy projectile
          pulsar rainbow-mode significant-other smartparens smtpmail-multi
-         terraform-mode time-zones undo-fu vertico visual-fill-column vterm
-         vundo wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
-         zprint-mode))
+         terraform-mode time-zones typst-ts-mode undo-fu vertico
+         visual-fill-column vterm vundo wgrep-deadgrep whitespace-cleanup-mode
+         yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
    '((magit-difftastic :url "https://github.com/rschmukler/magit-difftastic")
      (claude-code-ide :vc-backend Git :url
