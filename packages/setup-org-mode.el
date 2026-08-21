@@ -306,6 +306,22 @@ LABEL is used in the echo-area message."
   :after org
 
   :config
+  (defun my/org-ql-mute-no-headings-message (orig-fn &rest args)
+    "Call ORIG-FN with ARGS, muting org-ql's \"No headings in buffer\" message.
+Some agenda files (e.g. beorg-synced ones) are transiently empty while
+an external process rewrites them, causing noisy messages on every
+`org-upcoming-modeline' refresh."
+    (cl-letf* ((real-message (symbol-function 'message))
+               ((symbol-function 'message)
+                (lambda (format-string &rest message-args)
+                  (unless (and (stringp format-string)
+                               (string-prefix-p "org-ql: No headings in buffer"
+                                                format-string))
+                    (apply real-message format-string message-args)))))
+      (apply orig-fn args)))
+
+  (advice-add 'org-ql--select :around #'my/org-ql-mute-no-headings-message)
+
   (org-upcoming-modeline-mode))
 
 (defun my/org-update-parent-cookie (&rest _)
