@@ -281,7 +281,7 @@ Also supports yasnippet expansion in the message body."
 (use-package notmuch-indicator
   :ensure t
   :init
-  (notmuch-indicator-mode 1)
+  (notmuch-indicator-mode -1)
   :config
   (setq notmuch-indicator-args
         '(( :terms "tag:unread and tag:inbox"
@@ -294,6 +294,6 @@ Also supports yasnippet expansion in the message body."
         notmuch-indicator-hide-empty-counters t
         notmuch-indicator-force-refresh-commands '(notmuch-refresh-this-buffer))
 
-  (notmuch-indicator-mode 1))
+  (notmuch-indicator-mode -1))
 
 (provide 'setup-notmuch)
