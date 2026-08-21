@@ -4,8 +4,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("2493d0ad0bb94bd2ad297a6d76288751a532fd6d8d6af694ac14008caa6b7fa2"
+   '("967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058"
+     "6ca343480d3304bafd84118d45a550f855f77e383cca664a4dd545d316d9f5d2"
      "138ed99a323c1b93c52f4b3726caf2bc634b79a76fa63a3d3aff76394db5f28f"
+     "2493d0ad0bb94bd2ad297a6d76288751a532fd6d8d6af694ac14008caa6b7fa2"
      "8a95e584305d4738adc30c886aad967a240eb5c277b197ad37ae60b1deee7f4b"
      "6e8a05fb04263e01db44146fb3f549b2abea6b5ce432d9c755fd40cff5384f60"
      "e9835d67c171416877752f0aa0293b1f2070e5e011fb76419bae0adead7cbd45"
@@ -47,6 +49,7 @@
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus org-habit ol-info ol-irc
              ol-mhe ol-rmail ol-w3m))
+ '(org-refile-allow-creating-parent-nodes t)
  '(package-selected-packages
    '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
          casual catppuccin-theme chezmoi claude-code-ide clj-refactor
@@ -58,12 +61,12 @@
          html-to-hiccup jira kaocha-runner keycast lin logos lsp-java
          lsp-pyright lsp-ui magit magit-difftastic marginalia mise modus-themes
          move-text neil nerd-icons-completion nerd-icons-dired notmuch-indicator
-         ol-notmuch olivetti orderless org-modern org-pomodoro org-present
-         ox-gfm ox-slack perspective pi-coding-agent popper prodigy projectile
-         pulsar rainbow-mode significant-other smartparens smtpmail-multi
-         terraform-mode time-zones typst-ts-mode undo-fu vertico
-         visual-fill-column vterm vundo wgrep-deadgrep whitespace-cleanup-mode
-         yaml-mode zoom-frm zprint-mode))
+         ol-notmuch olivetti omarchy orderless org-modern org-pomodoro
+         org-present org-upcoming-modeline ox-gfm ox-slack perspective
+         pi-coding-agent popper prodigy projectile pulsar rainbow-mode
+         significant-other smartparens smtpmail-multi terraform-mode time-zones
+         undo-fu vertico visual-fill-column vterm vundo wgrep-deadgrep
+         whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
    '((magit-difftastic :url "https://github.com/rschmukler/magit-difftastic")
      (claude-code-ide :vc-backend Git :url
