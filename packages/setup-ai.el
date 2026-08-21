@@ -486,11 +486,6 @@ this buffer."
   (setq eca-chat-hide-markdown-markup nil)
 
   :custom
-  ;; eca splices this into its display-buffer action as
-  ;; (window-width . VALUE); a function value makes every chat window
-  ;; eca creates take a balanced, equal share of the frame instead of
-  ;; a fixed 0.40 fraction.
-  (eca-chat-window-width #'my/agent--balance-window-width)
   (eca-chat-auto-add-repomap nil)
   ;; (eca-worktree-mode 'isolated)
   ;; Keep tool call blocks open after they complete — no manual tabbing needed.
