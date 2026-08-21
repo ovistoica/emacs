@@ -20,6 +20,7 @@
          ("\\.ts\\'" . typescript-ts-mode)
          ("\\.jsx\\'" . tsx-ts-mode)
          ("\\.json\\'" . json-ts-mode)
+         ("\\.lua\\'" . lua-ts-mode)
          ("\\.yaml\\'" . yaml-ts-mode)
          ("\\.css\\'" . css-ts-mode)
          ("\\.yml\\'" . yaml-ts-mode)
