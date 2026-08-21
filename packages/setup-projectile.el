@@ -57,6 +57,8 @@ Attaches to an existing session if one already exists."
   :config
   (projectile-mode +1)
   (define-key projectile-command-map (kbd "s-p") #'projectile-switch-project)
+  ;; Upstream default in Projectile 3.4; missing from the installed snapshot's map.
+  (define-key projectile-command-map (kbd "W") #'projectile-switch-worktree)
   (define-key projectile-command-map (kbd "x m") #'my/projectile-run-tmux)
   ;; Shadows the default `projectile-run-vterm' binding — ghostel is the
   ;; preferred terminal (vterm stays available via M-x / `x r' backends).
