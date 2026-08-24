@@ -28,9 +28,14 @@
 (require 'markdown-mode)
 (require 'transient)
 
-(require 'eca-util)
-(require 'eca-chat)
-(require 'eca)
+;; Soft-require: `eca' installs itself via `use-package's `:ensure t/:vc' in
+;; setup-ai.el, which loads *after* this file in the packages-dir load loop
+;; (init.el).  A hard `require' here would fail whenever eca hasn't been
+;; installed yet (e.g. a fresh checkout).  `multi-eca' re-requires for real
+;; below, by which point setup-ai.el has already installed/loaded eca.
+(require 'eca-util nil t)
+(require 'eca-chat nil t)
+(require 'eca nil t)
 
 ;; Present in eca-chat.el but possibly missing from an older compiled
 ;; eca-chat.elc picked up at compile time.
@@ -1166,6 +1171,9 @@ When `multi-eca-fullscreen' is non-nil, the current window
 configuration is saved first and the dashboard takes over the
 frame; \\<multi-eca-list-mode-map>\\[multi-eca-quit] restores it."
   (interactive)
+  (require 'eca-util)
+  (require 'eca-chat)
+  (require 'eca)
   (let ((buf (get-buffer-create multi-eca-buffer-name)))
     (with-current-buffer buf
       (unless (derived-mode-p 'multi-eca-list-mode)
