@@ -71,10 +71,7 @@ SPEC may be a face symbol, a `face-attribute' plist, or a list of either."
 
 (use-package magit-difftastic
   :vc (:url "https://github.com/rschmukler/magit-difftastic")
-  ;; Loads with magit (no :defer): the global mode is enabled in :config;
-  ;; C-c C-d toggles per-file rendering.
   :after magit
-  :commands (magit-difftastic-mode magit-difftastic-toggle-file-rendering)
   :defines (magit-difftastic-mode
             ansi-color-normal-colors-vector
             ansi-color-bright-colors-vector)
@@ -111,6 +108,10 @@ section selection.  For other sections, call ORIG with SECTION and ARGS."
                   (setq pos next))))))
       (apply orig section args)))
 
+  :custom
+  ;; Dogfooding feat/default-rendering (fork branch, upstream issue #16):
+  ;; stock diffs by default, C-c C-d opts a file into difftastic.
+  (magit-difftastic-default-rendering 'stock)
   :config
   ;; The default `magit-section-highlight' lays a flat overlay over the chunk
   ;; body, painting over the added/removed line colors.

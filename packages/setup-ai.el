@@ -451,7 +451,7 @@ this buffer."
       (setq-local my/eca-auto-expand-blocks nil)
       (message "ECA: auto-expand disabled for this buffer")))
 
-  :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest)
+  :vc (:url "https://github.com/ovistoica/eca-emacs" :branch "feat/chat-compose" :rev :newest)
   :hook ((eca-chat-mode . my/eca-chat-mode-hook)
          (eca-chat-mode . agent-chat-mode))
   :bind ((:map eca-chat-mode-map
