@@ -85,11 +85,11 @@ On exit: restores markup visibility and removes table overlays."
                 logos-scroll-lock nil
                 logos-olivetti t)
 
+  ;; <f9> is intentionally left unbound: it's reserved for OS-level dictation.
   (let ((map global-map))
     (define-key map [remap narrow-to-region] #'logos-narrow-dwim)
     (define-key map [remap forward-page] #'logos-forward-page-dwim)
-    (define-key map [remap backward-page] #'logos-backward-page-dwim)
-    (define-key map (kbd "<f9>") #'logos-focus-mode))
+    (define-key map [remap backward-page] #'logos-backward-page-dwim))
 
   (add-hook 'logos-page-motion-hook #'my/logos-recenter-top)
   (add-hook 'logos-page-motion-hook #'logos-reveal-entry)
