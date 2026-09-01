@@ -1,4 +1,4 @@
-;; setup-whitespace-cleanup-mode.el
+;;; setup-whitespace-cleanup-mode.el --- Whitespace cleanup mode configuration -*- lexical-binding: t; -*-
 ;;
 ;; A minor mode that will intelligently call whitespace-cleanup before buffers
 ;; are saved.

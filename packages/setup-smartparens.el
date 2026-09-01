@@ -1,4 +1,4 @@
-;; Smartparens
+;;; setup-smartparens.el --- Smartparens configuration -*- lexical-binding: t; -*-
 ;;
 ;; Smartparens is a minor mode for dealing with pairs in Emacs. Like a
 ;; paredit-lite for non-lisps.

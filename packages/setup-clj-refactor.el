@@ -1,3 +1,5 @@
+;;; setup-clj-refactor.el --- Clj-refactor configuration -*- lexical-binding: t; -*-
+
 (use-package clj-refactor
   :diminish clj-refactor-mode
 

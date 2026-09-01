@@ -1,4 +1,4 @@
-;; Make indenting yanked text the default for programming modes.
+;;; indented-yank.el --- Indented yank configuration -*- lexical-binding: t; -*-
 ;; Use C-S-y to yank unindented
 
 (require 'dash)

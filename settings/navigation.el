@@ -1,4 +1,4 @@
-;; Moving the cursor around
+;;; navigation.el --- Cursor navigation utilities -*- lexical-binding: t; -*-
 
 ;; Like isearch, but adds region (if any) to history and deactivates mark
 (global-set-key (kbd "C-s") 'isearch-forward-use-region)

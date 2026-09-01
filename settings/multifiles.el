@@ -1,4 +1,4 @@
-;;; multifiles.el --- View and edit parts of multiple files in one buffer
+;;; multifiles.el --- View and edit parts of multiple files in one buffer -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011 Magnar Sveen
 

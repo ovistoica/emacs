@@ -1,3 +1,5 @@
+;;; setup-html-to-hiccup.el --- HTML to Hiccup configuration -*- lexical-binding: t; -*-
+
 (use-package html-to-hiccup
   :defer t)
 

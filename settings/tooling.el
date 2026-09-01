@@ -1,3 +1,5 @@
+;;; tooling.el --- General tooling utilities -*- lexical-binding: t; -*-
+
 (use-package s)
 (use-package dash)
 (use-package diminish)

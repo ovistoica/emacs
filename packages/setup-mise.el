@@ -1,4 +1,4 @@
-;; mise - Dependency manager
+;;; setup-mise.el --- Mise configuration -*- lexical-binding: t; -*-
 
 (use-package mise
   :ensure t

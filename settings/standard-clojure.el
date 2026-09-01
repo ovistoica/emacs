@@ -1,4 +1,4 @@
-;; standard-clojure.el
+;;; standard-clojure.el --- Standard Clojure formatting -*- lexical-binding: t; -*-
 
 ;; Uses `standard-clojure' to apply formatting to clojure buffers
 

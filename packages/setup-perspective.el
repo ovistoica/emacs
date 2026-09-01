@@ -1,4 +1,4 @@
-;; Perspective
+;;; setup-perspective.el --- Perspective configuration -*- lexical-binding: t; -*-
 ;;
 ;; Provides multiple named workspaces (or "perspectives") in Emacs, similar to
 ;; multiple desktops in window managers like Awesome and XMonad, and Spaces on

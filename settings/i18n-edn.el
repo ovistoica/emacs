@@ -1,4 +1,4 @@
-;; Edit multiple i18n.edn files at once with multifile.el
+;;; i18n-edn.el --- i18n EDN file editing -*- lexical-binding: t; -*-
 
 (require 'multifiles)
 (require 'tooling)

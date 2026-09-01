@@ -1,3 +1,5 @@
+;;; setup-prodigy.el --- Prodigy configuration -*- lexical-binding: t; -*-
+
 (use-package prodigy
   :defer t
   :bind (("C-c C-x C-p" . prodigy)

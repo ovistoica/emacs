@@ -1,3 +1,5 @@
+;;; setup-envrc.el --- envrc configuration -*- lexical-binding: t; -*-
+
 (use-package envrc
   :diminish nil
   :init (envrc-global-mode))

@@ -1,4 +1,4 @@
-;; Undo Fu
+;;; setup-undo-fu.el --- Undo-fu configuration -*- lexical-binding: t; -*-
 ;;
 ;; Simple, stable linear undo with redo for Emacs. Unlike undo-tree, does not
 ;; mess with Emacs internals. We still get visualisation of the tree structure

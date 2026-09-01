@@ -1,3 +1,5 @@
+;;; setup-js-mode.el --- JS mode configuration -*- lexical-binding: t; -*-
+
 (use-package js-mode
   :ensure nil
   :defer t

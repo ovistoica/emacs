@@ -1,4 +1,4 @@
-;; setup-notmuch.el
+;;; setup-notmuch.el --- Notmuch configuration -*- lexical-binding: t; -*-
 ;; notmuch is a mail indexer and Mail User Agent (MUA). I use it to read and organize emails
 
 (require 'prot-common)

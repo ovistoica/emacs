@@ -1,3 +1,5 @@
+;;; setup-clojure-mode.el --- Clojure mode configuration -*- lexical-binding: t; -*-
+
 (use-package clojure-mode
   :after (significant-other)
   :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))

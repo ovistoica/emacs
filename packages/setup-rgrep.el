@@ -1,3 +1,5 @@
+;;; setup-rgrep.el --- Rgrep configuration -*- lexical-binding: t; -*-
+
 (require 'grep)
 
 (global-set-key (kbd "M-s M-s") 'rgrep-fullscreen)

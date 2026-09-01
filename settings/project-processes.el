@@ -1,4 +1,4 @@
-;; project-processes.el
+;;; project-processes.el --- Project process management -*- lexical-binding: t; -*-
 
 ;; Use prodigy with projectile to start processes related to that project upon visiting
 

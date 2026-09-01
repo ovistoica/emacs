@@ -1,3 +1,5 @@
+;;; setup-hippie.el --- Hippie expand configuration -*- lexical-binding: t; -*-
+
 (require 'hippie-exp)
 
 (defvar he-search-loc-backward (make-marker))

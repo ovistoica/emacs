@@ -1,4 +1,4 @@
-;; Linux-specific configuration
+;;; linux-setup.el --- Linux-specific configuration -*- lexical-binding: t; -*-
 
 ;; Setup environment variables from the user's shell.
 (use-package exec-path-from-shell

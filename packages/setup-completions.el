@@ -1,4 +1,4 @@
-;; Vertico
+;;; setup-completions.el --- Completion framework configuration -*- lexical-binding: t; -*-
 ;;
 ;; Provides a performant and minimalistic vertical completion UI based on the
 ;; default completion system.

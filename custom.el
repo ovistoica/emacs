@@ -51,28 +51,31 @@
              ol-mhe ol-rmail ol-w3m))
  '(org-refile-allow-creating-parent-nodes t)
  '(package-selected-packages
-   '(acp agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote
-         casual catppuccin-theme chezmoi claude-code-ide clj-refactor
-         consult-flycheck dashboard datomic-snippets deadgrep denote diff-hl
-         diminish dired-preview dired-quick-sort dired-subtree dired-toggle-sudo
-         dockerfile-mode doom-themes doric-themes dotenv-mode dts-mode eca
-         edit-indirect envrc exec-path-from-shell expand-region fontaine forge
-         frame-fns git-timemachine groovy-mode helpful hide-mode-line hl-todo
-         html-to-hiccup jira kaocha-runner keycast lin logos lsp-java
-         lsp-pyright lsp-ui magit magit-difftastic marginalia mise modus-themes
-         move-text neil nerd-icons-completion nerd-icons-dired notmuch-indicator
-         ol-notmuch olivetti omarchy orderless org-modern org-pomodoro
-         org-present org-upcoming-modeline ox-gfm ox-slack perspective
-         pi-coding-agent popper prodigy projectile pulsar rainbow-mode
-         significant-other smartparens smtpmail-multi terraform-mode time-zones
-         undo-fu vertico visual-fill-column vterm vundo wgrep-deadgrep
-         whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
+   '(agent-shell apheleia auto-sudoedit beancount blamer browse-at-remote casual
+                 catppuccin-theme chezmoi claude-code-ide clj-refactor
+                 consult-flycheck dashboard datomic-snippets deadgrep denote
+                 diff-hl diminish dired-preview dired-quick-sort dired-subtree
+                 dired-toggle-sudo dockerfile-mode doom-themes doric-themes
+                 dotenv-mode dts-mode eca edit-indirect envrc
+                 exec-path-from-shell expand-region fontaine forge frame-fns
+                 ghostel git-timemachine groovy-mode helpful hide-mode-line
+                 hl-todo html-to-hiccup inflections jira kaocha-runner keycast
+                 lin logos lsp-java lsp-pyright lsp-ui magit-difftastic
+                 marginalia mise move-text multiple-cursors neil
+                 nerd-icons-completion nerd-icons-dired notmuch-indicator
+                 ol-notmuch olivetti omarchy orderless org-modern org-pomodoro
+                 org-present org-upcoming-modeline ox-slack perspective
+                 pi-coding-agent popper prodigy projectile pulsar rainbow-mode
+                 significant-other smartparens smtpmail-multi terraform-mode
+                 time-zones transient typst-ts-mode undo-fu vertico
+                 visual-fill-column vterm vundo wgrep-deadgrep
+                 whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
  '(package-vc-selected-packages
-   '((magit-difftastic :url "https://github.com/rschmukler/magit-difftastic")
+   '((eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
+          "master")
+     (magit-difftastic :url "https://github.com/rschmukler/magit-difftastic")
      (claude-code-ide :vc-backend Git :url
                       "https://github.com/parsnips/claude-code-ide.el")
-     (eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
-          "master" :lisp-dir "." :main-file "eca.el")
      (zoom-frm :url "https://github.com/emacsmirror/zoom-frm")
      (frame-cmds :url "https://github.com/emacsmirror/frame-cmds")
      (frame-fns :url "https://github.com/emacsmirror/frame-fns")

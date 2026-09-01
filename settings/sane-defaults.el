@@ -1,4 +1,4 @@
-;; Auto refresh buffers
+;;; sane-defaults.el --- Sane default settings -*- lexical-binding: t; -*-
 (use-package autorevert
   :config (global-auto-revert-mode 1))
 

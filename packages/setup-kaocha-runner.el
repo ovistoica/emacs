@@ -1,4 +1,4 @@
-;; Kaocha Runner
+;;; setup-kaocha-runner.el --- Kaocha runner configuration -*- lexical-binding: t; -*-
 ;;
 ;; An emacs package for running Kaocha tests via CIDER.
 

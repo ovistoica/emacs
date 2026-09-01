@@ -1,3 +1,5 @@
+;;; setup-significant-other.el --- Significant other jump configuration -*- lexical-binding: t; -*-
+
 ;;; Code:
 
 (use-package significant-other

@@ -1,4 +1,4 @@
-;; * FONT CONFIGURATIONS
+;;; setup-font.el --- Font configuration -*- lexical-binding: t; -*-
 ;; Read the manual: <https://protesilaos.com/emacs/fontaine>
 (use-package fontaine
   :ensure t

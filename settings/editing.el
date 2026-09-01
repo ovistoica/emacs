@@ -1,4 +1,4 @@
-;; Manipulating the contents of a buffer
+;;; editing.el --- Buffer editing utilities -*- lexical-binding: t; -*-
 
 ;; Killing words backwards
 (global-set-key (kbd "C-w") 'kill-region-or-backward-word)

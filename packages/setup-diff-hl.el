@@ -1,4 +1,4 @@
-;; diff-hl-mode
+;;; setup-diff-hl.el --- Diff-hl configuration -*- lexical-binding: t; -*-
 ;;
 ;; Highlights uncomitted changes on the left side of the widnow (area also known
 ;; as the "gutter"), allows you to jump between and revert them selectively.

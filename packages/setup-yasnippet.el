@@ -1,3 +1,5 @@
+;;; setup-yasnippet.el --- Yasnippet configuration -*- lexical-binding: t; -*-
+
 (defvar snippets-dir (expand-file-name "snippets" user-emacs-directory))
 
 (defun yas/goto-end-of-active-field ()

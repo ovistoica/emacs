@@ -1,4 +1,4 @@
-;; setup-project-icons.el
+;;; setup-project-icons.el --- Project icons configuration -*- lexical-binding: t; -*-
 ;; Shipclojure icons are stored in the repository
 
 (require 'setup-babashka)

@@ -1,4 +1,4 @@
-;; change command to meta, and ignore option to use weird Norwegian keyboard
+;;; romanian-mac.el --- Romanian Mac keyboard configuration -*- lexical-binding: t; -*-
 ;; Each SYMBOL is control, meta, alt, super, hyper or none.
 (setq mac-option-modifier 'meta)
 (setq mac-command-modifier 'super)

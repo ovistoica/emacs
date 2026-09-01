@@ -1,3 +1,5 @@
+;;; default-black-theme.el --- Black color theme -*- lexical-binding: t; -*-
+
 (deftheme default-black)
 
 (custom-theme-set-faces

@@ -1,4 +1,4 @@
-;; clj-auto-refer-mode.el
+;;; clj-auto-refer-mode.el --- Clojure auto-refer minor mode -*- lexical-binding: t; -*-
 ;;
 ;; Requires and refers well-known functions and macros for you.
 

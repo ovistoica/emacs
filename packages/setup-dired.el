@@ -1,3 +1,5 @@
+;;; setup-dired.el --- Dired configuration -*- lexical-binding: t; -*-
+
 (with-eval-after-load 'dired
   (require 'dired-x)
 

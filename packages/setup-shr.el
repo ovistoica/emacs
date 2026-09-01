@@ -1,4 +1,4 @@
-;;;; `shr' (Simple HTML Renderer)
+;;; setup-shr.el --- SHR configuration -*- lexical-binding: t; -*-
 (use-package shr
   :ensure nil
   :defer t

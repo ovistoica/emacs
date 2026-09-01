@@ -1,4 +1,4 @@
-;; setup-helpful.el
+;;; setup-helpful.el --- Helpful configuration -*- lexical-binding: t; -*-
 ;;
 ;; Better help documentation that adds info about the code itself and much more
 

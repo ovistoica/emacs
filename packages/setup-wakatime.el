@@ -1,5 +1,8 @@
-;; Waka time is a tracker of how much time you spend coding.
-;; It's great to keep you honest
+;;; setup-wakatime.el --- WakaTime configuration -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Waka time is a tracker of how much time you spend coding.
+;;; It's great to keep you honest
+;;; Code:
 
 (when (eq system-type 'darwin)
   (require 'private)
@@ -12,3 +15,4 @@
 
 
 (provide 'setup-wakatime)
+;;; setup-wakatime.el ends here

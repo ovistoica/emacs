@@ -1,4 +1,4 @@
-;; which-key
+;;; setup-which-key.el --- Which-key configuration -*- lexical-binding: t; -*-
 ;;
 ;; a minor mode for Emacs that displays the key bindings following your
 ;; currently entered incomplete command (a prefix) in a popup.

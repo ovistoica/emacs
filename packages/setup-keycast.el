@@ -1,4 +1,4 @@
-;; The ocasional presentation or similar Keycast is a program to show the keys
+;;; setup-keycast.el --- Keycast configuration -*- lexical-binding: t; -*-
 ;; and commands in the modeline or separate buffer as you type them
 
 (use-package keycast

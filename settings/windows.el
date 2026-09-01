@@ -1,4 +1,4 @@
-;; Manipulating windows, ie. the squares with buffers in them
+;;; windows.el --- Window management -*- lexical-binding: t; -*-
 
 ;; Enable repeat-mode for window resizing (C-x } then }}}... to keep enlarging)
 (repeat-mode 1)

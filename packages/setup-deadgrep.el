@@ -1,4 +1,4 @@
-;; Deadgrep
+;;; setup-deadgrep.el --- Deadgrep configuration -*- lexical-binding: t; -*-
 ;; 
 ;; The fast, beautiful text search that your Emacs deserves
 

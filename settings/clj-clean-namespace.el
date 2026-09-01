@@ -1,4 +1,4 @@
-;; Provides basic namespace sorting functionality for clojure
+;;; clj-clean-namespace.el --- Clojure namespace sorting -*- lexical-binding: t; -*-
 
 (require 'dash)
 (require 's)

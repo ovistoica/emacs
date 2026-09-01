@@ -1,4 +1,4 @@
-;; JS utility to install/remove & run package.json scrips
+;;; setup-js-pkg-mode.el --- JS package.json script runner configuration -*- lexical-binding: t; -*-
 
 (use-package js-pkg-mode
   :diminish js-pkg-mode

@@ -1,4 +1,4 @@
-;; Packages that are related to appearance
+;;; setup-appearance.el --- Appearance configuration -*- lexical-binding: t; -*-
 
 (use-package pulsar
   :ensure t

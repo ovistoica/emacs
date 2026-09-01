@@ -1,4 +1,4 @@
-;; Setup email
+;;; setup-email.el --- Email configuration -*- lexical-binding: t; -*-
 ;; Tools and utils to read email from emacs
 
 (require 'prot-common)
