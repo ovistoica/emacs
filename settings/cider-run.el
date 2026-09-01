@@ -6,7 +6,10 @@
 (require 's)
 
 (defvar cider-run--out-buffer "*cider-run-output*")
-(defvar ns-regex "^(ns \\([^\s]+\\)")
+;; Stop at whitespace, newline or `)' so a one-line `(ns foo.bar)' doesn't
+;; capture the closing paren (which leaks into the minibuffer prompt and
+;; trips paredit's check-parens).
+(defvar ns-regex "^(ns \\([^ )\n\t]+\\)")
 
 (defun cider-run--find-comment-forms ()
   (when (re-search-forward "^(comment ;; s-:" nil t)
@@ -93,11 +96,12 @@
              (form (completing-read (format "Eval in %s: " ns)
                                     (or (cdr ns+forms)
                                         cider-run-in-dev-namespace-default-suggestions)))
-             ;; Require the dev ns before evaluating so its (:require ...)
-             ;; aliases (e.g. `main/...`) resolve — even when the REPL was
-             ;; booted without user.clj importing it.
+             ;; Require the dev ns before evaluating so it works even when the
+             ;; REPL booted without loading it. Eval in `user` (always loaded):
+             ;; passing a not-yet-loaded ns as :ns makes nREPL fail with
+             ;; namespace-not-found before the require can run.
              (wrapped (format "(do (require '%s) (in-ns '%s) %s)" ns ns form)))
-        (cider-run--run-in-repl ns wrapped))
+        (cider-run--run-in-repl "user" wrapped))
     (message "No dev namespace found")))
 
 (defvar cider-run-in-dev-namespace-default-suggestions
