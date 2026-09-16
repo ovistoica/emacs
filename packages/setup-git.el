@@ -74,8 +74,12 @@ SPEC may be a face symbol, a `face-attribute' plist, or a list of either."
   :after magit
   :defines (magit-difftastic-mode
             ansi-color-normal-colors-vector
-            ansi-color-bright-colors-vector)
-  :functions (magit-refresh magit-section-highlight-range)
+            ansi-color-bright-colors-vector
+            difftastic-normal-colors-vector
+            difftastic-bright-colors-vector
+            difftastic--ansi-color-add-background-cache)
+  :functions (magit-refresh magit-section-highlight-range
+              magit-difftastic-clear-cache)
   :preface
   (defun my/magit-difftastic--next-face-change (pos limit)
     "Return the next position after POS where face properties change.
@@ -108,9 +112,21 @@ section selection.  For other sections, call ORIG with SECTION and ARGS."
                   (setq pos next))))))
       (apply orig section args)))
 
+  (defun my/magit-difftastic-reset-caches (&rest _)
+    "Drop every cached difftastic render so the next refresh uses fresh colors.
+Rendered chunks carry literal colour strings, so after a theme change both
+`magit-difftastic''s render cache and difftastic's per-buffer face memo
+would keep painting the previous theme's colours.  For `enable-theme-functions'."
+    (when (fboundp 'magit-difftastic-clear-cache)
+      (magit-difftastic-clear-cache))
+    (dolist (buf (buffer-list))
+      (when (buffer-local-value 'difftastic--ansi-color-add-background-cache buf)
+        (with-current-buffer buf
+          (setq difftastic--ansi-color-add-background-cache nil)))))
+
   :custom
-  ;; Dogfooding feat/default-rendering (fork branch, upstream issue #16):
-  ;; stock diffs by default, C-c C-d opts a file into difftastic.
+  ;; Stock diffs by default (fast on big diffs); C-c C-d opts a file into
+  ;; difftastic, C-u C-c C-d flips the whole buffer.
   (magit-difftastic-default-rendering 'stock)
   :config
   ;; The default `magit-section-highlight' lays a flat overlay over the chunk
@@ -132,6 +148,8 @@ section selection.  For other sections, call ORIG with SECTION and ARGS."
                      'font-lock-string-face
                      'font-lock-warning-face
                      (aref base 7)))))
+  ;; Cached renders bake in hex colours; invalidate them on theme switches.
+  (add-hook 'enable-theme-functions #'my/magit-difftastic-reset-caches)
   (magit-difftastic-mode 1))
 
 (defun kill-magit-buffers ()
