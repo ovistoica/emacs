@@ -35,8 +35,8 @@
     ("C-c n N" . denote-type)
     ("C-c n d" . denote-date)
     ("C-c n z" . denote-signature)      ; "zettelkasten" mnemonic
-    ("C-c n s" . denote-subdirectory)
-    ("C-c n o" . denote-sort-dired)     ; "order" mnemonic
+    ("C-c n s" . denote-grep)           ; "search" note contents
+    ("C-c n o" . denote-open-or-create)
     ("C-c n j" . denote-journal-extras-new-entry)
     ("C-c n J" . denote-journal-extras-new-or-existing-entry)
     ;; Note that `denote-rename-file' can work from any context, not
