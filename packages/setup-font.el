@@ -23,6 +23,8 @@
   (setq fontaine-presets
         '((smallest
            :default-height 100)
+          (almost-smallest
+           :default-height 115)
           (smaller
            :default-height 120)
           (small
