@@ -456,9 +456,15 @@ this buffer."
 
   :hook ((eca-chat-mode . my/eca-chat-mode-hook)
          (eca-chat-mode . agent-chat-mode))
+  ;; `C-x <left>'/`C-x <right>' (`previous-buffer'/`next-buffer') walk the
+  ;; window's buffer history, which mixes chats from every project (e.g. the
+  ;; multi-eca preview window) and only goes "next" after going "previous".
+  ;; Cycle the session-scoped chat tab-line instead, in tab order.
   :bind ((:map eca-chat-mode-map
                ("C-c C-o" . my/eca-chat-expand-all-blocks)
-               ("C-c C-c" . my/eca-chat-collapse-all-blocks)))
+               ("C-c C-c" . my/eca-chat-collapse-all-blocks)
+               ([remap next-buffer] . tab-line-switch-to-next-tab)
+               ([remap previous-buffer] . tab-line-switch-to-prev-tab)))
   :ensure t
   :config
   ;; Ensure chat window is visible before adding context.  Both senders end by

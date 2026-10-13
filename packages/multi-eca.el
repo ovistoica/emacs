@@ -62,40 +62,84 @@
   :type 'string
   :group 'multi-eca)
 
-(defcustom multi-eca-list-display-action nil
-  "Display action used by `pop-to-buffer' for the dashboard buffer.
-When nil, the default `pop-to-buffer' behavior is used."
-  :type '(choice (const :tag "Default" nil) sexp)
+(defcustom multi-eca-sidebar-width 0.25
+  "Width of the dashboard sidebar window.
+A float is a fraction of the frame width; an integer is a number
+of columns."
+  :type 'number
   :group 'multi-eca)
 
-(defun multi-eca--balance-window-width (window)
-  "Resize side WINDOW to an equal share of the frame columns.
-Gives WINDOW the width each window would get after
-`balance-windows', instead of a fixed fraction, and then balances
-the remaining main windows.  Used as the `window-width' action
-alist entry of `multi-eca-display-action'; `balance-windows'
-itself never resizes side windows."
-  (let* ((frame (window-frame window))
-         (total (window-total-width (frame-root-window frame)))
-         (mains (seq-remove
-                 (lambda (w)
-                   (or (eq w window)
-                       (window-parameter w 'window-side)))
-                 (window-list frame 'no-minibuffer)))
-         (share (/ total (1+ (length mains))))
-         (delta (- share (window-total-width window))))
-    (unless (zerop delta)
-      (ignore-errors (window-resize window delta t t)))
-    (balance-windows (window-main-window frame))))
+(defcustom multi-eca-list-display-action nil
+  "Display action used by `pop-to-buffer' for the dashboard buffer.
+When nil, the dashboard is shown in a left side window of
+`multi-eca-sidebar-width', herdr style."
+  :type '(choice (const :tag "Left sidebar" nil) sexp)
+  :group 'multi-eca)
+
+(defun multi-eca--list-display-action ()
+  "Return the display action for the dashboard buffer.
+This is `multi-eca-list-display-action' when non-nil, else a
+regular (non-side) window split off the left edge of the frame,
+`multi-eca-sidebar-width' wide.  Being a normal window, it is
+deleted by `delete-other-windows' like any other."
+  (or multi-eca-list-display-action
+      `((display-buffer-reuse-window display-buffer-in-direction)
+        (direction . leftmost)
+        (window-width . ,multi-eca-sidebar-width)
+        (preserve-size . (t . nil)))))
+
+(defun multi-eca--main-windows (&optional frame)
+  "Return the main-area windows of FRAME.
+These are the live, non-minibuffer windows of FRAME (default: the
+selected frame) that are neither side windows nor dedicated, and
+do not show the dashboard buffer."
+  (seq-remove
+   (lambda (w)
+     (or (window-parameter w 'window-side)
+         (window-dedicated-p w)
+         (equal (buffer-name (window-buffer w)) multi-eca-buffer-name)))
+   (window-list frame 'no-minibuffer)))
+
+(defun multi-eca--main-window (&optional frame)
+  "Return the most recently used main-area window of FRAME, or nil.
+See `multi-eca--main-windows'."
+  (let ((candidates (multi-eca--main-windows frame)))
+    (when candidates
+      (seq-reduce (lambda (best w)
+                    (if (> (window-use-time w) (window-use-time best)) w best))
+                  (cdr candidates)
+                  (car candidates)))))
+
+(defun multi-eca--display-buffer-in-main-window (buffer alist)
+  "Display action function: show BUFFER in `multi-eca--main-window'.
+ALIST is the display action alist.  Return the window used, or
+nil when the frame has no main-area window."
+  (when-let* ((window (multi-eca--main-window)))
+    (window--display-buffer buffer window 'reuse alist)))
+
+(defun multi-eca--single-main-window ()
+  "Delete every window of the selected frame but one main window.
+Selects a non-side window first, then deletes all others including
+side windows (e.g. eca chat windows marked
+`no-delete-other-windows')."
+  (let ((main (if (window-parameter (selected-window) 'window-side)
+                  (seq-find (lambda (w) (not (window-parameter w 'window-side)))
+                            (window-list nil 'no-minibuffer))
+                (selected-window))))
+    (when main
+      (select-window main))
+    (let ((ignore-window-parameters t))
+      (delete-other-windows))
+    (set-window-parameter nil 'window-side nil)
+    (set-window-parameter nil 'window-slot nil)))
 
 (defcustom multi-eca-display-action
-  '((display-buffer-in-side-window)
-    (side . right)
-    (slot . 0)
-    (window-width . multi-eca--balance-window-width))
-  "Display action used to preview chat buffers from the dashboard.
-The default gives the preview window a balanced, equal share of
-the frame via `multi-eca--balance-window-width'."
+  '((display-buffer-reuse-window multi-eca--display-buffer-in-main-window)
+    (inhibit-same-window . t))
+  "Display action used to show chat buffers from the dashboard.
+The default reuses a window already showing the chat, else shows
+it in the main area right of the dashboard sidebar (see
+`multi-eca--display-buffer-in-main-window')."
   :type 'sexp
   :group 'multi-eca)
 
@@ -107,7 +151,8 @@ the frame via `multi-eca--balance-window-width'."
 (defcustom multi-eca-fullscreen t
   "Whether opening the dashboard takes over the whole frame.
 When non-nil, `multi-eca' saves the current window configuration
-and deletes other windows, magit-fullscreen style; quitting with
+and leaves only the dashboard sidebar plus one main window in the
+frame, magit-fullscreen style; quitting with
 \\<multi-eca-list-mode-map>\\[multi-eca-quit] restores the saved
 configuration."
   :type 'boolean
@@ -197,7 +242,7 @@ via `register-val-jump-to'.")
                        (ignore-errors
                          (when-let* ((str (eca-chat--usage-str)))
                            (substring-no-properties str))))))
-      (string-join (delq nil (list model usage)) "  "))))
+      (string-join (delq nil (list model usage)) " · "))))
 
 (defun multi-eca--chat-entry (session buf)
   "Return a chat entry plist for chat BUF belonging to SESSION."
@@ -216,7 +261,8 @@ via `register-val-jump-to'.")
                             ", ")))
     (list :type 'group
           :name (eca--session-project-name session)
-          :detail (format "(%s)  [%s]" folders (eca--session-status session))
+          :detail (format "%s" (eca--session-status session))
+          :subtitle folders
           :status (eca--session-status session)
           :session session)))
 
@@ -311,16 +357,36 @@ Chat entries use their buffer; group entries use their group key
 
 ;;;; Rendering
 
-(defun multi-eca--attention-symbol ()
-  "Return the indicator symbol for chats needing attention."
-  (if (boundp 'eca-chat-mcp-tool-call-pending-approval-symbol)
-      eca-chat-mcp-tool-call-pending-approval-symbol
-    "🚧"))
-
-(defun multi-eca--insert-line (text entry)
+(defun multi-eca--insert-line (text entry &optional continuation)
   "Insert TEXT as a dashboard line carrying ENTRY as a text property.
-When ENTRY is nil the line carries no entry property."
-  (insert (if entry (propertize text 'multi-eca-entry entry) text) "\n"))
+When ENTRY is nil the line carries no entry property.  When
+CONTINUATION is non-nil the line is also marked with the
+`multi-eca-continuation' property, i.e. as a non-first line of
+ENTRY's block."
+  (insert (if entry
+              (propertize text
+                          'multi-eca-entry entry
+                          'multi-eca-continuation (and continuation t))
+            text)
+          "\n"))
+
+(defun multi-eca--continuation-line-p ()
+  "Return non-nil when the current line continues an entry block."
+  (get-text-property (line-beginning-position) 'multi-eca-continuation))
+
+(defun multi-eca--entry-range ()
+  "Return (START . END) spanning the entry block at point.
+START is the beginning of the block's first line and END the
+beginning of the line after the block.  Used as
+`hl-line-range-function' so the whole block is highlighted."
+  (save-excursion
+    (while (and (multi-eca--continuation-line-p)
+                (zerop (forward-line -1))))
+    (let ((start (line-beginning-position)))
+      (forward-line 1)
+      (while (and (not (eobp)) (multi-eca--continuation-line-p))
+        (forward-line 1))
+      (cons start (point)))))
 
 (defun multi-eca--summary-string (entries)
   "Return the dim summary line text for ENTRIES."
@@ -330,7 +396,7 @@ When ENTRY is nil the line carries no entry property."
                               entries))
          (attention (seq-count (lambda (e) (eq (plist-get e :status) 'attention))
                                chats)))
-    (propertize (format "%d sessions · %d chats · %d need attention"
+    (propertize (format "%d sessions · %d chats · %d need input"
                         sessions (length chats) attention)
                 'face 'multi-eca-detail)))
 
@@ -349,51 +415,67 @@ When ENTRY is nil the line carries no entry property."
       (push (cons current (nreverse chats)) result))
     (nreverse result)))
 
+(defun multi-eca--status-style (status)
+  "Return (GLYPH WORD FACE) describing chat STATUS."
+  (pcase status
+    ('attention '("◉" "needs input" multi-eca-chat-attention))
+    ('running '("●" "working" multi-eca-chat-running))
+    (_ '("○" "idle" multi-eca-chat-idle))))
+
+(defun multi-eca--non-empty (str)
+  "Return STR when it is a non-empty string, else nil."
+  (and (stringp str) (not (string-empty-p str)) str))
+
 (defun multi-eca--render-chat (entry)
-  "Insert the dashboard line for chat ENTRY."
-  (let* ((status (plist-get entry :status))
-         (prefix (pcase status
-                   ('attention (concat (multi-eca--attention-symbol) " "))
-                   ('running "⏳ ")
-                   (_ "")))
-         (face (pcase status
-                 ('attention 'multi-eca-chat-attention)
-                 ('running 'multi-eca-chat-running)
-                 (_ 'multi-eca-chat-idle)))
-         (detail (plist-get entry :detail))
-         (visited (when-let* ((buf (plist-get entry :buffer)))
-                    (and (buffer-live-p buf) (get-buffer-window buf)))))
+  "Insert the two-line dashboard block for chat ENTRY.
+The first line holds the visited chevron, status glyph and title;
+the second the status word and detail."
+  (pcase-let* ((`(,glyph ,word ,face)
+                (multi-eca--status-style (plist-get entry :status)))
+               (detail (multi-eca--non-empty (plist-get entry :detail)))
+               (visited (when-let* ((buf (plist-get entry :buffer)))
+                          (and (buffer-live-p buf) (get-buffer-window buf)))))
     (multi-eca--insert-line
-     (concat (if visited
-                 (propertize "> " 'face 'multi-eca-chevron)
-               "  ")
-             (propertize (concat prefix (plist-get entry :title)) 'face face)
-             (if (or (null detail) (string-empty-p detail))
-                 ""
-               (concat "  " (propertize detail 'face 'multi-eca-detail))))
-     entry)))
+     (concat (if visited (propertize "> " 'face 'multi-eca-chevron) "  ")
+             (propertize (concat glyph " " (plist-get entry :title)) 'face face))
+     entry)
+    (multi-eca--insert-line
+     (concat "    "
+             (propertize word 'face face)
+             (if detail
+                 (concat (propertize " · " 'face 'multi-eca-detail)
+                         (propertize detail 'face 'multi-eca-detail))
+               ""))
+     entry t)))
 
 (defun multi-eca--render-group (group chats)
-  "Insert the header for GROUP followed by its CHATS entries.
-Collapsed groups render only the header line."
+  "Insert the header block for GROUP followed by its CHATS entries.
+The header is followed by the group's subtitle line, when any.
+Collapsed groups render only the header block."
   (let* ((key (plist-get group :group-key))
-         (collapsed (and key (gethash key multi-eca--collapsed))))
+         (collapsed (and key (gethash key multi-eca--collapsed)))
+         (detail (multi-eca--non-empty (plist-get group :detail)))
+         (subtitle (multi-eca--non-empty (plist-get group :subtitle))))
     (multi-eca--insert-line
      (concat (propertize (format "%s %s"
                                  (if collapsed "▶" "▼")
                                  (plist-get group :name))
                          'face 'multi-eca-group-heading)
-             " "
-             (propertize (or (plist-get group :detail) "")
-                         'face 'multi-eca-detail))
+             (if detail
+                 (concat "  " (propertize detail 'face 'multi-eca-detail))
+               ""))
      group)
+    (when subtitle
+      (multi-eca--insert-line
+       (propertize (concat "  " subtitle) 'face 'multi-eca-detail)
+       group t))
     (unless collapsed
       (if chats
           (dolist (chat chats)
             (multi-eca--render-chat chat))
         (multi-eca--insert-line
          (propertize "  (no chats yet)" 'face 'multi-eca-detail)
-         group)))
+         group t)))
     (insert "\n")))
 
 (defun multi-eca--render (entries)
@@ -524,13 +606,16 @@ already visible."
 (defun multi-eca--find-line (step pred)
   "Return position of the nearest line in STEP direction matching PRED.
 STEP is 1 to search forward or -1 to search backward.  PRED is called
-with the entry of each candidate line; return nil when no line matches."
+with the entry of each candidate line; only the first line of each
+entry block is a candidate.  Return nil when no line matches."
   (save-excursion
     (let (result)
       (while (and (not result)
                   (zerop (forward-line step)))
         (let ((entry (multi-eca--entry-at-point)))
-          (when (and entry (funcall pred entry))
+          (when (and entry
+                     (not (multi-eca--continuation-line-p))
+                     (funcall pred entry))
             (setq result (point)))))
       result)))
 
@@ -640,8 +725,10 @@ moves to the next chat entry."
 
 (defun multi-eca-preview ()
   "Toggle the preview of the chat at point without selecting its window.
-When the chat is not visible, display it in the preview window.
-When it is already visible, hide its window instead."
+When the chat is not visible, display it in the main area.  When it
+is already visible, hide it: delete its window when another
+main-area window remains, else (the sole main window next to the
+sidebar) switch that window to its previous buffer."
   (interactive)
   (let* ((entry (multi-eca--chat-entry-at-point))
          (buf (plist-get entry :buffer))
@@ -652,17 +739,34 @@ When it is already visible, hide its window instead."
           ;; cursor-follow preview does not immediately re-show the
           ;; window while point stays on this line.
           (setq multi-eca--last-previewed buf)
-          (delete-window win))
+          (if (and (window-deletable-p win)
+                   (cdr (multi-eca--main-windows)))
+              (delete-window win)
+            (switch-to-prev-buffer win)))
       (setq multi-eca--last-previewed nil)
       (multi-eca--preview entry))))
 
+(defun multi-eca--focus-chat (buf session)
+  "Select a window showing chat BUF of SESSION in the main area.
+Reuses a window already showing BUF, else displays it via
+`multi-eca-display-action'; falls back to
+`eca-chat--switch-to-buffer' when no window could be used."
+  (if-let* ((window (or (get-buffer-window buf)
+                        (display-buffer buf multi-eca-display-action))))
+      (progn
+        (select-window window)
+        (setf (eca--session-last-chat-buffer session) buf))
+    (eca-chat--switch-to-buffer buf session)))
+
 (defun multi-eca-visit ()
-  "Focus the chat at point, or toggle folding when on a group header."
+  "Focus the chat at point, or toggle folding when on a group header.
+The chat is selected in the main area right of the dashboard
+sidebar, reusing its window when already visible."
   (interactive)
   (let ((entry (multi-eca--entry-at-point)))
     (pcase (and entry (plist-get entry :type))
-      ('chat (eca-chat--switch-to-buffer (plist-get entry :buffer)
-                                         (plist-get entry :session)))
+      ('chat (multi-eca--focus-chat (plist-get entry :buffer)
+                                    (plist-get entry :session)))
       ('group (multi-eca-toggle-fold))
       (_ (user-error "Nothing at point")))))
 
@@ -1133,6 +1237,8 @@ Kills the compose buffer afterwards."
     (define-key map (kbd "g") #'multi-eca-refresh)
     (define-key map (kbd "n") #'multi-eca-next-chat)
     (define-key map (kbd "p") #'multi-eca-previous-chat)
+    (define-key map (kbd "<down>") #'multi-eca-next-chat)
+    (define-key map (kbd "<up>") #'multi-eca-previous-chat)
     (define-key map (kbd "M-n") #'multi-eca-next-attention)
     (define-key map (kbd "M-p") #'multi-eca-previous-attention)
     (define-key map (kbd "f") #'multi-eca-toggle-follow)
@@ -1161,14 +1267,17 @@ Kills the compose buffer afterwards."
 \\{multi-eca-list-mode-map}"
   (setq-local truncate-lines t
               revert-buffer-function #'multi-eca--revert)
+  (setq-local hl-line-range-function #'multi-eca--entry-range)
   (hl-line-mode 1)
   (add-hook 'post-command-hook #'multi-eca--post-command nil t))
 
 ;;;###autoload
 (defun multi-eca ()
   "Open the global ECA dashboard listing all sessions and chats.
-When `multi-eca-fullscreen' is non-nil, the current window
-configuration is saved first and the dashboard takes over the
+The dashboard is a narrow left sidebar; chats show in the main
+area to its right, starting with the chat at point.  When
+`multi-eca-fullscreen' is non-nil, the current window configuration
+is saved first and the sidebar plus one main window take over the
 frame; \\<multi-eca-list-mode-map>\\[multi-eca-quit] restores it."
   (interactive)
   (require 'eca-util)
@@ -1179,13 +1288,23 @@ frame; \\<multi-eca-list-mode-map>\\[multi-eca-quit] restores it."
       (unless (derived-mode-p 'multi-eca-list-mode)
         (multi-eca-list-mode))
       (multi-eca--refresh))
-    (when (and multi-eca-fullscreen
-               (not (get-buffer-window buf)))
-      (setq multi-eca--previous-window-configuration
-            (list (current-window-configuration) (point-marker))))
-    (pop-to-buffer buf multi-eca-list-display-action)
-    (when multi-eca-fullscreen
-      (delete-other-windows))))
+    (if-let* ((window (get-buffer-window buf)))
+        (select-window window)
+      (when multi-eca-fullscreen
+        (setq multi-eca--previous-window-configuration
+              (list (current-window-configuration) (point-marker)))
+        (multi-eca--single-main-window))
+      (pop-to-buffer buf (multi-eca--list-display-action)))
+    (with-current-buffer buf
+      (unless (multi-eca--chat-line-p (multi-eca--entry-at-point))
+        (when-let* ((pos (save-excursion
+                           (goto-char (point-min))
+                           (multi-eca--find-line 1 #'multi-eca--chat-line-p))))
+          (goto-char pos)))
+      (setq multi-eca--last-previewed nil)
+      (when-let* ((entry (multi-eca--entry-at-point))
+                  ((multi-eca--chat-line-p entry)))
+        (multi-eca--preview entry)))))
 
 ;;;; Global hooks (added once at load; refresh no-ops when buffer is absent)
 

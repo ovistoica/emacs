@@ -112,6 +112,15 @@ refresh inline image display.  Otherwise behave like `org-yank'."
     (interactive)
     (org-map-entries 'org-id-get-create))
 
+  (defun my/org-copy-id-to-clipboard ()
+    "Copy the ID property of the org node at point.
+If no ID is available, create one for the node."
+    (interactive)
+    (when (eq major-mode 'org-mode)
+      (setq mytmpid (funcall 'org-id-get-create))
+      (kill-new mytmpid)
+      (message "Copied %s succesfully to clipboard" mytmpid)))
+
   (defvar my/org-shared-agenda-files
     '("inbox.org" "calendar-beorg.org" "reminders-beorg.org")
     "Agenda files included in every focus context.")
@@ -184,7 +193,11 @@ LABEL is used in the echo-area message."
     (define-key org-agenda-mode-map (kbd "C-c s")
                 (λ (my/org-focus "ShipClojure" "shipclojure.org")))
     (define-key org-agenda-mode-map (kbd "C-c a")
-                (λ (my/org-focus "all"))))
+                (λ (my/org-focus "all")))
+    ;; Let S-<left>/S-<right> fall through to windmove instead of
+    ;; rescheduling the item at point one day earlier/later.
+    (unbind-key "S-<left>" org-agenda-mode-map)
+    (unbind-key "S-<right>" org-agenda-mode-map))
 
   ;; Color the TODO keyword faces from the current theme now (the hook keeps
   ;; them in sync on later theme switches).

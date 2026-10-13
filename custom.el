@@ -4,7 +4,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058"
+   '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5"
+     "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058"
      "6ca343480d3304bafd84118d45a550f855f77e383cca664a4dd545d316d9f5d2"
      "138ed99a323c1b93c52f4b3726caf2bc634b79a76fa63a3d3aff76394db5f28f"
      "2493d0ad0bb94bd2ad297a6d76288751a532fd6d8d6af694ac14008caa6b7fa2"
@@ -91,7 +92,11 @@
  '(safe-local-variable-directories
    '("/home/ovistoica/Work/tries/2025-12-14-lambdaisland-launchpad/"))
  '(safe-local-variable-values
-   '((lisp-indent-local-overrides (cond . 0) (interactive . 0))
+   '((eval when
+           (and (boundp 'projectile-project-types)
+                (alist-get 'pk/emacs-package projectile-project-types))
+           (setq projectile-project-type 'pk/emacs-package))
+     (lisp-indent-local-overrides (cond . 0) (interactive . 0))
      (checkdoc-allow-quoting-nil-and-t . t)
      (kaocha-runner-extra-configuration . "{:config-file \"tests.local.edn\"}")
      (cider-clojure-cli-global-options . "-A:dev:test")

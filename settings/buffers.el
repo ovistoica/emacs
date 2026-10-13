@@ -152,16 +152,28 @@ ready to paste into any agent chat."
     (message "Copied code block (%s) to kill ring"
              (buffer-substring-no-properties beg (min end (+ beg 40))))))
 
+(declare-function my/org-copy-id-to-clipboard "setup-org-mode")
+
 (defun copy-current-buffer-dwim (beg end)
-  "Copy file path of the current buffer or code block from BEG to END of region.
-If the region is selected, use `region-as-code-block' otherwise use
+  "Copy code block, org node ID, or file path, depending on context.
+If the region is selected, use `region-as-code-block' with BEG and
+END.  Otherwise, in an Org buffer, prompt for whether to copy the
+node's ID (via `my/org-copy-id-to-clipboard') or the file path (via
+`copy-current-file-path').  In any other buffer, just use
 `copy-current-file-path'."
   (interactive (if (use-region-p)
                    (list (region-beginning) (region-end))
                  (list nil nil)))
-  (if (use-region-p)
-      (region-as-code-block beg end)
-    (copy-current-file-path)))
+  (cond
+   ((use-region-p)
+    (region-as-code-block beg end))
+   ((derived-mode-p 'org-mode)
+    (if (string= (completing-read "Copy: " '("org id" "filename") nil t)
+                 "org id")
+        (my/org-copy-id-to-clipboard)
+      (copy-current-file-path)))
+   (t
+    (copy-current-file-path))))
 
 (provide 'buffers)
 ;;; buffers.el ends here
