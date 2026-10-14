@@ -121,8 +121,12 @@ If no ID is available, create one for the node."
       (kill-new mytmpid)
       (message "Copied %s succesfully to clipboard" mytmpid)))
 
+  (defvar my/gcal-org-files '("work-gmail.org" "personal-gmail.org")
+    "Google Calendar files written by gcal-org (see ~/dotfiles/gcal-org).
+Every sync replaces them, so they are read-only from Emacs's side.")
+
   (defvar my/org-shared-agenda-files
-    '("inbox.org" "calendar-beorg.org" "reminders-beorg.org")
+    '("inbox.org" "reminders-beorg.org")
     "Agenda files included in every focus context.")
 
   (defun my/org-focus (label &rest area-files)
@@ -183,11 +187,12 @@ LABEL is used in the echo-area message."
   ;; `org-agenda-mode-map' only exists once org-agenda is loaded.
   (with-eval-after-load 'org-agenda
     (define-key org-agenda-mode-map (kbd "C-c w")
-                (λ (my/org-focus "work" "work.org")))
+                (λ (my/org-focus "work" "work.org" "work-gmail.org")))
     (define-key org-agenda-mode-map (kbd "C-c p")
                 (λ (my/org-focus "private" "private.org")))
     (define-key org-agenda-mode-map (kbd "C-c l")
-                (λ (my/org-focus "life" "private.org" "cafenea.org" "shipclojure.org")))
+                (λ (my/org-focus "life" "private.org" "cafenea.org" "shipclojure.org"
+                                 "personal-gmail.org")))
     (define-key org-agenda-mode-map (kbd "C-c f")
                 (λ (my/org-focus "cafenea" "cafenea.org")))
     (define-key org-agenda-mode-map (kbd "C-c s")
@@ -264,11 +269,20 @@ LABEL is used in the echo-area message."
            "%\\%(org-anniversary %^{Year} %^{Month} %^{Day}) %^{Person} is %d years old\n")))
 
 
-  (setq org-agenda-files '("work.org" "private.org" "cafenea.org" "shipclojure.org"
-                           "inbox.org" "calendar-beorg.org" "reminders-beorg.org"
-                           "birthdays.org"
-                           "nutrition-log-2026.org" "habits.org"))
+  (setq org-agenda-files (append '("work.org" "private.org" "cafenea.org" "shipclojure.org"
+                                   "inbox.org" "reminders-beorg.org"
+                                   "birthdays.org"
+                                   "nutrition-log-2026.org" "habits.org")
+                                 my/gcal-org-files))
   (setq org-original-agenda-files org-agenda-files)
+
+  ;; gcal-org replaces its files on every sync; reload them without asking
+  ;; "changed on disk; reread?", which would block the agenda (and the
+  ;; desktop bar's export).  Matched against the abbreviated path, so match
+  ;; the file name only.
+  (dolist (file my/gcal-org-files)
+    (add-to-list 'revert-without-query
+                 (concat "/" (regexp-quote file) "\\'")))
 
   (setq org-feed-alist
         '(("Slashdot"
