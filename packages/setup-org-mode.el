@@ -329,6 +329,42 @@ an external process rewrites them, causing noisy messages on every
 
   (advice-add 'org-ql--select :around #'my/org-ql-mute-no-headings-message)
 
+  (defun my/org-timer-running? ()
+    "Return non-nil when an org-pomodoro or `org-timer' timer is active."
+    (or (and (fboundp 'org-pomodoro-active-p) (org-pomodoro-active-p))
+        (bound-and-true-p org-timer-countdown-timer)
+        (and (bound-and-true-p org-timer-start-time)
+             (not (bound-and-true-p org-timer-pause-time)))))
+
+  (defun my/org-upcoming-modeline-hide-when-timing (&rest _)
+    "Blank `org-upcoming-modeline-string' while a pomodoro or org timer runs."
+    (when (my/org-timer-running?)
+      (setq org-upcoming-modeline-string nil)))
+
+  (advice-add 'org-upcoming-modeline--set-string
+              :after #'my/org-upcoming-modeline-hide-when-timing)
+
+  ;; Refresh immediately on pomodoro/timer transitions instead of waiting
+  ;; for the next `org-upcoming-modeline-interval' tick.
+  (defun my/org-upcoming-modeline-refresh (&rest _)
+    "Recompute the upcoming-event modeline string right away.
+Deferred so that timer state (e.g. `org-timer-stop-hook', which runs
+before the timer is cleared) has settled."
+    (run-at-time 0.2 nil
+                 (lambda ()
+                   (when org-upcoming-modeline-mode
+                     (org-upcoming-modeline--set-string)
+                     (force-mode-line-update t)))))
+
+  (dolist (hook '(org-pomodoro-started-hook
+                  org-pomodoro-finished-hook
+                  org-pomodoro-killed-hook
+                  org-pomodoro-break-finished-hook
+                  org-timer-start-hook
+                  org-timer-stop-hook
+                  org-timer-done-hook))
+    (add-hook hook #'my/org-upcoming-modeline-refresh))
+
   (org-upcoming-modeline-mode))
 
 (defun my/org-update-parent-cookie (&rest _)
