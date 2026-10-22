@@ -47,6 +47,7 @@
 (declare-function eca-chat-media--extension-for-type "eca-chat-context" (type))
 (declare-function eca-chat-completion-at-point "eca-chat-context")
 (declare-function eca-chat--completion-type-at-point "eca-chat-context")
+(declare-function eca--quota-short-str "eca-util" (quota))
 
 (defvar yank-media--registered-handlers)
 
@@ -233,15 +234,26 @@ via `register-val-jump-to'.")
    ((eq (buffer-local-value 'eca-chat--chat-loading buf) t) 'running)
    (t 'idle)))
 
+(defun multi-eca--chat-usage ()
+  "Return the current chat buffer's per-chat usage string, or nil.
+Wraps `eca-chat--usage-str' with the `:quota' segment removed from
+`eca-chat-usage-string-format': the subscription quota is account
+wide, so repeating it on every chat line is noise.  Subscription
+chats carry no session cost, so this usually leaves tokens and
+context.  The `%' characters, doubled for the mode line, are
+collapsed back for plain buffer text."
+  (when (fboundp 'eca-chat--usage-str)
+    (ignore-errors
+      (let ((eca-chat-usage-string-format
+             (remq :quota eca-chat-usage-string-format)))
+        (when-let* ((str (eca-chat--usage-str)))
+          (string-replace "%%" "%" (substring-no-properties str)))))))
+
 (defun multi-eca--chat-detail (buf)
   "Return the model and usage detail string for chat BUF."
   (with-current-buffer buf
     (let* ((model eca-chat--selected-model)
-           (usage (and eca-chat--session-cost
-                       (fboundp 'eca-chat--usage-str)
-                       (ignore-errors
-                         (when-let* ((str (eca-chat--usage-str)))
-                           (substring-no-properties str))))))
+           (usage (multi-eca--chat-usage)))
       (string-join (delq nil (list model usage)) " · "))))
 
 (defun multi-eca--chat-entry (session buf)
@@ -388,17 +400,48 @@ beginning of the line after the block.  Used as
         (forward-line 1))
       (cons start (point)))))
 
+(defun multi-eca--latest-quota (chats)
+  "Return the most recently updated subscription quota among CHATS, or nil.
+CHATS are chat entries.  Every chat buffer keeps its own copy of the
+account-wide quota from its last usage update; the one with the
+newest `:updatedAt' is the most accurate."
+  (seq-reduce (lambda (best quota)
+                (if (> (or (plist-get quota :updatedAt) 0)
+                       (or (plist-get best :updatedAt) 0))
+                    quota
+                  best))
+              (seq-keep (lambda (chat)
+                          (let ((buf (plist-get chat :buffer)))
+                            (and (buffer-live-p buf)
+                                 (buffer-local-value 'eca-chat--quota buf))))
+                        chats)
+              nil))
+
+(defun multi-eca--quota-string (chats)
+  "Return the short quota summary of the newest quota among CHATS, or nil.
+Keeps the usage-level faces set by `eca--quota-short-str'."
+  (when-let* (((fboundp 'eca--quota-short-str))
+              (quota (multi-eca--latest-quota chats))
+              (str (ignore-errors (eca--quota-short-str quota))))
+    (unless (string-empty-p str)
+      str)))
+
 (defun multi-eca--summary-string (entries)
-  "Return the dim summary line text for ENTRIES."
+  "Return the dim summary line text for ENTRIES.
+Ends with the account-wide subscription quota when a chat reported
+one; its usage-level faces take precedence over the dim face."
   (let* ((chats (seq-filter (lambda (e) (eq (plist-get e :type) 'chat)) entries))
          (sessions (seq-count (lambda (e) (and (eq (plist-get e :type) 'group)
                                                (not (plist-get e :custom))))
                               entries))
          (attention (seq-count (lambda (e) (eq (plist-get e :status) 'attention))
-                               chats)))
-    (propertize (format "%d sessions · %d chats · %d need input"
-                        sessions (length chats) attention)
-                'face 'multi-eca-detail)))
+                               chats))
+         (quota (multi-eca--quota-string chats))
+         (str (concat (format "%d sessions · %d chats · %d need input"
+                              sessions (length chats) attention)
+                      (if quota (concat " · " quota) ""))))
+    (add-face-text-property 0 (length str) 'multi-eca-detail t str)
+    str))
 
 (defun multi-eca--partition-groups (entries)
   "Partition flat ENTRIES into a list of (GROUP . CHATS) conses."
