@@ -90,6 +90,7 @@ SPEC may be a face symbol, a `face-attribute' plist, or a list of either."
   :vc (:url "https://github.com/rschmukler/magit-difftastic")
   :after magit
   :defines (magit-difftastic-mode
+            magit-difftastic-lazy
             ansi-color-normal-colors-vector
             ansi-color-bright-colors-vector
             difftastic-normal-colors-vector
@@ -129,6 +130,11 @@ section selection.  For other sections, call ORIG with SECTION and ARGS."
                   (setq pos next))))))
       (apply orig section args)))
 
+  (defun my/magit-difftastic-eager-refresh (fn &rest args)
+    "Call FN with ARGS, rendering difftastic synchronously during its refresh."
+    (let ((magit-difftastic-lazy nil))
+      (apply fn args)))
+
   (defun my/magit-difftastic-reset-caches (&rest _)
     "Drop every cached difftastic render so the next refresh uses fresh colors.
 Rendered chunks carry literal colour strings, so after a theme change both
@@ -145,7 +151,16 @@ would keep painting the previous theme's colours.  For `enable-theme-functions'.
   ;; Stock diffs by default (fast on big diffs); C-c C-d opts a file into
   ;; difftastic, C-u C-c C-d flips the whole buffer.
   (magit-difftastic-default-rendering 'stock)
+  ;; Render difft output asynchronously: files show "Rendering difftastic…"
+  ;; and fill in as each difft subprocess finishes; expanding prioritizes.
+  (magit-difftastic-lazy t)
   :config
+  ;; Lazy rendering swaps the staged file for a "Rendering difftastic…"
+  ;; placeholder until difft finishes, which flickers after every hunk
+  ;; stage.  Render synchronously for the refresh these commands trigger;
+  ;; the diff is small and unchanged files come from the render cache.
+  (dolist (cmd '(magit-stage magit-unstage))
+    (advice-add cmd :around #'my/magit-difftastic-eager-refresh))
   ;; The default `magit-section-highlight' lays a flat overlay over the chunk
   ;; body, painting over the added/removed line colors.
   (advice-add 'magit-section-highlight :around
