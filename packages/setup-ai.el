@@ -62,7 +62,7 @@
 (declare-function agent-shell-other-buffer "agent-shell")
 (declare-function agent-shell-send-region "agent-shell" (&optional pick-shell))
 (declare-function agent-shell-send-file "agent-shell" (&optional prompt-for-file pick-shell))
-(declare-function agent-shell-queue-request "agent-shell")
+(declare-function agent-shell-prompt-queue "agent-shell")
 (declare-function pi-coding-agent-queue-steering "pi-coding-agent")
 (declare-function agent-shell-project-buffers "agent-shell")
 (declare-function agent-shell-buffers "agent-shell")
@@ -240,7 +240,7 @@ Queueing is only supported by agent-shell and pi; ECA and claude-code-ide
 do not expose a queue API."
   (interactive)
   (pcase (agent--active-backend)
-    ('agent-shell     (call-interactively #'agent-shell-queue-request))
+    ('agent-shell     (call-interactively #'agent-shell-prompt-queue))
     ('pi              (call-interactively #'pi-coding-agent-queue-steering))
     ('eca             (user-error "Queue not supported for ECA"))
     ('claude-code-ide (user-error "Queue not supported for Claude Code IDE"))
@@ -598,14 +598,14 @@ this buffer."
       ("c" "Compose prompt" agent-shell-prompt-compose)
       ("o" "Other buffer" agent-shell-other-buffer)]
      [("i" "Interrupt" agent-shell-interrupt)
-      ("r" "Resume pending" agent-shell-resume-pending-requests)
-      ("R" "Remove pending" agent-shell-remove-pending-request)]]
+      ("r" "Resume pending" agent-shell-prompt-queue-resume)
+      ("R" "Remove pending" agent-shell-prompt-queue-remove)]]
     ["Session"
      [("m" "Set model" agent-shell-set-session-model)
       ("M" "Set mode" agent-shell-set-session-mode)
       ("C" "Cycle mode" agent-shell-cycle-session-mode)]]
     ["Send"
-     [("RET" "Queue request" agent-shell-queue-request)
+     [("RET" "Queue request" agent-shell-prompt-queue)
       ("f" "Send file" agent-shell-send-file)
       ("F" "Send other file" agent-shell-send-other-file)
       ("s" "Send screenshot" agent-shell-send-screenshot)
