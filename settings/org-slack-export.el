@@ -3,17 +3,23 @@
 ;;; Commentary:
 ;; Exports org-mode documents to Slack-formatted text.
 ;;
-;; Slack's markup differs from standard markdown in several ways:
-;;   - Bold:            *bold*
+;; Slack now interprets pasted text as standard (CommonMark) markdown, where a
+;; single asterisk means italic.  The legacy `mrkdwn' dialect it replaced used
+;; a single asterisk for bold.  The flavor is chosen with
+;; `org-slack-export-flavor'; the default `markdown' emits:
+;;   - Bold:            **bold**
 ;;   - Italic:          _italic_
-;;   - Strikethrough:   ~strikethrough~
+;;   - Strikethrough:   ~~strikethrough~~
 ;;   - Inline code:     `code`
 ;;   - Code blocks:     ``` without a language identifier
 ;;   - No headings:     all levels become bold text
-;;   - Links:           [label](url) standard markdown (works in Slack)
+;;   - Links:           [label](url)
 ;;   - Tables:          rendered as a space-aligned ASCII grid wrapped in a
-;;                      ``` code block, since Slack has no table markup and its
-;;                      monospace font keeps the columns aligned
+;;                      ``` code block so the columns stay aligned in
+;;                      Slack's monospace font
+;;
+;; Set `org-slack-export-flavor' to `mrkdwn' for the legacy syntax, which
+;; differs in bold (*bold*) and strikethrough (~strikethrough~).
 ;;
 ;; Entry points:
 ;;   M-x org-slack-export-to-buffer    — export to *Org Slack Export* buffer
@@ -32,12 +38,37 @@
 (require 'seq)
 (require 'subr-x)
 
+;;; Customization
+
+(defgroup org-slack-export nil
+  "Org export backend for Slack."
+  :group 'org-export
+  :prefix "org-slack-")
+
+(defcustom org-slack-export-flavor 'markdown
+  "Slack text syntax produced by the export backend.
+`markdown' targets Slack's standard markdown parsing, where `**bold**'
+is bold and a single asterisk is italic.  `mrkdwn' targets the legacy
+Slack dialect, where `*bold*' is bold."
+  :type '(choice (const :tag "Standard markdown (**bold**, ~~strike~~)" markdown)
+                 (const :tag "Legacy mrkdwn (*bold*, ~strike~)" mrkdwn))
+  :group 'org-slack-export)
+
 ;;; Transcoders
 
+(defun org-slack--bold (text)
+  "Wrap TEXT in bold markup for `org-slack-export-flavor'."
+  (format (if (eq org-slack-export-flavor 'mrkdwn) "*%s*" "**%s**") text))
+
+(defun org-slack--strike (text)
+  "Wrap TEXT in strikethrough markup for `org-slack-export-flavor'."
+  (format (if (eq org-slack-export-flavor 'mrkdwn) "~%s~" "~~%s~~") text))
+
 (defun org-slack-bold (_bold contents _info)
-  "Transcode BOLD object to Slack *bold*.
-CONTENTS is the transcoded text inside the bold markup."
-  (format "*%s*" contents))
+  "Transcode BOLD object to Slack bold, e.g. **bold**.
+CONTENTS is the transcoded text inside the bold markup.  The delimiter
+depends on `org-slack-export-flavor'."
+  (org-slack--bold contents))
 
 (defun org-slack-italic (_italic contents _info)
   "Transcode ITALIC object (/italic/) to Slack _italic_.
@@ -49,9 +80,10 @@ CONTENTS is the transcoded text inside the italic markup."
   contents)
 
 (defun org-slack-strike-through (_strike-through contents _info)
-  "Transcode STRIKE-THROUGH object (+text+) to Slack ~strikethrough~.
-CONTENTS is the transcoded text inside the strikethrough markup."
-  (format "~%s~" contents))
+  "Transcode STRIKE-THROUGH object (+text+) to Slack ~~strikethrough~~.
+CONTENTS is the transcoded text inside the strikethrough markup.  The
+delimiter depends on `org-slack-export-flavor'."
+  (org-slack--strike contents))
 
 (defun org-slack-code (code _contents _info)
   "Transcode inline CODE object (=code=) to Slack `backtick`."
@@ -73,7 +105,7 @@ to visualize the hierarchy; by default no indentation is added."
          (indent (if (plist-get info :slack-indent-headlines)
                      (make-string (* 2 (1- level)) ?\s)
                    "")))
-    (concat indent (format "*%s*\n" title)
+    (concat indent (org-slack--bold title) "\n"
             (when contents
               (if (string-empty-p indent)
                   contents

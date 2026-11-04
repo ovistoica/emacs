@@ -94,7 +94,14 @@ Dired directory in Nautilus."
 (use-package dired-quick-sort
   :after dired
   :init
-  (dired-quick-sort-setup))
+  (dired-quick-sort-setup)
+  :config
+  ;; Allow per-directory sort defaults via .dir-locals.el without prompting,
+  ;; e.g. ~/Downloads: ((dired-mode . ((dired-quick-sort-sort-by-last . "time"))))
+  (put 'dired-quick-sort-sort-by-last 'safe-local-variable #'stringp)
+  (put 'dired-quick-sort-time-last 'safe-local-variable #'stringp)
+  (put 'dired-quick-sort-reverse-last 'safe-local-variable #'characterp)
+  (put 'dired-quick-sort-group-directories-last 'safe-local-variable #'characterp))
 
 (defun my/dired-insert-directory-dotfiles-first (orig &rest args)
   "Call ORIG (`dired-insert-directory') with ARGS under C collation.

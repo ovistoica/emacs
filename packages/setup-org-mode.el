@@ -300,6 +300,9 @@ LABEL is used in the echo-area message."
             duplicate-current-line-or-region)
     (advice-add it :after 'my/org-update-parent-cookie))
 
+    (advice-add 'org-agenda-todo :after
+              (lambda (&rest _) (org-save-all-org-buffers)))
+
   (require 'ox-gfm nil t))
 
 
