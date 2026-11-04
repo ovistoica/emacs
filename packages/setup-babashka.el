@@ -15,41 +15,44 @@
 (declare-function makefile-invoke-target "setup-makefile-mode")
 (declare-function js-pkg-run "setup-js")
 
-(defun babashka-find-tasks ()
-  "Extract the task names of all the tasks from the bb.edn buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward ":tasks" nil t)
-      ;; Move past the :tasks key and any whitespace/opening brace
-      (skip-chars-forward " \t\n{")
+(defun babashka--parse-tasks-output (output)
+  "Return the task names listed in `bb tasks' OUTPUT.
+Names are the first word of each line after the \"The following tasks\"
+header.  Return nil when there is no header, e.g. \"No tasks found.\"."
+  (when-let* ((lines (split-string output "\n"))
+              (body (cdr (--drop-while (not (string-prefix-p "The following tasks" it))
+                                       lines))))
+    (->> body
+         (--map (car (split-string it nil t)))
+         (-non-nil))))
 
-      ;; Skip past :requires if it exists
-      (when (looking-at ":requires")
-        (forward-sexp 2))         ; Skip :requires and its associated vector/sexp
+(defun babashka--error-summary (stderr)
+  "Return a readable summary of `bb' STDERR.
+Dependency download progress and Java stack frames are dropped;
+\"(no error output)\" is returned when nothing is left."
+  (let* ((noise "\\`\\(?:Cloning:\\|Checking out:\\|Downloading:\\|at \\)")
+         (summary (->> (split-string stderr "\n" t "[ \t\r]+")
+                       (--remove (string-match-p noise it))
+                       (s-join "\n"))))
+    (if (string-empty-p summary) "(no error output)" summary)))
 
-      (let ((tasks '()))
-        (while (< (point) (point-max))
-          (skip-chars-forward " \t\n,") ;; Skip tabs, spaces, newlines, commas
-          (when (< (point) (point-max))
-            (cond
-             ;; Found a task name
-             ((looking-at "\\([a-zA-Z0-9_:-]+\\)")
-
-              (let ((task-name (match-string-no-properties 0)))
-                (unless (string-prefix-p "requires" task-name)
-                  (push task-name tasks)))
-              (goto-char (match-end 0))
-              ;; Skip the associated value (map, vector, or atom)
-              (skip-chars-forward " \t\n")
-              (forward-sexp))
-
-             ;; Skip comments and other content
-             ((looking-at ";")
-              (forward-line))
-
-             ;; Move forward if we hit something unexpected
-             (t (forward-char)))))
-        (reverse tasks)))))
+(defun babashka-find-tasks (&optional root)
+  "Return the babashka task names of the project at ROOT.
+ROOT defaults to `default-directory'.  Runs `bb tasks' and signals a
+`user-error' summarizing stderr when it exits with a non-zero status."
+  (let ((default-directory (or root default-directory))
+        (stderr-file (make-temp-file "bb-tasks-stderr")))
+    (unwind-protect
+        (with-temp-buffer
+          (let ((status (process-file "bb" nil (list t stderr-file) nil "tasks")))
+            (if (eql status 0)
+                (babashka--parse-tasks-output (buffer-string))
+              (user-error "Running bb tasks failed (exit %s): %s" status
+                          (babashka--error-summary
+                           (with-temp-buffer
+                             (insert-file-contents stderr-file)
+                             (buffer-string)))))))
+      (delete-file stderr-file))))
 
 (defun shorten-path (path)
   "Shortens the file PATH by replacing the home directory with ~."
@@ -69,18 +72,17 @@
 (defun babashka-invoke-task ()
   "Invoke a babashka task from bb.edn."
   (interactive)
-  (let* ((file (concat (projectile-project-root) "bb.edn"))
-         (short-dir (shorten-path (projectile-project-root)))
-         (default-directory (projectile-project-root))
-         (task (completing-read (format "bb in %s: " short-dir)
-                                (--map
-                                 (concat "bb " it)
-                                 (with-temp-buffer
-                                   (insert-file-contents file)
-                                   (babashka-find-tasks))))))
-    (if (file-exists-p file)
-        (babashka--exec-task task)
-      (message "No bb.edn found in %s" short-dir))))
+  (let* ((root (projectile-project-root))
+         (short-dir (shorten-path root))
+         (default-directory root))
+    (if (not (file-exists-p (expand-file-name "bb.edn" root)))
+        (message "No bb.edn found in %s" short-dir)
+      (let ((tasks (babashka-find-tasks root)))
+        (unless tasks
+          (user-error "No babashka tasks found in %s" short-dir))
+        (babashka--exec-task
+         (completing-read (format "bb in %s: " short-dir)
+                          (--map (concat "bb " it) tasks)))))))
 
 (defun display-prefix (arg)
   "Display the value of the raw prefix ARG."
