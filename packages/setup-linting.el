@@ -6,6 +6,10 @@
 ;;; configured to use the same
 
 ;;; Code:
+;; Flycheck's Emacs Lisp checkers only run in `trusted-content' (Emacs 30+);
+;; trust this config so byte-compile diagnostics keep working here.
+(add-to-list 'trusted-content (abbreviate-file-name user-emacs-directory))
+
 (use-package flycheck
   :diminish flycheck-mode
   :defer 2

@@ -49,9 +49,8 @@ alongside `deps.edn', so kaocha declared only in a personal
            nil t))
       (let ((original-buffer (current-buffer)))
         (when (kaocha-runner--should-run-tests?)
-          (save-window-excursion
-            (when-let ((file (kaocha-runner--significant-other-find-existing-test)))
-              (find-file file)
+          (when-let* ((file (kaocha-runner--significant-other-find-existing-test)))
+            (with-current-buffer (find-file-noselect file)
               (when (kaocha-runner--should-run-tests?)
                 (kaocha-runner--run-tests
                  (kaocha-runner--testable-sym (cider-current-ns) nil nil)

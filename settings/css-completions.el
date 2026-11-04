@@ -107,7 +107,9 @@
       (list beg end
             (--map (concat prefix it)
                    (cssc/extract-css-class-names
-                    (cssc/read-project-css-file-contents)))))))
+                    (cssc/read-project-css-file-contents)))
+            ;; Let other capfs (CIDER, LSP) run when no CSS class matches.
+            :exclusive 'no))))
 
 (defun cssc/enable-for-clojure ()
   "Sets up current buffer for clojure css completions. Run in a hook."

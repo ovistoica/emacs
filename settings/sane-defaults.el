@@ -21,6 +21,9 @@
 ;; Answering just 'y' or 'n' will do
 (setopt use-short-answers t)
 
+;; Only git is used; don't probe every other VC backend on each file visit.
+(setq vc-handled-backends '(Git))
+
 ;; UTF-8 please
 (setq locale-coding-system 'utf-8) ; pretty
 (set-terminal-coding-system 'utf-8) ; pretty

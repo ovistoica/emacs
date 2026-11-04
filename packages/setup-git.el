@@ -14,7 +14,6 @@
                                             (unpulled . show)
                                             (stashes . hide)))
   (magit-diff-refine-hunk t)
-  (magit-push-always-verify nil)
   (magit-no-confirm '(stage-all-changes
                       unstage-all-changes))
 
