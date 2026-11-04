@@ -1,5 +1,10 @@
 ;;; setup-clojure-mode.el --- Clojure mode configuration -*- lexical-binding: t; -*-
 
+(declare-function paredit-forward "paredit")
+(declare-function paredit-forward-down "paredit")
+(declare-function cider-interactive-eval "cider-eval")
+(declare-function cider-pprint-eval-last-sexp "cider-eval")
+
 (use-package clojure-mode
   :after (significant-other)
   :hook (((clojure-mode clojurescript-mode clojurec-mode) . setup-clojure-mode-so))
@@ -25,6 +30,7 @@
               ([remap paredit-backward] . clojure-backward-logical-sexp)
               ("C-\"" . clojure-toggle-keyword-string)
               ("C-x M-e" . my/cider-eval-including-lets)
+              ("C-c C-M-s" . my/cider-eval-def-symbol)
               ("C-." . clj-hippie-expand-no-case-fold)
               ;; ("C-c i 1 8 n" . i18n-edn-edit-in-multifile)
               ("<f7>" . cider-eval-last-sexp)
@@ -148,6 +154,18 @@
                             (when output-to-current-buffer
                               (cider-eval-print-handler)))))
 
+(defun my/cider-eval-def-symbol ()
+  "Pretty-print the value of the symbol defined by the top-level def at point.
+Works from anywhere inside a `(def...' form, e.g. `def', `defn' or
+`defonce'.  Does nothing when the top-level form is not a def."
+  (interactive)
+  (save-excursion
+    (beginning-of-defun)
+    (paredit-forward-down)
+    (when (looking-at "def\\(\\w*\\)")
+      (paredit-forward 2)
+      (cider-pprint-eval-last-sexp))))
+
 (defun clj-hippie-expand-no-case-fold ()
   "Consider / as whitespace when doing hippie-expand i clojure-mode"
   (interactive)
@@ -172,6 +190,12 @@
   ;; your currently open namespace.
   (interactive)
   (cider-interactive-eval "(doseq [a (keys (ns-aliases *ns*))] (ns-unalias (symbol (str *ns*)) a))"))
+
+(defun my/clojure-sync-deps ()
+  "Load deps newly added to deps.edn into the running REPL.
+Requires Clojure 1.12+ (`clojure.repl.deps/sync-deps')."
+  (interactive)
+  (cider-interactive-eval "((requiring-resolve 'clojure.repl.deps/sync-deps))"))
 
 (use-package neil :defer t) ;; M-x neil-find-clojure-package
 

@@ -205,5 +205,44 @@ If there's no region, the current line will be duplicated."
       (newline)
       (indent-for-tab-command)))))
 
+(defun my/code-comma? (pos)
+  "Return non-nil if the comma at POS is code, not literal text.
+Commas inside strings or comments, and escaped commas such as the
+Clojure character literal `\\,', are literal text."
+  (let ((ppss (save-excursion (syntax-ppss pos)))) ; syntax-ppss moves point
+    (not (or (nth 3 ppss)               ; in string
+             (nth 4 ppss)               ; in comment
+             (nth 5 ppss)))))           ; right after an escape char
+
+(defun my/remove-all-commas (beg end)
+  "Remove every comma between BEG and END that is code, not literal text.
+Interactively, operate on the active region, or else the whole buffer.
+Commas in strings, comments and character literals are kept; see
+`my/code-comma?'.  A comma directly between two tokens, as in `[1,2]',
+is replaced by a single space so the tokens stay separate; a comma next
+to whitespace, an opening delimiter before it or a closing delimiter
+after it is deleted."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list (point-min) (point-max))))
+  (save-excursion
+    (let ((end (copy-marker end))
+          (boundary-before? (lambda (c) (or (null c)
+                                            (memq c '(?\s ?\t ?\n ?\r ?\f))
+                                            (eq (char-syntax c) ?\())))
+          (boundary-after? (lambda (c) (or (null c)
+                                           (memq c '(?\s ?\t ?\n ?\r ?\f))
+                                           (eq (char-syntax c) ?\))))))
+      (goto-char beg)
+      (while (search-forward "," end t)
+        (when (my/code-comma? (match-beginning 0))
+          (let ((joins-tokens? (not (or (funcall boundary-before?
+                                                 (char-before (match-beginning 0)))
+                                        (funcall boundary-after? (char-after))))))
+            (delete-char -1)
+            (when joins-tokens?
+              (insert " ")))))
+      (set-marker end nil))))
+
 
 (provide 'editing)
