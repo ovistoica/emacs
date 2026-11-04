@@ -65,12 +65,12 @@
                  marginalia mise move-text multiple-cursors neil
                  nerd-icons-completion nerd-icons-dired notmuch-indicator
                  ol-notmuch olivetti omarchy orderless org-modern org-pomodoro
-                 org-present org-upcoming-modeline ox-slack perspective
-                 pi-coding-agent popper prodigy projectile pulsar rainbow-mode
-                 significant-other smartparens smtpmail-multi terraform-mode
-                 time-zones transient typst-ts-mode undo-fu vertico
-                 visual-fill-column vterm vundo wgrep-deadgrep
-                 whitespace-cleanup-mode yaml-mode zoom-frm zprint-mode))
+                 org-present org-upcoming-modeline ox-slack perspective pilish
+                 popper prodigy projectile pulsar rainbow-mode significant-other
+                 smartparens smtpmail-multi terraform-mode time-zones transient
+                 typst-ts-mode undo-fu vertico visual-fill-column vterm vundo
+                 wgrep-deadgrep whitespace-cleanup-mode yaml-mode zoom-frm
+                 zprint-mode))
  '(package-vc-selected-packages
    '((eca :url "https://github.com/editor-code-assistant/eca-emacs" :branch
           "master")

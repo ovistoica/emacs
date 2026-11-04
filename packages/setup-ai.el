@@ -8,7 +8,7 @@
 ;;   1. eca            — editor-code-assistant/eca-emacs
 ;;   2. claude-code-ide — manzaltu/claude-code-ide.el (parsnips' ghostel fork)
 ;;   3. agent-shell    — xenodium/agent-shell, ACP-based
-;;   4. pi-coding-agent — dnouri/pi-coding-agent
+;;   4. pilish — dnouri/pilish
 ;;
 ;; Standard keys (active globally when `agent-mode' is on):
 ;;   C-c e   toggle the current harness's chat window (and focus it)
@@ -63,7 +63,7 @@
 (declare-function agent-shell-send-region "agent-shell" (&optional pick-shell))
 (declare-function agent-shell-send-file "agent-shell" (&optional prompt-for-file pick-shell))
 (declare-function agent-shell-prompt-queue "agent-shell")
-(declare-function pi-coding-agent-queue-steering "pi-coding-agent")
+(declare-function pilish-queue-steering "pilish")
 (declare-function agent-shell-project-buffers "agent-shell")
 (declare-function agent-shell-buffers "agent-shell")
 (declare-function agent-shell--display-buffer "agent-shell")
@@ -77,11 +77,11 @@
 (declare-function claude-code-ide-insert-at-mentioned "claude-code-ide")
 (declare-function claude-code-ide-list-sessions "claude-code-ide")
 
-(declare-function pi-coding-agent "pi-coding-agent")
-(declare-function pi-coding-agent-menu "pi-coding-agent")
-(declare-function pi-coding-agent-abort "pi-coding-agent")
-(declare-function pi-coding-agent-new-session "pi-coding-agent")
-(declare-function pi-coding-agent-resume-session "pi-coding-agent")
+(declare-function pilish "pilish")
+(declare-function pilish-menu "pilish")
+(declare-function pilish-abort "pilish")
+(declare-function pilish-new-session "pilish")
+(declare-function pilish-session-browser "pilish")
 
 ;; Variables referenced before their defining package loads (silence the
 ;; byte-compiler's free-variable warnings; the real definitions live in eca).
@@ -123,8 +123,8 @@ mode; elsewhere the value of `agent-current' is used."
   (cond
    ((derived-mode-p 'eca-chat-mode 'multi-eca-list-mode) 'eca)
    ((derived-mode-p 'agent-shell-mode) 'agent-shell)
-   ((derived-mode-p 'pi-coding-agent-chat-mode
-                    'pi-coding-agent-input-mode) 'pi)
+   ((derived-mode-p 'pilish-chat-mode
+                    'pilish-input-mode) 'pi)
    (agent--claude-buffer-p 'claude-code-ide)
    (t agent-current)))
 
@@ -143,7 +143,7 @@ mode; elsewhere the value of `agent-current' is used."
   (pcase (agent--active-backend)
     ('eca             (call-interactively #'my/eca-toggle))
     ('agent-shell     (call-interactively #'my/agent-shell-toggle))
-    ('pi              (call-interactively #'my/pi-coding-agent-toggle))
+    ('pi              (call-interactively #'my/pilish-toggle))
     ('claude-code-ide (call-interactively #'claude-code-ide-toggle))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
@@ -200,7 +200,7 @@ Resolution order:
   (pcase (agent--active-backend)
     ('eca             (call-interactively #'eca-transient-menu))
     ('agent-shell     (call-interactively #'agent-shell-menu))
-    ('pi              (call-interactively #'pi-coding-agent-menu))
+    ('pi              (call-interactively #'pilish-menu))
     ('claude-code-ide (call-interactively #'claude-code-ide-menu))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
@@ -210,7 +210,7 @@ Resolution order:
   (pcase (agent--active-backend)
     ('eca             (call-interactively #'eca-chat-stop-prompt))
     ('agent-shell     (call-interactively #'agent-shell-interrupt))
-    ('pi              (call-interactively #'pi-coding-agent-abort))
+    ('pi              (call-interactively #'pilish-abort))
     ('claude-code-ide (call-interactively #'claude-code-ide-send-escape))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
@@ -220,7 +220,7 @@ Resolution order:
   (pcase (agent--active-backend)
     ('eca             (call-interactively #'eca-chat-new))
     ('agent-shell     (call-interactively #'agent-shell-new-shell))
-    ('pi              (call-interactively #'pi-coding-agent-new-session))
+    ('pi              (call-interactively #'pilish-new-session))
     ('claude-code-ide (call-interactively #'claude-code-ide))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
@@ -230,7 +230,7 @@ Resolution order:
   (pcase (agent--active-backend)
     ('eca             (call-interactively #'eca-chat-select))
     ('agent-shell     (call-interactively #'agent-shell-other-buffer))
-    ('pi              (call-interactively #'pi-coding-agent-resume-session))
+    ('pi              (call-interactively #'pilish-session-browser))
     ('claude-code-ide (call-interactively #'claude-code-ide-list-sessions))
     (backend (user-error "Unknown agent backend: %s" backend))))
 
@@ -241,7 +241,7 @@ do not expose a queue API."
   (interactive)
   (pcase (agent--active-backend)
     ('agent-shell     (call-interactively #'agent-shell-prompt-queue))
-    ('pi              (call-interactively #'pi-coding-agent-queue-steering))
+    ('pi              (call-interactively #'pilish-queue-steering))
     ('eca             (user-error "Queue not supported for ECA"))
     ('claude-code-ide (user-error "Queue not supported for Claude Code IDE"))
     (backend          (user-error "Queue not supported for backend: %s" backend))))
@@ -269,7 +269,7 @@ do not expose a queue API."
 (define-minor-mode agent-chat-mode
   "Minor mode installed in every agent harness chat/input buffer.
 Provides a consistent set of keybindings across eca, agent-shell,
-pi-coding-agent, and claude-code-ide buffers."
+pilish, and claude-code-ide buffers."
   :lighter " Agent"
   :keymap agent-chat-mode-map)
 
@@ -618,13 +618,13 @@ this buffer."
       ("V" "Version" agent-shell-version)]]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; 4. pi-coding-agent — Emacs frontend for the pi CLI coding agent
-;;    https://github.com/dnouri/pi-coding-agent
+;; 4. pilish — Emacs frontend for the pi CLI coding agent
+;;    https://github.com/dnouri/pilish
 ;;
 ;; REQUIREMENTS
 ;;   - Emacs 29+ with tree-sitter support
 ;;   - pi CLI installed and authenticated:
-;;       npm install -g @mariozechner/pi-coding-agent
+;;       npm install -g @earendil-works/pi-coding-agent
 ;;       pi --login
 ;;
 ;; SIDE PANEL DESIGN
@@ -646,19 +646,19 @@ this buffer."
 ;;       error, a git diff hunk, a CIDER exception, etc.).
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(use-package pi-coding-agent
-  :vc (:url "https://github.com/dnouri/pi-coding-agent" :rev :newest)
+(use-package pilish
+  :ensure t
 
-  :functions (pi-coding-agent--session-directory
-              pi-coding-agent--find-session
-              pi-coding-agent--setup-session)
+  :functions (pilish--session-directory
+              pilish--find-session
+              pilish--setup-session)
 
   :preface
 
   (defcustom my/pi-panel-width 0.4
     "Width of the pi side panel as a fraction of the frame width."
     :type 'number
-    :group 'pi-coding-agent)
+    :group 'pilish)
 
   (defun my/pi--short-name (dir)
     "Return the last path component of DIR as a short project name."
@@ -668,7 +668,7 @@ this buffer."
     "Display CHAT-BUF (top) and INPUT-BUF (bottom) as a right side panel.
 DIR is the session directory used to derive the short project name shown
 in the mode-line.  Uses side windows so the main window layout is untouched."
-    (let ((input-height (or (bound-and-true-p pi-coding-agent-input-window-height) 10))
+    (let ((input-height (or (bound-and-true-p pilish-input-window-height) 10))
           (win-params   '((no-delete-other-windows . t)))
           (label        (format " *pi:%s*" (my/pi--short-name dir))))
       (display-buffer chat-buf
@@ -701,22 +701,22 @@ in the mode-line.  Uses side windows so the main window layout is untouched."
       (when-let ((win (get-buffer-window buf)))
         (delete-window win))))
 
-  (defun my/pi-coding-agent-toggle ()
+  (defun my/pilish-toggle ()
     "Toggle the pi side panel for the current project.
 Opens a right-side panel with chat on top and input on bottom.
 Creates a new session if none exists for the current project."
     (interactive)
-    (let* ((dir       (pi-coding-agent--session-directory))
-           (chat-buf  (pi-coding-agent--find-session dir))
+    (let* ((dir       (pilish--session-directory))
+           (chat-buf  (pilish--find-session dir))
            (input-buf (and chat-buf
                            (buffer-local-value
-                            'pi-coding-agent--input-buffer chat-buf))))
+                            'pilish--input-buffer chat-buf))))
       (if (and chat-buf (get-buffer-window chat-buf))
           (my/pi--close-panel chat-buf input-buf)
         (unless chat-buf
-          (setq chat-buf  (pi-coding-agent--setup-session dir))
+          (setq chat-buf  (pilish--setup-session dir))
           (setq input-buf (buffer-local-value
-                           'pi-coding-agent--input-buffer chat-buf)))
+                           'pilish--input-buffer chat-buf)))
         (my/pi--open-panel chat-buf input-buf dir)
         (when-let ((win (get-buffer-window input-buf)))
           (select-window win)))))
@@ -725,10 +725,10 @@ Creates a new session if none exists for the current project."
     "Append TEXT to the pi input buffer for the current project and focus it.
 Creates a new pi session if one does not exist yet.
 Opens the side panel if not currently visible."
-    (let* ((dir      (pi-coding-agent--session-directory))
-           (chat-buf (or (pi-coding-agent--find-session dir)
-                         (pi-coding-agent--setup-session dir)))
-           (input-buf (buffer-local-value 'pi-coding-agent--input-buffer chat-buf)))
+    (let* ((dir      (pilish--session-directory))
+           (chat-buf (or (pilish--find-session dir)
+                         (pilish--setup-session dir)))
+           (input-buf (buffer-local-value 'pilish--input-buffer chat-buf)))
       (with-current-buffer input-buf
         (goto-char (point-max))
         (unless (bobp)
@@ -773,7 +773,7 @@ Opens the side panel if not currently visible."
   (defun my/pi--yank-considering-image (orig-fun &rest args)
     "Yank image from clipboard when in pi input buffer, else call ORIG-FUN."
     (if (and (display-graphic-p)
-             (derived-mode-p 'pi-coding-agent-input-mode)
+             (derived-mode-p 'pilish-input-mode)
              (fboundp 'yank-media)
              (boundp 'yank-media--registered-handlers)
              yank-media--registered-handlers
@@ -811,22 +811,22 @@ interactive `@' completion in its input buffer.  This inserts pi's native
 @path file reference (project-relative when possible) so pi resolves it as a
 file, mirroring what `@' completion produces."
     (let* ((file (buffer-file-name))
-           (dir  (ignore-errors (pi-coding-agent--session-directory)))
+           (dir  (ignore-errors (pilish--session-directory)))
            (rel  (if (and dir (file-in-directory-p file dir))
                      (file-relative-name file dir)
                    file)))
       (my/pi-send-to-input (concat "@" rel " "))))
 
-  :hook ((pi-coding-agent-input-mode . my/pi--setup-image-yank)
-         (pi-coding-agent-chat-mode  . agent-chat-mode)
-         (pi-coding-agent-input-mode . agent-chat-mode))
+  :hook ((pilish-input-mode . my/pi--setup-image-yank)
+         (pilish-chat-mode  . agent-chat-mode)
+         (pilish-input-mode . agent-chat-mode))
 
   :custom
-  (pi-coding-agent-input-markdown-highlighting t)
+  (pilish-input-markdown-highlighting t)
 
   :init
   ;; Allow M-x pi as a shorthand
-  (defalias 'pi #'pi-coding-agent))
+  (defalias 'pi #'pilish))
 
 (provide 'setup-ai)
 ;;; setup-ai.el ends here
