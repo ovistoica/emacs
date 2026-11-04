@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(declare-function magit-git-lines "magit-git")
+
 (use-package magit
   :defer t
   :custom
@@ -29,8 +31,24 @@
                           'magit-insert-worktrees
                           nil t)
 
+  ;; Faster status refresh: intentionally drop the tags header and the
+  ;; Head/Merge/Push headers, which each cost extra git calls.
+  (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
+
   ;; move cursor into position when entering commit message
-  (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix))
+  (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix)
+
+  ;; TAB on the empty subject line offers previous "prefix: " subjects;
+  ;; elsewhere the filter yields nil so TAB keeps its usual binding.
+  ;; `magit' requires `git-commit', so the keymap exists here.  <tab> is
+  ;; bound too, since GUI frames only translate <tab> to TAB when no
+  ;; active keymap binds <tab> (e.g. snippet/completion minor modes).
+  (dolist (key '("TAB" "<tab>"))
+    (keymap-set git-commit-mode-map key
+                '(menu-item "" my/git-choose-subject
+                            :filter (lambda (cmd)
+                                      (when (my/git-subject-position?) cmd))))))
 
 (use-package git-timemachine
   :defer t
@@ -176,6 +194,73 @@ stored by magit-status fullscreen."
     (while (looking-at "#")
       (forward-line))
     (forward-line)))
+
+(defun my/git-subject-commit-range-safe? (value)
+  "Return non-nil if VALUE is a safe `my/git-subject-commit-range'.
+Only nil or a string not starting with \"-\" is accepted: the value is
+passed to `git log' as an argument, so a leading dash would turn it into
+an option such as --output=FILE."
+  (or (null value)
+      (and (stringp value)
+           (not (string-prefix-p "-" value)))))
+
+(defun my/git-subject-info-safe? (value)
+  "Return non-nil if VALUE is a list of (SUBJECT . TEXT) string pairs."
+  (and (proper-list-p value)
+       (seq-every-p (lambda (entry)
+                      (and (consp entry)
+                           (stringp (car entry))
+                           (stringp (cdr entry))))
+                    value)))
+
+(defcustom my/git-subject-commit-range nil
+  "Git revision range to scan for previous commit subjects.
+For example \"abc123^..HEAD\".  nil means the last 9999 commits."
+  :type '(choice (const :tag "Last 9999 commits" nil) string)
+  :safe #'my/git-subject-commit-range-safe?
+  :group 'git-commit)
+
+(defcustom my/git-subject-info nil
+  "Alist of (SUBJECT . TEXT) shown when choosing a commit subject.
+When SUBJECT is chosen with `my/git-choose-subject', TEXT is inserted
+on the lines below it."
+  :type '(alist :key-type string :value-type string)
+  :safe #'my/git-subject-info-safe?
+  :group 'git-commit)
+
+(defun my/git-subject-suggestions ()
+  "Return distinct \"prefix: \" subjects of previous commits, most recent first.
+Commits are taken from `my/git-subject-commit-range'."
+  (thread-last
+    (magit-git-lines "log" (or my/git-subject-commit-range "-n9999") "--format=%s")
+    (seq-keep (lambda (subject)
+                (when (string-match "\\`\\([^:]+\\): " subject)
+                  (concat (match-string 1 subject) ": "))))
+    (delete-dups)))
+
+(defun my/git-subject-position? ()
+  "Return non-nil when point is at the start of an empty first line."
+  (and (bobp) (looking-at-p "$")))
+
+(defun my/git-choose-subject ()
+  "Insert a commit subject prefix chosen from previous commits.
+Suggestions keep recency order.  If the chosen subject has an entry in
+`my/git-subject-info', its text is inserted below, leaving point after
+the subject."
+  (interactive)
+  (let* ((suggestions (my/git-subject-suggestions))
+         (collection (lambda (string pred action)
+                       (if (eq action 'metadata)
+                           '(metadata (display-sort-function . identity)
+                                      (cycle-sort-function . identity))
+                         (complete-with-action action suggestions string pred))))
+         (subject (completing-read "Subject: " collection nil nil)))
+    (insert subject)
+    (when-let* ((entry (assoc subject my/git-subject-info)))
+      (save-excursion
+        (newline)
+        (insert (cdr entry))
+        (newline)))))
 
 (defun my/magit-create-bitbucket-pr ()
   "Generate and open Bitbucket PR URL for the current branch."
