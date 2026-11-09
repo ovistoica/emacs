@@ -112,6 +112,48 @@ refresh inline image display.  Otherwise behave like `org-yank'."
     (interactive)
     (org-map-entries 'org-id-get-create))
 
+  (defun my/org-auto-id-enabled-p ()
+    "Return non-nil unless the buffer opts out of automatic IDs.
+A file opts out with a header line like `#+AUTO_ID: nil' (also accepts
+false, no, off or 0)."
+    (let ((value (car (cdr (assoc "AUTO_ID"
+                                  (org-collect-keywords '("AUTO_ID")))))))
+      (not (and value
+                (member (downcase (string-trim value))
+                        '("nil" "false" "no" "off" "0"))))))
+
+  (defun my/org-maybe-add-ids-before-save ()
+    "Add IDs to headlines before save unless the file sets `#+AUTO_ID: nil'."
+    (when (my/org-auto-id-enabled-p)
+      (my/org-add-ids-to-headlines-in-file)))
+
+  (defun my/org-disable-generate-id ()
+    "Disable automatic ID generation for the current Org buffer.
+Insert or update a `#+AUTO_ID: nil' header line and remove the ID
+generating functions from this buffer's `before-save-hook'.  Existing
+IDs are not removed, and the buffer is not saved automatically."
+    (interactive)
+    (unless (derived-mode-p 'org-mode)
+      (user-error "Not in an Org buffer"))
+    (org-with-wide-buffer
+     (let* ((case-fold-search t)
+            (limit (save-excursion
+                     (goto-char (point-min))
+                     (if (re-search-forward org-outline-regexp-bol nil t)
+                         (match-beginning 0)
+                       (point-max)))))
+       (goto-char (point-min))
+       (if (re-search-forward "^[ \t]*#\\+AUTO_ID:.*$" limit t)
+           (replace-match "#+AUTO_ID: nil" t t)
+         (while (looking-at "^[ \t]*#\\+[[:alnum:]_-]+:")
+           (forward-line 1))
+         (when (and (eobp) (not (bolp)))
+           (insert "\n"))
+         (insert "#+AUTO_ID: nil\n"))))
+    (remove-hook 'before-save-hook #'my/org-maybe-add-ids-before-save t)
+    (remove-hook 'before-save-hook #'my/org-add-ids-to-headlines-in-file t)
+    (message "Automatic ID generation disabled for %s" (buffer-name)))
+
   (defun my/org-copy-id-to-clipboard ()
     "Copy the ID property of the org node at point.
 If no ID is available, create one for the node."
@@ -178,7 +220,7 @@ LABEL is used in the echo-area message."
          (enable-theme-functions . my/org-sync-todo-faces)
          (org-mode . (lambda ()
                        (add-hook 'before-save-hook
-                                 'my/org-add-ids-to-headlines-in-file nil 'local))))
+                                 #'my/org-maybe-add-ids-before-save nil 'local))))
 
   :config
 
