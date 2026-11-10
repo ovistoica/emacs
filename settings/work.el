@@ -21,8 +21,12 @@
 
 ;;; JIRA Utilities
 
+(declare-function org-element-type "org-element-ast")
+(declare-function org-element-context "org-element")
+(declare-function org-link-make-string "ol")
+
 (defvar my/jira-ticket-mappings
-  '(("OH-[0-9]+" . "https://teamohana.atlassian.net/browse/"))
+  '(("\\(?:CHM\\|OP\\|OH\\|PLAT\\)-[0-9]+" . "https://teamohana.atlassian.net/browse/"))
   "Alist of (REGEX . BASE-URL) for matching JIRA ticket patterns to their base URLs.")
 
 (defun my/jira-ticket-url (ticket-number)
@@ -69,9 +73,33 @@ and inserts [[https://teamohana.atlassian.net/browse/OH-20979][OH-20979]]"
         (insert (format "[[%s][%s]]" full-url ticket-number))
       (message "Invalid JIRA URL format or no matching pattern"))))
 
+(defun my/jira-ticket-before-point ()
+  "Return (BEG END TICKET) for a JIRA ticket ending at point, or nil.
+TICKET must fully match a regex in `my/jira-ticket-mappings'."
+  (when-let* ((bounds (bounds-of-thing-at-point 'symbol))
+              ((= (point) (cdr bounds)))
+              (ticket (buffer-substring-no-properties (car bounds) (cdr bounds)))
+              ((seq-some (lambda (mapping)
+                           (string-match-p (concat "\\`" (car mapping) "\\'") ticket))
+                         my/jira-ticket-mappings)))
+    (list (car bounds) (cdr bounds) ticket)))
+
+(defun my/org-tab-linkify-jira-ticket ()
+  "Turn the JIRA ticket before point into an Org link, snippet-style.
+Meant for `org-tab-first-hook': typing OH-20979 then TAB yields
+[[https://teamohana.atlassian.net/browse/OH-20979][OH-20979]].
+Does nothing inside an existing link, so TAB keeps its usual behavior."
+  (when-let* ((found (my/jira-ticket-before-point))
+              ((not (eq (org-element-type (org-element-context)) 'link))))
+    (pcase-let ((`(,beg ,end ,ticket) found))
+      (delete-region beg end)
+      (insert (org-link-make-string (my/jira-ticket-url ticket) ticket)))
+    t))
+
 ;; Jira helpers
 (define-key org-mode-map (kbd "C-x j l") #'my/org-linkify-jira-ticket-at-point)
 (define-key org-mode-map (kbd "C-x j i") #'my/org-insert-jira-link)
+(add-hook 'org-tab-first-hook #'my/org-tab-linkify-jira-ticket)
 
 
 (provide 'work)
