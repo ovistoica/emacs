@@ -159,8 +159,10 @@ would keep painting the previous theme's colours.  For `enable-theme-functions'.
   ;; placeholder until difft finishes, which flickers after every hunk
   ;; stage.  Render synchronously for the refresh these commands trigger;
   ;; the diff is small and unchanged files come from the render cache.
-  (dolist (cmd '(magit-stage magit-unstage))
-    (advice-add cmd :around #'my/magit-difftastic-eager-refresh))
+  ;; Depth -100 keeps this outside `magit-difftastic-mode''s own advice, which
+  ;; stages a chunk and refreshes without calling the advised command.
+  (dolist (cmd '(magit-stage magit-unstage magit-discard))
+    (advice-add cmd :around #'my/magit-difftastic-eager-refresh '((depth . -100))))
   ;; The default `magit-section-highlight' lays a flat overlay over the chunk
   ;; body, painting over the added/removed line colors.
   (advice-add 'magit-section-highlight :around
