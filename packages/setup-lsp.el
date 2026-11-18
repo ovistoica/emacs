@@ -55,6 +55,10 @@
   ;; watchers
   (setq lsp-file-watch-threshold 2000)
 
+  ;; Shut a server down once its last buffer is closed.  With one server per
+  ;; git worktree, idle servers otherwise pile up until Emacs exits.
+  (setq lsp-keep-workspace-alive nil)
+
   (setq lsp-signature-doc-lines 1)      ; Don't raise the echo area. It's distracting
 
   ;; semgrep-ls is not installed and not needed - silence the prompt
