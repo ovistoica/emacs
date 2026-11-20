@@ -14,12 +14,13 @@
 ;;   - Code blocks:     ``` without a language identifier
 ;;   - No headings:     all levels become bold text
 ;;   - Links:           [label](url)
-;;   - Tables:          rendered as a space-aligned ASCII grid wrapped in a
-;;                      ``` code block so the columns stay aligned in
-;;                      Slack's monospace font
+;;   - Tables:          native markdown tables (| a | b |), with the first
+;;                      row as the header and inline markup kept in cells
 ;;
 ;; Set `org-slack-export-flavor' to `mrkdwn' for the legacy syntax, which
-;; differs in bold (*bold*) and strikethrough (~strikethrough~).
+;; differs in bold (*bold*) and strikethrough (~strikethrough~).  Legacy
+;; Slack has no table markup, so there tables are rendered as a
+;; space-aligned ASCII grid wrapped in a ``` code block.
 ;;
 ;; Entry points:
 ;;   M-x org-slack-export-to-buffer    — export to *Org Slack Export* buffer
@@ -48,8 +49,9 @@
 (defcustom org-slack-export-flavor 'markdown
   "Slack text syntax produced by the export backend.
 `markdown' targets Slack's standard markdown parsing, where `**bold**'
-is bold and a single asterisk is italic.  `mrkdwn' targets the legacy
-Slack dialect, where `*bold*' is bold."
+is bold and a single asterisk is italic, and tables are native markdown
+tables.  `mrkdwn' targets the legacy Slack dialect, where `*bold*' is
+bold and tables fall back to a code-fenced ASCII grid."
   :type '(choice (const :tag "Standard markdown (**bold**, ~~strike~~)" markdown)
                  (const :tag "Legacy mrkdwn (*bold*, ~strike~)" mrkdwn))
   :group 'org-slack-export)
@@ -144,9 +146,37 @@ Falls back to the default markdown transcoder for internal links."
 
 ;;; Tables
 ;;
-;; Slack has no table markup, so tables are rendered as a space-aligned
-;; ASCII grid wrapped in a triple-backtick code block.  Cell contents are
-;; flattened to plain text because code blocks render everything literally.
+;; With the `markdown' flavor, tables become native markdown tables.  With
+;; the legacy `mrkdwn' flavor, which has no table markup, they are rendered
+;; as a space-aligned ASCII grid wrapped in a triple-backtick code block,
+;; with cell contents flattened to plain text because code blocks render
+;; everything literally.
+
+(defun org-slack--square-matrix (matrix)
+  "Return MATRIX with every row padded with empty cells to the same length.
+MATRIX is a list of rows, each a list of cell strings."
+  (let ((ncols (apply #'max (mapcar #'length matrix))))
+    (mapcar (lambda (row)
+              (append row (make-list (- ncols (length row)) "")))
+            matrix)))
+
+(defun org-slack--escape-pipes (text)
+  "Escape `|' characters in TEXT so they stay inside a markdown table cell."
+  (replace-regexp-in-string "|" "\\\\|" text))
+
+(defun org-slack--native-table (matrix)
+  "Render MATRIX as a native markdown table.
+MATRIX is a list of rows, each a list of cell strings.  Markdown tables
+require a header, so the first row is always the header and is followed
+by the delimiter row."
+  (let* ((rows (org-slack--square-matrix matrix))
+         (format-row (lambda (cells)
+                       (concat "| " (string-join cells " | ") " |"))))
+    (string-join
+     (cons (funcall format-row (car rows))
+           (cons (funcall format-row (make-list (length (car rows)) "---"))
+                 (mapcar format-row (cdr rows))))
+     "\n")))
 
 (defun org-slack--element-to-plain-text (data)
   "Return the plain text of DATA, stripping all inline markup.
@@ -189,10 +219,8 @@ Columns are padded to their widest cell.  When HEADER-ROWS is a
 positive integer, a `-+-' divider is inserted after that many leading
 rows.  Returns the table between triple backticks so Slack keeps the
 columns aligned in its monospace font."
-  (let* ((ncols (apply #'max (mapcar #'length matrix)))
-         (rows (mapcar (lambda (row)
-                         (append row (make-list (- ncols (length row)) "")))
-                       matrix))
+  (let* ((rows (org-slack--square-matrix matrix))
+         (ncols (length (car rows)))
          (widths (make-list ncols 0)))
     (dolist (row rows)
       (dotimes (i ncols)
@@ -219,14 +247,15 @@ columns aligned in its monospace font."
       (concat "```\n" (string-join (nreverse lines) "\n") "\n```"))))
 
 (defun org-slack-table (table _contents info)
-  "Transcode TABLE to a monospace ASCII grid inside a Slack code block.
-Slack has no table markup, so the table is rendered with space-padded
-columns wrapped in a triple-backtick code block, which keeps the
-columns aligned in Slack's monospace font.  INFO is the export plist.
-Inline markup within cells is flattened to plain text, since code
-blocks render everything literally.  A `-+-' divider is emitted after
-the header rows when the Org table separates them with a rule."
-  (let ((header-rows nil)
+  "Transcode TABLE according to `org-slack-export-flavor'.
+INFO is the export plist.  With the `markdown' flavor the table is a
+native markdown table whose cells keep their inline markup.  With the
+legacy `mrkdwn' flavor, which has no table markup, it is a monospace
+ASCII grid inside a triple-backtick code block; cell markup is
+flattened to plain text there, and a `-+-' divider is emitted after the
+header rows when the Org table separates them with a rule."
+  (let ((native (not (eq org-slack-export-flavor 'mrkdwn)))
+        (header-rows nil)
         (count 0)
         (matrix '()))
     (dolist (row (org-element-map table 'table-row #'identity info))
@@ -237,14 +266,18 @@ the header rows when the Org table separates them with a rule."
          (setq count (1+ count))
          (push (org-element-map row 'table-cell
                  (lambda (cell)
-                   (string-trim
-                    (org-slack--element-to-plain-text
-                     (org-element-contents cell))))
+                   (if native
+                       (org-slack--escape-pipes
+                        (string-trim (org-export-data cell info)))
+                     (string-trim
+                      (org-slack--element-to-plain-text
+                       (org-element-contents cell)))))
                  info)
                matrix))))
-    (if (null matrix)
-        ""
-      (org-slack--format-table (nreverse matrix) header-rows))))
+    (cond
+     ((null matrix) "")
+     (native (org-slack--native-table (nreverse matrix)))
+     (t (org-slack--format-table (nreverse matrix) header-rows)))))
 
 (defun org-slack-table-row (_row contents _info)
   "Transcode table ROW by passing CONTENTS through.
