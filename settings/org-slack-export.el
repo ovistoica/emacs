@@ -293,6 +293,36 @@ table element directly; this only short-circuits the inherited HTML
 cell transcoder."
   (or contents ""))
 
+;;; Clipboard
+;;
+;; Emacs serves Latin-1-only text (for example `×' or `é') to Wayland
+;; clients as ISO-8859-1 bytes under the STRING, TEXT, COMPOUND_TEXT and
+;; `text/plain' targets, and only the explicit UTF-8 targets carry real
+;; UTF-8.  A client that asks for one of the former, such as a browser
+;; running Slack, decodes those bytes as UTF-8 and shows U+FFFD (`�').
+;; `wl-copy' offers the same UTF-8 bytes under every text target instead.
+
+(defun org-slack--copy-utf8 (text)
+  "Put TEXT on the system clipboard so every text target is UTF-8.
+Uses `wl-copy' in a Wayland session and falls back to `gui-select-text',
+the default `interprogram-cut-function', when it is unavailable or fails."
+  (if (and (getenv "WAYLAND_DISPLAY") (executable-find "wl-copy"))
+      (let ((coding-system-for-write 'utf-8-unix))
+        (unless (zerop (call-process-region text nil "wl-copy" nil nil nil))
+          (gui-select-text text)))
+    (gui-select-text text)))
+
+(defun org-slack--copy-to-clipboard (text)
+  "Add TEXT to the kill ring and copy it to the clipboard as UTF-8."
+  (let ((interprogram-cut-function #'org-slack--copy-utf8))
+    (kill-new text)))
+
+(defun org-slack--prepare-export-buffer ()
+  "Make copying from the current Slack export buffer UTF-8 safe.
+Sets `interprogram-cut-function' buffer-locally so that `kill-ring-save'
+and `kill-region' in this buffer go through `org-slack--copy-utf8'."
+  (setq-local interprogram-cut-function #'org-slack--copy-utf8))
+
 ;;; Backend registration
 
 (org-export-define-derived-backend 'slack 'md
@@ -300,18 +330,20 @@ cell transcoder."
   '(?k "Export to Slack"
        ((?b "To buffer"    (lambda (a s v b)
                              (org-export-to-buffer 'slack "*Org Slack Export*"
-                               a s v b)))
+                               a s v b nil #'org-slack--prepare-export-buffer)))
         (?c "To clipboard" (lambda (a s v _b)
-                             (kill-new (org-export-as 'slack s v))
+                             (org-slack--copy-to-clipboard
+                              (org-export-as 'slack s v))
                              (message "Slack markup copied to clipboard")))
         (?B "To buffer (indent hierarchy)"
             (lambda (a s v b)
               (org-export-to-buffer 'slack "*Org Slack Export*"
-                a s v b '(:slack-indent-headlines t))))
+                a s v b '(:slack-indent-headlines t)
+                #'org-slack--prepare-export-buffer)))
         (?C "To clipboard (indent hierarchy)"
             (lambda (a s v _b)
-              (kill-new (org-export-as 'slack s v nil
-                                       '(:slack-indent-headlines t)))
+              (org-slack--copy-to-clipboard
+               (org-export-as 'slack s v nil '(:slack-indent-headlines t)))
               (message "Slack markup copied to clipboard")))))
   :options-alist
   ;; Disable the table of contents by default, and expose an option to
@@ -338,14 +370,15 @@ cell transcoder."
 (defun org-slack-export-to-buffer ()
   "Export current org buffer to Slack markup in *Org Slack Export*."
   (interactive)
-  (org-export-to-buffer 'slack "*Org Slack Export*")
+  (org-export-to-buffer 'slack "*Org Slack Export*"
+    nil nil nil nil nil #'org-slack--prepare-export-buffer)
   (with-current-buffer "*Org Slack Export*"
     (goto-char (point-min))))
 
 (defun org-slack-export-to-clipboard ()
   "Export current org buffer to Slack markup and copy to clipboard."
   (interactive)
-  (kill-new (org-export-as 'slack))
+  (org-slack--copy-to-clipboard (org-export-as 'slack))
   (message "Slack markup copied to clipboard"))
 
 (provide 'org-slack-export)
