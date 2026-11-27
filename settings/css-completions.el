@@ -51,13 +51,13 @@
 
 (defun cssc/find-hiccup-class-name-position ()
   "Are we completing a Clojure keyword with dots in it, like :div.foo.bar ?"
-  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
+  (when-let* ((bounds (bounds-of-thing-at-point 'symbol)))
     (when (not (or (cider-in-string-p)
                    (cider-in-comment-p)))
       (let ((s (buffer-substring-no-properties (car bounds)
                                                (cdr bounds))))
         (when (s-starts-with? ":" s)
-          (when-let ((last-dot-index (string-match-p "\\.[^\\.]+$" s)))
+          (when-let* ((last-dot-index (string-match-p "\\.[^\\.]+$" s)))
             (list
              (+ last-dot-index (car bounds))
              (cdr bounds)
@@ -65,7 +65,7 @@
 
 (defun cssc/find-keyword-class-name-position ()
   "Are we completing a Clojure keyword inside some structure assigning to :class?"
-  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
+  (when-let* ((bounds (bounds-of-thing-at-point 'symbol)))
     (when (not (or (cider-in-string-p)
                    (cider-in-comment-p)))
       (let ((s (buffer-substring-no-properties (car bounds)
@@ -79,7 +79,7 @@
 
 (defun cssc/find-string-class-name-position ()
   "Are we completing a symbol in a string inside some structure assigning to :class?"
-  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
+  (when-let* ((bounds (bounds-of-thing-at-point 'symbol)))
     (when (and (cider-in-string-p)
                (cssc/inside-clojure-class-structure?))
       (list
@@ -88,7 +88,7 @@
        ""))))
 
 (defun cssc/find-html-class-name-position ()
-  (when-let ((bounds (bounds-of-thing-at-point 'symbol)))
+  (when-let* ((bounds (bounds-of-thing-at-point 'symbol)))
     (when (and (nth 3 (syntax-ppss))
                (save-excursion
                  (goto-char (nth 8 (syntax-ppss)))
@@ -102,7 +102,7 @@
 (make-variable-buffer-local 'cssc/find-class-name-position-fns)
 
 (defun cssc/css-classes-completion-at-point ()
-  (when-let ((res (--some (funcall it) cssc/find-class-name-position-fns)))
+  (when-let* ((res (--some (funcall it) cssc/find-class-name-position-fns)))
     (-let [(beg end prefix) res]
       (list beg end
             (--map (concat prefix it)
